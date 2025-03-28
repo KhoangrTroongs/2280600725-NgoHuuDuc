@@ -1,0 +1,46 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model NgoHuuDuc_2280600725.Models.Product
+
+@{
+    ViewData["Title"] = "Xóa sản phẩm";
+}
+
+<h2>Xóa sản phẩm</h2>
+
+<div class="alert alert-danger">
+    <h3>Bạn có chắc chắn muốn xóa sản phẩm này?</h3>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">Tên sản phẩm</dt>
+            <dd class="col-sm-8">@Model.Name</dd>
+
+            <dt class="col-sm-4">Giá</dt>
+            <dd class="col-sm-8">@Model.Price.ToString("C")</dd>
+
+            <dt class="col-sm-4">Mô tả</dt>
+            <dd class="col-sm-8">@Model.Description</dd>
+
+            <dt class="col-sm-4">Danh mục</dt>
+            <dd class="col-sm-8">@Model.Category?.Name</dd>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <dt class="col-sm-4">Hình ảnh</dt>
+                <dd class="col-sm-8">
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="img-thumbnail" style="max-width: 200px;" />
+                </dd>
+            }
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Xóa</button>
+            <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</div>

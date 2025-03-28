@@ -1,0 +1,80 @@
+﻿@model NgoHuuDuc_2280600725.Models.Product
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<div class="card mb-3">
+    <div class="row g-0">
+        <div class="col-md-4">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="img-fluid rounded-start" alt="@Model.Name" style="max-height: 400px; object-fit: cover;">
+            }
+            else
+            {
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <span>Không có hình ảnh</span>
+                </div>
+            }
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h2 class="card-title">@Model.Name</h2>
+                <p class="card-text text-muted">Danh mục: @Model.Category?.Name</p>
+                <p class="card-text">@Model.Description</p>
+                <p class="card-text"><strong class="fs-4">Giá: @Model.Price.ToString("N0") VNĐ</strong></p>
+                <div class="mt-4">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <form asp-controller="Home" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class='bx bx-cart-add'></i> Thêm vào giỏ hàng
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">
+                            <i class='bx bx-log-in'></i> Đăng nhập để mua hàng
+                        </a>
+                    }
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.add-to-cart-form').on('submit', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            // Update cart badge
+                            $('.badge.bg-danger').text(response.cartCount);
+                            // Optional: Show success message
+                            alert('Đã thêm sản phẩm vào giỏ hàng!');
+                        }
+                    },
+                    error: function () {
+                        alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,57 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model IEnumerable<NgoHuuDuc_2280600725.Models.AccountViewModels.UserDetailsViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Ảnh</th>
+            <th>Họ và tên</th>
+            <th>Email</th>
+            <th>Số điện thoại</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(user.AvatarUrl))
+                    {
+                        <img src="@user.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                    }
+                </td>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@(user.PhoneNumber ?? "Chưa cập nhật")</td>
+                <td>
+                    <span class="badge @(user.IsActive ? "bg-success" : "bg-danger")">
+                        @(user.IsActive ? "Hoạt động" : "Đã khóa")
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a asp-action="UserDetails" asp-route-id="@user.Id" class="btn btn-sm btn-info">
+                            <i class="fas fa-info-circle"></i> Chi tiết
+                        </a>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Xóa
+                            </a>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

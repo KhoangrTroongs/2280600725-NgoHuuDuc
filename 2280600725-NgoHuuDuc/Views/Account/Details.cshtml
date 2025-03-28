@@ -1,0 +1,52 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model NgoHuuDuc_2280600725.Models.AccountViewModels.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "Thông tin người dùng";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+        {
+            <div class="mb-3">
+                <img src="@Model.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" />
+            </div>
+        }
+        <dl class="row">
+            <dt class="col-sm-4">Email</dt>
+            <dd class="col-sm-8">@Model.Email</dd>
+
+            <dt class="col-sm-4">Họ và tên</dt>
+            <dd class="col-sm-8">@Model.FullName</dd>
+
+            <dt class="col-sm-4">Ngày sinh</dt>
+            <dd class="col-sm-8">@Model.DateOfBirth.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-4">Số điện thoại</dt>
+            <dd class="col-sm-8">@(Model.PhoneNumber ?? "Chưa cập nhật")</dd>
+
+            <dt class="col-sm-4">Địa chỉ</dt>
+            <dd class="col-sm-8">@(Model.Address ?? "Chưa cập nhật")</dd>
+
+            <dt class="col-sm-4">Ngày tạo tài khoản</dt>
+            <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+
+        <div class="form-group">
+            <a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-primary">Cập nhật thông tin</a>
+            @if (User.IsInRole("Administrator"))
+            {
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

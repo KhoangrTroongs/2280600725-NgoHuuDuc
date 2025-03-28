@@ -1,0 +1,73 @@
+﻿@model List<NgoHuuDuc_2280600725.Models.Product>
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4">Chào mừng đến với cửa hàng</h1>
+            <p class="lead">Khám phá các sản phẩm của chúng tôi dưới đây hoặc duyệt theo danh mục.</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="@Url.Action("Index", "Home")" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory == null ? "active" : "")">
+                    Tất cả danh mục
+                </a>
+                
+@foreach (var category in ViewBag.Categories)
+{
+    <a href="@Url.Action("Index", "Home", new { categoryId = category.Id })" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
+        @category.Name
+    </a>
+}
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <h2>@(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory.Name)</h2>
+            
+@if (!Model.Any())
+{
+    <p>Không có sản phẩm nào trong danh mục này.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                    {
+                        <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span>Không có hình ảnh</span>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text text-muted">@product.Category.Name</p>
+                        <p class="card-text">@(
+                            product.Description?.Length > 100 
+                            ? product.Description.Substring(0, 100) + "..." 
+                            : product.Description
+                        )</p>
+                        <p class="card-text"><strong>@product.Price.ToString("N0") VNĐ</strong></p>
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">Chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+        </div>
+    </div>
+</div>
