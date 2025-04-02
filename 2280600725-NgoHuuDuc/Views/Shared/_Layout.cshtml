@@ -1,108 +1,38 @@
 ﻿<!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Quản Lý Sản Phẩm</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style.css" />
     <link rel='stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
 </head>
-<body style="padding-top: 70px; padding-bottom: 100px;">
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 fixed-top">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Ngô Hữu Đức - 2280600725</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
-                        </li>
 
-                        @if (User.IsInRole("Administrator"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Category" asp-action="Index">Quản lý danh mục</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Quản lý người dùng</a>
-                            </li>
-                        }
+<body>
 
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Details">Thông tin cá nhân</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark position-relative" asp-controller="Home" asp-action="Cart">
-                                    <i class='bx bx-cart fs-5'></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
-                                    </span>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container-fluid">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <partial name="_HeaderPartial" />
 
-    <div class="container py-5" style="width: 100%; background-color: white;">
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 my-2 border-top">
-            <div class="col-md-4 d-flex align-items-center">
-                <a href="https://github.com/khoangrtroongs" target="_blank" class="mb-2 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1">
-                    <img src="https://github.com/khoangrtroongs.png" alt="" width="32" height="32" class="rounded-circle me-2">
-                </a>
-                <span class="mb-2 mb-md-0 text-body-secondary">© 2025, Hutech University</span>
-            </div>
+    @RenderBody()
 
-            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                <li class="ms-3"><a href="https://www.facebook.com/ngohuuduc.tkc" target="_blank"><i class='bx bxl-facebook-circle bx-md' style='color:rgb(41, 41, 41)'></i></a></li>
-                <li class="ms-3"><a href="https://github.com/khoangrtroongs"></a><i class='bx bxl-github bx-md' style='color:rgb(41, 41, 41)'></i></li>
-            </ul>
-        </footer>
-    </div>
+    <partial name="_FooterPartial" />
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/main.js"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    <script>
-        function updateCartCount() {
-            if (document.querySelector('.cart-count')) {
-                $.get('/Home/GetCartCount', function(response) {
-                    if (response.count > 0) {
-                        $('.cart-count').html(`${response.count}<span class="visually-hidden">items in cart</span>`);
-                    } else {
-                        $('.cart-count').empty();
-                    }
-                });
-            }
-        }
-
-        @if (User.Identity.IsAuthenticated)
-        {
-            <text>
-            $(document).ready(function() {
-                updateCartCount();
-                setInterval(updateCartCount, 2000);
-            });
-            </text>
-        }
-    </script>
 </body>
+
 </html>

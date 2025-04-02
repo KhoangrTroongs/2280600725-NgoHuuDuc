@@ -1,0 +1,72 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+    <div class="container">
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Shop quần áo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Product" asp-action="Index">Sản phẩm</a>
+                </li>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Category" asp-action="Index">Quản
+                            lý danh mục</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Index">Quản
+                            lý người dùng</a>
+                    </li>
+                }
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Details">Thông
+                            tin cá nhân</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" asp-controller="Home" asp-action="Cart">
+                            <i class='bx bx-cart fs-5'></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                            </span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+            <partial name="_LoginPartial" />
+        </div>
+    </div>
+</nav>
+
+<script>
+    function updateCartCount() {
+        if (document.querySelector('.cart-count')) {
+            $.get('/Home/GetCartCount', function (response) {
+                if (response.count > 0) {
+                    $('.cart-count').html(`${response.count}<span class="visually-hidden">items in cart</span>`);
+                } else {
+                    $('.cart-count').empty();
+                }
+            });
+        }
+    }
+
+    @if (User.Identity.IsAuthenticated)
+        {
+            <text>
+                $(document).ready(function() {
+                    updateCartCount();
+                setInterval(updateCartCount, 2000);
+                        });
+            </text>
+    }
+</script>
