@@ -1,71 +1,74 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+  ViewData["Title"] = "Home Page";
 }
 
-  <!-- Hero Section -->
-  <section id="home" class="hero" style="background-image: url('https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80');">
-    <div class="hero-overlay"></div>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 hero-content">
-          <h1>Premium Tailored Suits For Modern Gentlemen</h1>
-          <p>Experience the perfect fit with our hand-crafted suits designed for the discerning gentleman.</p>
-          <a href="products.html" class="btn btn-secondary btn-lg">Explore Collection</a>
-        </div>
+<!-- Hero Section -->
+<section id="home" class="hero"
+  style="background-image: url('https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80');">
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 hero-content">
+        <h1>Premium Tailored Suits For Modern Gentlemen</h1>
+        <p>Experience the perfect fit with our hand-crafted suits designed for the discerning gentleman.</p>
+        <a href="products.html" class="btn btn-secondary btn-lg">Explore Collection</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
 
 <div class="position-relative" style="position: relative;">
-    <div class="hero-overlay" style="z-index: 2"></div>
-    <div id="myCarousel" class="carousel slide mb-6" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1" aria-current="true"></button>
-            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
-            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3" class=""></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="~/images/img/wall.jpg" alt="Wall" style="width: 100%; height: 400px; object-fit: cover;">
-                <div class="container">
-                    <div class="carousel-caption text-start">
-                        <h1>Cửa hàng áo Vest.</h1>
-                        <p class="opacity-75">Tổng hợp nhiều loại suit phù hợp cho từng mục đích của bạn.</p>
-                        <p><a class="btn btn-lg btn-primary" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a></p>
-                    </div>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="~/images/img/wall4.jpg" alt="Wall2" style="width: 100%; height: 400px; object-fit: cover;">
-                <div class="container">
-                    <div class="carousel-caption">
-                        <h1>Nhận đặt may.</h1>
-                        <p>Lựa chọn kiểu dáng, loại vải, màu sắc phù hợp với mục đích của bạn.</p>
-                        <p><a class="btn btn-lg btn-primary" href="#">Liên hệ với chúng tôi.</a></p>
-                    </div>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="~/images/img/wall3.jpg" alt="Wall2" style="width: 100%; height: 400px; object-fit: cover;">
-                <div class="container">
-                    <div class="carousel-caption text-end">
-                        <h1>Cho thuê.</h1>
-                        <p>Bạn muốn tiết kiệm chi phí, đến với chúng tôi.</p>
-                        <p><a class="btn btn-lg btn-primary" href="#">Dịch vụ cho thuê</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
+  <div class="hero-overlay" style="z-index: 2"></div>
+  <div id="myCarousel" class="carousel slide mb-6" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"
+        aria-current="true"></button>
+      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
+      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3" class=""></button>
     </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="~/images/img/wall.jpg" alt="Wall" style="width: 100%; height: 400px; object-fit: cover;">
+        <div class="container">
+          <div class="carousel-caption text-start">
+            <h1>Cửa hàng áo Vest.</h1>
+            <p class="opacity-75">Tổng hợp nhiều loại suit phù hợp cho từng mục đích của bạn.</p>
+            <p><a class="btn btn-lg btn-secondary" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <img src="~/images/img/wall4.jpg" alt="Wall2" style="width: 100%; height: 400px; object-fit: cover;">
+        <div class="container">
+          <div class="carousel-caption">
+            <h1>Nhận đặt may.</h1>
+            <p>Lựa chọn kiểu dáng, loại vải, màu sắc phù hợp với mục đích của bạn.</p>
+            <p><a class="btn btn-lg btn-primary" href="#">Liên hệ với chúng tôi.</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <img src="~/images/img/wall3.jpg" alt="Wall2" style="width: 100%; height: 400px; object-fit: cover;">
+        <div class="container">
+          <div class="carousel-caption text-end">
+            <h1>Cho thuê.</h1>
+            <p>Bạn muốn tiết kiệm chi phí, đến với chúng tôi.</p>
+            <p><a class="btn btn-lg btn-primary" href="#">Dịch vụ cho thuê</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
 </div>
 
 <hr class="featurette-divider">
@@ -96,167 +99,192 @@
 @* <hr class="featurette-divider"> *@
 
 <div class="container marketing">
-    <div class="row">
-        <div class="col-lg-4 text-center">
-            <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple1">
-            <h2 class="fw-normal">Hoàng Ân</h2>
-            <p>Supper Support</p>
-            <p><a class="btn btn-secondary" href="https://github.com/SushiRedpanda" target="_blank">View details »</a></p>
-        </div>
-        <div class="col-lg-4 text-center">
-            <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple2">
-            <h2 class="fw-normal">Ngô Hữu Đức</h2>
-            <p>Hàng không, ăn hàng ở không</p>
-            <p><a class="btn btn-secondary" href="https://github.com/khoangrtroongs" target="_blank">View details »</a></p>
-        </div>
-        <div class="col-lg-4 text-center">
-            <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple3">
-            <h2 class="fw-normal">Nguyễn Quốc Trung</h2>
-            <p>Fép đêêêêêêêêêêêêêêêê</p>
-            <p><a class="btn btn-secondary" href="https://github.com/TrungQNdev20" target="_blank">View details »</a></p>
-        </div>
+  <div class="row">
+    <div class="col-12 col-md-6 col-lg-3 text-center">
+      <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple1">
+      <h4 class="fw-bold mt-2">Hoàng Ân</h4>
+      <p>Supper Support</p>
+      <p><a class="btn btn-secondary" href="https://github.com/SushiRedpanda" target="_blank">View details »</a></p>
     </div>
+    <div class="col-12 col-md-6 col-lg-3 text-center">
+      <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple2">
+      <h4 class="fw-bold mt-2">Ngô Hữu Đức</h4>
+      <p>Hàng không, ăn hàng ở không</p>
+      <p><a class="btn btn-secondary" href="https://github.com/khoangrtroongs" target="_blank">View details »</a></p>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 text-center">
+      <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple3">
+      <h4 class="fw-bold mt-2">Nguyễn Quốc Trung</h4>
+      <p>Fép đêêêêêêêêêêêêêêêê</p>
+      <p><a class="btn btn-secondary" href="https://github.com/TrungQNdev20" target="_blank">View details »</a></p>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 text-center">
+      <img src="https://avatars.githubusercontent.com/u/95553945?v=4" class="bd-placeholder-img rounded-circle"
+        width="140" height="140" alt="Peple3">
+      <h4 class="fw-bold mt-2">Phan Ngọc Cường</h4>
+      <p>Harryitc</p>
+      <p><a class="btn btn-secondary" href="https://github.com/harryitc" target="_blank">View details »</a></p>
+    </div>
+  </div>
 
 </div>
 
 <section class="py-5 bg-dark">
-    <div class="container">
-      <h2 class="section-title text-center mb-5">The Art of Fine Tailoring</h2>
+  <div class="container">
+    <h2 class="section-title text-center mb-5">The Art of Fine Tailoring</h2>
 
-      <!-- Row 1: The Perfect Fit -->
-      <div class="row align-items-center mb-5">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <img src="~/images/img/feat1.jpg" alt="Cuahang" class="img-fluid rounded shadow">
-        </div>
-        <div class="col-lg-6">
-          <h3 class="mb-3">Đa đang kiểu loại. Tìm mỏi con mắt luôn.</h3>
-          <p>Đầy đủ các kiểu dáng. Phù hợp cho mọi lứa tuổi. At Elegant Suits, we believe that a well-fitted suit is the cornerstone of a gentleman's wardrobe. Our master tailors take precise measurements to ensure that every suit complements your unique physique.</p>
-          <p>A properly tailored suit doesn't just enhance your appearance—it boosts your confidence and commands respect in every room you enter.</p>
-          <div class="d-flex align-items-center mt-4">
-            <div class="me-4">
-              <i class="fas fa-ruler-combined fa-2x text-secondary"></i>
-            </div>
-            <div>
-              <h5 class="mb-1">Expert Measurements</h5>
-              <p class="mb-0">Over 20 precise measurements taken for each client</p>
-            </div>
+    <!-- Row 1: The Perfect Fit -->
+    <div class="row align-items-center mb-5">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <img src="~/images/img/feat1.jpg" alt="Cuahang" class="img-fluid rounded shadow">
+      </div>
+      <div class="col-lg-6">
+        <h3 class="mb-3">Đa đang kiểu loại. Tìm mỏi con mắt luôn.</h3>
+        <p>Đầy đủ các kiểu dáng. Phù hợp cho mọi lứa tuổi. At Elegant Suits, we believe that a well-fitted suit is the
+          cornerstone of a gentleman's wardrobe. Our master tailors take precise measurements to ensure that every suit
+          complements your unique physique.</p>
+        <p>A properly tailored suit doesn't just enhance your appearance—it boosts your confidence and commands respect
+          in every room you enter.</p>
+        <div class="d-flex align-items-center mt-4">
+          <div class="me-4">
+            <i class="fas fa-ruler-combined fa-2x text-secondary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Expert Measurements</h5>
+            <p class="mb-0">Over 20 precise measurements taken for each client</p>
           </div>
         </div>
-      </div>
-
-      <!-- Row 2: Premium Materials -->
-      <div class="row align-items-center mb-5 flex-lg-row-reverse">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <img src="~/images/img/maydo.jpg" alt="Maydo" class="img-fluid rounded shadow">
-        </div>
-        <div class="col-lg-6">
-          <h3 class="mb-3">không tìm thấy mẫu ứng ý?</h3>
-          <p>Với hơn 500 mẫu có sẵn, chúng tôi sẽ "tùy chỉnh" lại một bộ suit dành riêng cho bạn. Tha hồ lựa chọn kiểu dáng, kích thước không giới hạn, chất liệu vải đa dạng. We source only the finest fabrics from renowned mills in Italy, England, and Scotland. From luxurious Super 150s wool to breathable linen and sophisticated cashmere blends, our selection caters to every climate and occasion.</p>
-          <p>The quality of our materials ensures comfort, durability, and an impeccable drape that distinguishes our suits from mass-produced alternatives.</p>
-          <div class="d-flex align-items-center mt-4">
-            <div class="me-4">
-              <i class="fas fa-certificate fa-2x text-secondary"></i>
-            </div>
-            <div>
-              <h5 class="mb-1">Superior Quality</h5>
-              <p class="mb-0">Ethically sourced premium materials with certification</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 3: Craftsmanship -->
-      <div class="row align-items-center">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <img src="~/images/img/wall2.jpg" alt="chomuon" class="img-fluid rounded shadow">
-        </div>
-        <div class="col-lg-6">
-          <h3 class="mb-3">Tiết kiệm chi phí. Không lo về giá!</h3>
-          <p>Bạn chỉ đi dự tiệc có một lần nhưng phải mua hẳn một bộ suit ? Đừng lo, bên chúng tôi sẽ cho bạn mượn. Our suits blend traditional tailoring techniques with contemporary designs to create timeless pieces that never go out of style. Each suit requires over 60 hours of meticulous handwork by our skilled artisans.</p>
-          <p>From hand-stitched lapels to precisely aligned patterns, every detail is crafted to perfection, resulting in suits that tell a story of excellence and attention to detail.</p>
-          <div class="d-flex align-items-center mt-4">
-            <div class="me-4">
-              <i class="fas fa-hands fa-2x text-secondary"></i>
-            </div>
-            <div>
-              <h5 class="mb-1">Artisan Crafted</h5>
-              <p class="mb-0">Each suit passes through 20 skilled craftspeople</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Visit Store CTA -->
-      <div class="text-center mt-5">
-        <a href="about.html" class="btn btn-secondary btn-lg">Learn More About Our Process</a>
       </div>
     </div>
-  </section>
+
+    <!-- Row 2: Premium Materials -->
+    <div class="row align-items-center mb-5 flex-lg-row-reverse">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <img src="~/images/img/maydo.jpg" alt="Maydo" class="img-fluid rounded shadow">
+      </div>
+      <div class="col-lg-6">
+        <h3 class="mb-3">không tìm thấy mẫu ứng ý?</h3>
+        <p>Với hơn 500 mẫu có sẵn, chúng tôi sẽ "tùy chỉnh" lại một bộ suit dành riêng cho bạn. Tha hồ lựa chọn kiểu
+          dáng, kích thước không giới hạn, chất liệu vải đa dạng. We source only the finest fabrics from renowned mills
+          in Italy, England, and Scotland. From luxurious Super 150s wool to breathable linen and sophisticated cashmere
+          blends, our selection caters to every climate and occasion.</p>
+        <p>The quality of our materials ensures comfort, durability, and an impeccable drape that distinguishes our
+          suits from mass-produced alternatives.</p>
+        <div class="d-flex align-items-center mt-4">
+          <div class="me-4">
+            <i class="fas fa-certificate fa-2x text-secondary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Superior Quality</h5>
+            <p class="mb-0">Ethically sourced premium materials with certification</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Craftsmanship -->
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <img src="~/images/img/wall2.jpg" alt="chomuon" class="img-fluid rounded shadow">
+      </div>
+      <div class="col-lg-6">
+        <h3 class="mb-3">Tiết kiệm chi phí. Không lo về giá!</h3>
+        <p>Bạn chỉ đi dự tiệc có một lần nhưng phải mua hẳn một bộ suit ? Đừng lo, bên chúng tôi sẽ cho bạn mượn. Our
+          suits blend traditional tailoring techniques with contemporary designs to create timeless pieces that never go
+          out of style. Each suit requires over 60 hours of meticulous handwork by our skilled artisans.</p>
+        <p>From hand-stitched lapels to precisely aligned patterns, every detail is crafted to perfection, resulting in
+          suits that tell a story of excellence and attention to detail.</p>
+        <div class="d-flex align-items-center mt-4">
+          <div class="me-4">
+            <i class="fas fa-hands fa-2x text-secondary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Artisan Crafted</h5>
+            <p class="mb-0">Each suit passes through 20 skilled craftspeople</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visit Store CTA -->
+    <div class="text-center mt-5">
+      <a href="about.html" class="btn btn-secondary btn-lg">Learn More About Our Process</a>
+    </div>
+  </div>
+</section>
 
 
 <section class="featured bg-darker">
-    <div class="container">
-      <h2 class="section-title text-center">Featured Suits</h2>
-      <div class="row">
-        <!-- Featured Product 1 -->
-        <div class="col-md-4">
-          <div class="card product-card">
-            <div class="position-relative">
-              <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80" class="card-img-top product-card-img" alt="Classic Navy Suit">
-              <div class="product-card-badge">Best Seller</div>
-            </div>
-            <div class="card-body product-card-body">
-              <h5 class="card-title product-card-title">Classic Navy Suit</h5>
-              <p class="product-card-price">
-                $499.99
-                <span class="old-price">$599.99</span>
-              </p>
-              <a href="#" class="btn btn-secondary">View Details</a>
-            </div>
+  <div class="container">
+    <h2 class="section-title text-center">Featured Suits</h2>
+    <div class="row">
+      <!-- Featured Product 1 -->
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="position-relative">
+            <img
+              src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80"
+              class="card-img-top product-card-img" alt="Classic Navy Suit">
+            <div class="product-card-badge">Best Seller</div>
           </div>
-        </div>
-        <!-- Featured Product 2 -->
-        <div class="col-md-4">
-          <div class="card product-card">
-            <div class="position-relative">
-              <img src="https://images.unsplash.com/photo-1593032465175-481ac7f401a0?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80" class="card-img-top product-card-img" alt="Slim Fit Gray Suit">
-              <div class="product-card-badge">New</div>
-            </div>
-            <div class="card-body product-card-body">
-              <h5 class="card-title product-card-title">Slim Fit Gray Suit</h5>
-              <p class="product-card-price">
-                $449.99
-              </p>
-              <a href="#" class="btn btn-secondary">View Details</a>
-            </div>
-          </div>
-        </div>
-        <!-- Featured Product 3 -->
-        <div class="col-md-4">
-          <div class="card product-card">
-            <div class="position-relative">
-              <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80" class="card-img-top product-card-img" alt="Tailored Black Suit">
-            </div>
-            <div class="card-body product-card-body">
-              <h5 class="card-title product-card-title">Tailored Black Suit</h5>
-              <p class="product-card-price">
-                $549.99
-                <span class="old-price">$649.99</span>
-              </p>
-              <a href="#" class="btn btn-secondary">View Details</a>
-            </div>
+          <div class="card-body product-card-body">
+            <h5 class="card-title product-card-title">Classic Navy Suit</h5>
+            <p class="product-card-price">
+              $499.99
+              <span class="old-price">$599.99</span>
+            </p>
+            <a href="#" class="btn btn-secondary">View Details</a>
           </div>
         </div>
       </div>
-      <div class="text-center mt-4">
-        <a asp-area="" asp-controller="Product" asp-action="Index" class="btn btn-secondary btn-lg">View All Products</a>
+      <!-- Featured Product 2 -->
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="position-relative">
+            <img
+              src="https://images.unsplash.com/photo-1593032465175-481ac7f401a0?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80"
+              class="card-img-top product-card-img" alt="Slim Fit Gray Suit">
+            <div class="product-card-badge">New</div>
+          </div>
+          <div class="card-body product-card-body">
+            <h5 class="card-title product-card-title">Slim Fit Gray Suit</h5>
+            <p class="product-card-price">
+              $449.99
+            </p>
+            <a href="#" class="btn btn-secondary">View Details</a>
+          </div>
+        </div>
+      </div>
+      <!-- Featured Product 3 -->
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="position-relative">
+            <img
+              src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1350&amp;q=80"
+              class="card-img-top product-card-img" alt="Tailored Black Suit">
+          </div>
+          <div class="card-body product-card-body">
+            <h5 class="card-title product-card-title">Tailored Black Suit</h5>
+            <p class="product-card-price">
+              $549.99
+              <span class="old-price">$649.99</span>
+            </p>
+            <a href="#" class="btn btn-secondary">View Details</a>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+    <div class="text-center mt-4">
+      <a asp-area="" asp-controller="Product" asp-action="Index" class="btn btn-secondary btn-lg">View All Products</a>
+    </div>
+  </div>
+</section>
 
-  <style>
-
-    .carousel-caption, .carousel-indicators, .carousel-control-next, .carousel-control-prev{
-      z-index: 3;
-    }
-  </style>
+<style>
+  .carousel-caption,
+  .carousel-indicators,
+  .carousel-control-next,
+  .carousel-control-prev {
+    z-index: 3;
+  }
+</style>
