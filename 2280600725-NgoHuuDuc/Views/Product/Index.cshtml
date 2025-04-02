@@ -12,17 +12,15 @@ ViewData["Title"] = "Sản phẩm";
     </div>
 </section>
 
-
 <!-- Products Section -->
 <section class="py-5 bg-darker">
 
-
     <div class="container">
-@if (User.IsInRole("Administrator"))
-{
-    <a asp-action="Create" class="btn btn-primary px-5 mb-4">Thêm sản
-        phẩm mới</a>
-}
+        @if (User.IsInRole("Administrator"))
+        {
+        <a asp-action="Create" class="btn btn-primary px-5 mb-4">Thêm sản
+            phẩm mới</a>
+        }
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
@@ -35,30 +33,43 @@ ViewData["Title"] = "Sản phẩm";
                 <div class="d-flex justify-content-md-end">
                     <div class="dropdown">
                         <button
-                            class="btn btn-outline-secondary dropdown-toggle"
+                            class="btn btn-secondary dropdown-toggle"
                             type="button" id="sortDropdown"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Sort by
+                            Danh mục sản phẩm
                         </button>
                         <ul class="dropdown-menu bg-dark"
                             aria-labelledby="sortDropdown">
-                            <li><a class="dropdown-item text-light"
-                                    href="#">Featured</a></li>
-                            <li><a class="dropdown-item text-light"
-                                    href="#">Price: Low to High</a></li>
-                            <li><a class="dropdown-item text-light"
-                                    href="#">Price: High to Low</a></li>
-                            <li><a class="dropdown-item text-light"
-                                    href="#">Newest</a></li>
+                            <li><a
+                                    class="dropdown-item text-light @(ViewBag.SelectedCategory == null ? "active"
+                                    : "")"
+                                    href="@Url.Action("Index",
+                                    "Product")">Tất cả danh mục</a></li>
+
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                            <li>
+                                <a
+                                    class="dropdown-item text-light @(ViewBag.SelectedCategory?.Id == category.Id ? "active"
+                                    : "")"
+                                    href="@Url.Action("Index", "Product",
+                                    new { categoryId=category.Id
+                                    })">@category.Name
+                                </a>
+                            </li>
+                            }
+
                         </ul>
+
                     </div>
                 </div>
             </div>
         </div>
-
+        <h2>@(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" :
+            ViewBag.SelectedCategory.Name)</h2>
         @if (!Model.Any())
         {
-            <p>Không có sản phẩm nào trong danh mục này.</p>
+        <p>Không có sản phẩm nào trong danh mục này.</p>
         }else {
         <div class="row">
             @foreach (var item in Model)
@@ -86,7 +97,7 @@ ViewData["Title"] = "Sản phẩm";
                             class="card-title product-card-title">@item.Name</h5>
                         <p class="product-card-price">
                             @item.Price.ToString("N0") VNĐ
-                            <span class="old-price">$599.99</span>
+                            <span class="old-price">@item.Price.ToString("N0") VNĐ</span>
                         </p>
                         <p class="card-text">@(
                             item.Description?.Length > 100
@@ -115,7 +126,7 @@ ViewData["Title"] = "Sản phẩm";
         </div>
 
         <!-- Pagination -->
-        <div class="d-flex justify-content-center mt-5">
+        @* <div class="d-flex justify-content-center mt-5">
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <li class="page-item disabled">
@@ -136,8 +147,7 @@ ViewData["Title"] = "Sản phẩm";
                     </li>
                 </ul>
             </nav>
-        </div>
+        </div> *@
         }
     </div>
 </section>
-
