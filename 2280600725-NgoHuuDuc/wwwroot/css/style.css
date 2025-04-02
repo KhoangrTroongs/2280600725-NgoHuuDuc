@@ -19,6 +19,10 @@
   --font-secondary: 'Raleway', sans-serif;
 }
 
+.navbar-brand:hover {
+  color: var(--secondary-dark);
+}
+
 body {
   font-family: var(--font-secondary);
   color: var(--text-primary);
