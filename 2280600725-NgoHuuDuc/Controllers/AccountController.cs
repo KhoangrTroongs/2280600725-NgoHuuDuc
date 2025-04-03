@@ -27,7 +27,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -37,7 +37,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -84,7 +84,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         // GET: /Account/Register
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
+        public IActionResult Register(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -94,7 +94,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
@@ -124,12 +124,17 @@ namespace NgoHuuDuc_2280600725.Controllers
                     model.AvatarUrl = "/images/users/default-avatar.png";
                 }
 
-                var user = new IdentityUser
+                var user = new ApplicationUser
                 {
                     UserName = model.Email,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FullName = model.FullName,
+                    DateOfBirth = model.DateOfBirth,
+                    Address = model.Address ?? "",
+                    Gender = (Models.Gender)model.Gender,
+                    AvatarUrl = model.AvatarUrl
                 };
 
                 var result = await _userRepository.RegisterUserAsync(user, model.Password);

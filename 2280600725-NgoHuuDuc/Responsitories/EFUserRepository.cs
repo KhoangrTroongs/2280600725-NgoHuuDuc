@@ -5,20 +5,21 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Models.AccountViewModels;
 
 namespace NgoHuuDuc_2280600725.Responsitories
 {
     public class EFUserRepository : IUserRepository
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public EFUserRepository(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -28,7 +29,7 @@ namespace NgoHuuDuc_2280600725.Responsitories
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IdentityResult> RegisterUserAsync(IdentityUser identityUser, string password)
+        public async Task<IdentityResult> RegisterUserAsync(ApplicationUser identityUser, string password)
         {
             return await _userManager.CreateAsync(identityUser, password);
         }
@@ -70,22 +71,22 @@ namespace NgoHuuDuc_2280600725.Responsitories
             await _signInManager.SignOutAsync();
         }
 
-        public async Task<List<IdentityUser>> GetAllUsersAsync()
+        public async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
             return await _userManager.Users.ToListAsync();
         }
 
-        public async Task<IdentityUser> GetUserByIdAsync(string id)
+        public async Task<ApplicationUser> GetUserByIdAsync(string id)
         {
             return await _userManager.FindByIdAsync(id);
         }
 
-        public async Task<IdentityResult> UpdateUserAsync(IdentityUser user)
+        public async Task<IdentityResult> UpdateUserAsync(ApplicationUser user)
         {
             return await _userManager.UpdateAsync(user);
         }
 
-        public async Task<IdentityResult> UpdateUserAsync(IdentityUser user, UserDetailsViewModel model)
+        public async Task<IdentityResult> UpdateUserAsync(ApplicationUser user, UserDetailsViewModel model)
         {
             user.PhoneNumber = model.PhoneNumber;
             user.UserName = model.Email;
@@ -105,7 +106,7 @@ namespace NgoHuuDuc_2280600725.Responsitories
             return await _userManager.UpdateAsync(user);
         }
 
-        private async Task UpdateClaim(IdentityUser user, IList<Claim> existingClaims, string claimType, string claimValue)
+        private async Task UpdateClaim(ApplicationUser user, IList<Claim> existingClaims, string claimType, string claimValue)
         {
             var claim = existingClaims.FirstOrDefault(c => c.Type == claimType);
             if (claim != null)
@@ -125,12 +126,12 @@ namespace NgoHuuDuc_2280600725.Responsitories
             return IdentityResult.Failed();
         }
 
-        public async Task<IdentityUser> GetCurrentUserAsync()
+        public async Task<ApplicationUser> GetCurrentUserAsync()
         {
             return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
         }
 
-        public async Task AddUserDetailsAsync(IdentityUser user, RegisterViewModel model)
+        public async Task AddUserDetailsAsync(ApplicationUser user, RegisterViewModel model)
         {
             var claims = new List<Claim>
             {
@@ -150,7 +151,7 @@ namespace NgoHuuDuc_2280600725.Responsitories
             }
         }
 
-        private UserDetailsViewModel ConvertToViewModel(IdentityUser user)
+        private UserDetailsViewModel ConvertToViewModel(ApplicationUser user)
         {
             var claims = _userManager.GetClaimsAsync(user).Result;
             return new UserDetailsViewModel
@@ -177,6 +178,47 @@ namespace NgoHuuDuc_2280600725.Responsitories
         {
             var user = await _userManager.FindByIdAsync(id);
             return user != null ? ConvertToViewModel(user) : null;
+        }
+
+        public async Task<List<string>> GetUserRolesAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                return (await _userManager.GetRolesAsync(user)).ToList();
+            }
+            return new List<string>();
+        }
+
+        public async Task<List<string>> GetAllRolesAsync()
+        {
+            return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+        }
+
+        public async Task<IdentityResult> UpdateUserRolesAsync(string userId, List<string> newRoles)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            var rolesToRemove = currentRoles.Except(newRoles).ToList();
+            var rolesToAdd = newRoles.Except(currentRoles).ToList();
+
+            var result = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+            if (!result.Succeeded) return result;
+
+            result = await _userManager.AddToRolesAsync(user, rolesToAdd);
+            return result;
+        }
+
+        public async Task<IdentityResult> RemoveFromRoleAsync(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                return await _userManager.RemoveFromRoleAsync(user, role);
+            }
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
         }
     }
 }

@@ -10,10 +10,10 @@ namespace NgoHuuDuc_2280600725.Models.ViewModels
 
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
         [Display(Name = "Tên sản phẩm")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         [Display(Name = "Mô tả")]
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         [Required(ErrorMessage = "Giá sản phẩm không được để trống")]
         [Range(0, double.MaxValue, ErrorMessage = "Giá sản phẩm phải lớn hơn hoặc bằng 0")]

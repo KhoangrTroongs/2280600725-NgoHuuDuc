@@ -1,0 +1,36 @@
+@using NgoHuuDuc_2280600725.Models.AccountViewModels
+@model List<UserRolesViewModel>
+
+<div class="container mt-4">
+    <h2>User Role Management</h2>
+    
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Current Roles</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@string.Join(", ", user.CurrentRoles)</td>
+                    <td>
+                        <a asp-action="EditRoles" asp-route-userId="@user.UserId" 
+                           class="btn btn-primary btn-sm">Edit Roles</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
