@@ -1,0 +1,39 @@
+@using NgoHuuDuc_2280600725.Models.AccountViewModels
+@model List<UserRolesViewModel>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-tag me-2" style="color: var(--elegant-gold);"></i>Quản lý vai trò người dùng</h1>
+</div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Tên người dùng</th>
+                <th>Email</th>
+                <th>Vai trò hiện tại</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@string.Join(", ", user.CurrentRoles)</td>
+                    <td>
+                        <a asp-action="EditRoles" asp-route-userId="@user.UserId"
+                           class="btn btn-elegant-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Chỉnh sửa vai trò
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

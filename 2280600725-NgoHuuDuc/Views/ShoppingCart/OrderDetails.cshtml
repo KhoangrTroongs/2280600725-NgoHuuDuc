@@ -1,0 +1,94 @@
+@model NgoHuuDuc_2280600725.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-file-invoice me-2" style="color: var(--elegant-gold);"></i>
+            Order #@Model.Id Details
+        </h1>
+        <a asp-action="MyOrders" class="btn btn-elegant-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-elegant mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Order Date:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Order Total:</strong> @Model.TotalPrice.ToString("C0")</p>
+                    <p><strong>Status:</strong> <span class="badge bg-success">Completed</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-elegant mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Shipping Address:</strong> @Model.ShippingAddress</p>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <p><strong>Notes:</strong> @Model.Notes</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-elegant">
+        <div class="card-header">
+            <h5 class="mb-0">Order Items</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.OrderDetails != null)
+                        {
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (item.Product != null && !string.IsNullOrEmpty(item.Product.ImageUrl))
+                                            {
+                                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" style="width:50px; height:50px; object-fit:cover" class="me-2" />
+                                            }
+                                            <span>@(item.Product?.Name ?? "Product not available")</span>
+                                        </div>
+                                    </td>
+                                    <td>@item.Price.ToString("C0")</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@((item.Price * item.Quantity).ToString("C0"))</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>@Model.TotalPrice.ToString("C0")</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

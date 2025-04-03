@@ -1,0 +1,16 @@
+@model int
+
+<div class="container mt-5">
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="bx bx-check-circle text-success" style="font-size: 5rem;"></i>
+        </div>
+        <h2 class="mb-3">Order Completed Successfully!</h2>
+        <p class="lead mb-4">Thank you for your purchase. Your order #@Model has been placed successfully.</p>
+        <p>We have sent a confirmation email with your order details.</p>
+        <div class="mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary me-2">Continue Shopping</a>
+            <a asp-controller="ShoppingCart" asp-action="MyOrders" class="btn btn-outline-secondary">View My Orders</a>
+        </div>
+    </div>
+</div>

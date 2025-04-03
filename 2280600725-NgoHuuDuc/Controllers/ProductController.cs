@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NgoHuuDuc_2280600725.Data;
+using NgoHuuDuc_2280600725.Helpers;
 using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Models.ViewModels;
 using NgoHuuDuc_2280600725.Responsitories;
@@ -33,17 +34,75 @@ namespace NgoHuuDuc_2280600725.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index(int? categoryId)
+        public async Task<IActionResult> Index(int? categoryId, int pageNumber = 1)
         {
-            var products = await _productRepository.GetProductsByCategoryAsync(categoryId);
-            if (products == null)
+            const int pageSize = 12; // 12 sản phẩm mỗi trang
+
+            try
             {
-                _logger.LogWarning("Không tìm thấy sản phẩm nào.");
-                TempData["Error"] = "Không tìm thấy sản phẩm.";
+                var products = await _productRepository.GetProductsByCategoryAsync(categoryId, pageNumber, pageSize);
+                if (products == null || products.Count == 0)
+                {
+                    _logger.LogWarning("Không tìm thấy sản phẩm nào.");
+                    TempData["Error"] = "Không tìm thấy sản phẩm.";
+                    return RedirectToAction("Index");
+                }
+
+                ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                ViewBag.CategoryId = categoryId;
+                ViewBag.CurrentPage = pageNumber;
+                ViewBag.TotalPages = products.TotalPages;
+                ViewBag.HasPreviousPage = products.HasPreviousPage;
+                ViewBag.HasNextPage = products.HasNextPage;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalItems = products.TotalItems;
+
+                if (categoryId.HasValue)
+                {
+                    var category = await _categoryRepository.GetCategoryByIdAsync(categoryId.Value);
+                    ViewBag.SelectedCategory = category;
+                }
+
+                return View(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách sản phẩm");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách sản phẩm.";
                 return RedirectToAction("Index");
             }
-            ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
-            return View(products);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Search(string keyword, int pageNumber = 1)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return RedirectToAction("Index");
+            }
+
+            const int pageSize = 12; // 12 sản phẩm mỗi trang
+
+            try
+            {
+                var products = await _productRepository.SearchProductsAsync(keyword, pageNumber, pageSize);
+                ViewBag.SearchKeyword = keyword;
+                ViewBag.ResultCount = products.TotalItems;
+                ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                ViewBag.CurrentPage = pageNumber;
+                ViewBag.TotalPages = products.TotalPages;
+                ViewBag.HasPreviousPage = products.HasPreviousPage;
+                ViewBag.HasNextPage = products.HasNextPage;
+                ViewBag.PageSize = pageSize;
+
+                return View(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm kiếm sản phẩm với từ khóa: {Keyword}", keyword);
+                TempData["Error"] = "Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại sau.";
+                return RedirectToAction("Index");
+            }
         }
 
         [Authorize(Roles = "Administrator")]

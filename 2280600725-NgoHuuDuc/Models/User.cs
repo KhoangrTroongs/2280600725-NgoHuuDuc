@@ -15,22 +15,24 @@ namespace NgoHuuDuc_2280600725.Models
 
     public class ApplicationUser : IdentityUser
     {
+        // IdentityUser đã có Id
+
         [Required]
         [StringLength(50)]
         [Display(Name = "Họ và tên")]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = "";
 
         [Required]
         [Display(Name = "Ngày sinh")]
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; } = DateTime.Now;
 
         [StringLength(200)]
         [Display(Name = "Địa chỉ")]
-        public string Address { get; set; }
+        public string Address { get; set; } = "";
 
         [Display(Name = "Ảnh đại diện")]
-        public string? AvatarUrl { get; set; }
+        public string? AvatarUrl { get; set; } = "/images/users/default-avatar.png";
 
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -40,10 +42,10 @@ namespace NgoHuuDuc_2280600725.Models
 
         [Required]
         [Display(Name = "Giới tính")]
-        public Gender Gender { get; set; }
+        public Gender Gender { get; set; } = Gender.Male;
 
         [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
         [Display(Name = "Số điện thoại")]
-        public override string PhoneNumber { get; set; }
+        public override string? PhoneNumber { get; set; }
     }
 }

@@ -1,0 +1,105 @@
+@{
+    var prevDisabled = !ViewBag.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !ViewBag.HasNextPage ? "disabled" : "";
+    var totalPages = ViewBag.TotalPages;
+    var currentPage = ViewBag.CurrentPage;
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+
+    // Determine route values based on the current action
+    var routeValues = new Dictionary<string, string>();
+
+    if (action == "Search")
+    {
+        routeValues.Add("keyword", ViewBag.SearchKeyword.ToString());
+    }
+    else if (ViewBag.CategoryId != null)
+    {
+        routeValues.Add("categoryId", ViewBag.CategoryId.ToString());
+    }
+}
+
+@if (totalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination pagination-elegant justify-content-center">
+            <li class="page-item @prevDisabled">
+                @if (prevDisabled == "")
+                {
+                    routeValues["pageNumber"] = (currentPage - 1).ToString();
+                    <a class="page-link" asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                }
+            </li>
+
+            @{
+                var startPage = Math.Max(1, currentPage - 2);
+                var endPage = Math.Min(totalPages, startPage + 4);
+
+                if (endPage - startPage < 4 && startPage > 1)
+                {
+                    startPage = Math.Max(1, endPage - 4);
+                }
+            }
+
+            @if (startPage > 1)
+            {
+                routeValues["pageNumber"] = "1";
+                <li class="page-item">
+                    <a class="page-link" asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues">1</a>
+                </li>
+                @if (startPage > 2)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                }
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                routeValues["pageNumber"] = i.ToString();
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues">@i</a>
+                </li>
+            }
+
+            @if (endPage < totalPages)
+            {
+                @if (endPage < totalPages - 1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                }
+                routeValues["pageNumber"] = totalPages.ToString();
+                <li class="page-item">
+                    <a class="page-link" asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues">@totalPages</a>
+                </li>
+            }
+
+            <li class="page-item @nextDisabled">
+                @if (nextDisabled == "")
+                {
+                    routeValues["pageNumber"] = (currentPage + 1).ToString();
+                    <a class="page-link" asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                }
+            </li>
+        </ul>
+    </nav>
+
+    <div class="text-center text-muted mb-4">
+        <small>Hiển thị @ViewBag.PageSize sản phẩm trên mỗi trang | Tổng cộng @ViewBag.TotalItems sản phẩm</small>
+    </div>
+}

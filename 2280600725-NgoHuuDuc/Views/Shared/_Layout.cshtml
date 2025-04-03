@@ -1,50 +1,83 @@
 ﻿<!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-100">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Quản Lý Sản Phẩm</title>
+    <title>@ViewData["Title"] - Elegant Suits</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/elegant-theme.css" asp-append-version="true" />
     <link rel='stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 </head>
-<body style="padding-top: 70px; padding-bottom: 100px;">
+<body class="d-flex flex-column h-100 @(User.IsInRole("Administrator") ? "admin-mode" : "")" style="padding-top: 70px;">
+    <!-- Back to top button -->
+    <button type="button" class="btn btn-elegant-secondary btn-floating btn-lg" id="btn-back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 fixed-top">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-elegant border-bottom box-shadow mb-3 fixed-top">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Ngô Hữu Đức - 2280600725</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-tshirt me-2"></i>Elegant Suits
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        <!-- Search form -->
+                        <li class="nav-item d-flex align-items-center mx-2">
+                            <form class="search-form" asp-controller="Product" asp-action="Search" method="get">
+                                <div class="input-group">
+                                    <input type="text" name="keyword" class="form-control form-control-sm search-input" placeholder="Tìm kiếm sản phẩm..." aria-label="Search" required>
+                                    <button class="btn btn-elegant-primary btn-sm" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i>Trang chủ
+                            </a>
+                        </li>
+                        @if (!User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">
+                                    <i class="fas fa-store me-1"></i>Sản phẩm
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">
+                                <i class="fas fa-info-circle me-1"></i>Giới thiệu
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">
+                                <i class="fas fa-envelope me-1"></i>Liên hệ
+                            </a>
                         </li>
 
                         @if (User.IsInRole("Administrator"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Category" asp-action="Index">Quản lý danh mục</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Quản lý người dùng</a>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" id="adminDashboard">
+                                    <i class="fas fa-user-shield me-1"></i>Quản lý
+                                </a>
                             </li>
                         }
 
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Details">Thông tin cá nhân</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark position-relative" asp-controller="Home" asp-action="Cart">
-                                    <i class='bx bx-cart fs-5'></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                                <a class="nav-link position-relative" asp-controller="Home" asp-action="Cart">
+                                    <i class="fas fa-shopping-cart cart-icon"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count">
                                     </span>
                                 </a>
                             </li>
@@ -55,33 +88,82 @@
             </div>
         </nav>
     </header>
-    <div class="container-fluid">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+
+    @if (User.IsInRole("Administrator"))
+    {
+        <partial name="_AdminIconSidebar" />
+    }
+
+    <div class="container-fluid flex-grow-1 @(User.IsInRole("Administrator") ? "admin-mode-container" : "")">
+        @if (User.IsInRole("Administrator"))
+        {
+            <div class="admin-content">
+                <main role="main" class="pb-3" aria-label="Nội dung chính">
+                    @RenderBody()
+                </main>
+            </div>
+        }
+        else
+        {
+            <main role="main" class="pb-3" aria-label="Nội dung chính">
+                @RenderBody()
+            </main>
+        }
     </div>
 
-    <div class="container py-5" style="width: 100%; background-color: white;">
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 my-2 border-top">
+    <footer class="footer mt-auto py-3 footer-elegant">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
             <div class="col-md-4 d-flex align-items-center">
-                <a href="https://github.com/khoangrtroongs" target="_blank" class="mb-2 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1">
-                    <img src="https://github.com/khoangrtroongs.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <a href="https://github.com/khoangrtroongs" target="_blank" class="mb-2 me-2 mb-md-0 text-decoration-none lh-1">
+                    <img src="https://github.com/khoangrtroongs.png" alt="" width="32" height="32" class="rounded-circle profile-img-elegant me-2">
                 </a>
-                <span class="mb-2 mb-md-0 text-body-secondary">© 2025, Hutech University</span>
+                <span class="mb-2 mb-md-0">© 2025, Elegant Suits</span>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <h5 style="color: var(--elegant-gold);">Elegant Suits</h5>
+                <p class="small">Nơi phong cách gặp gỡ sự sang trọng</p>
             </div>
 
             <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                <li class="ms-3"><a href="https://www.facebook.com/ngohuuduc.tkc" target="_blank"><i class='bx bxl-facebook-circle bx-md' style='color:rgb(41, 41, 41)'></i></a></li>
-                <li class="ms-3"><a href="https://github.com/khoangrtroongs"></a><i class='bx bxl-github bx-md' style='color:rgb(41, 41, 41)'></i></li>
+                <li class="ms-3"><a href="https://www.facebook.com/ngohuuduc.tkc" target="_blank"><i class="fab fa-facebook fa-2x"></i></a></li>
+                <li class="ms-3"><a href="https://github.com/khoangrtroongs" target="_blank"><i class="fab fa-github fa-2x"></i></a></li>
+                <li class="ms-3"><a href="#" target="_blank"><i class="fab fa-instagram fa-2x"></i></a></li>
             </ul>
-        </footer>
-    </div>
+            </div>
+        </div>
+    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script>
+        // Back to top button
+        let mybutton = document.getElementById("btn-back-to-top");
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        }
+
+        mybutton.addEventListener("click", backToTop);
+
+        function backToTop() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+
+        // Cart count update
         function updateCartCount() {
             if (document.querySelector('.cart-count')) {
                 $.get('/Home/GetCartCount', function(response) {
@@ -93,6 +175,14 @@
                 });
             }
         }
+
+        // Initialize tooltips
+        $(document).ready(function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        })
 
         @if (User.Identity.IsAuthenticated)
         {

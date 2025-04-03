@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NgoHuuDuc_2280600725.Data;
+using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Responsitories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +11,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
@@ -72,7 +73,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Tạo vai trò Administrator nếu chưa tồn tại
     if (!await roleManager.RoleExistsAsync("Administrator"))
@@ -80,28 +81,44 @@ using (var scope = app.Services.CreateScope())
         await roleManager.CreateAsync(new IdentityRole("Administrator"));
     }
 
-    // Tạo vai trò User nếu chưa tồn tại
-    if (!await roleManager.RoleExistsAsync("User"))
+    // Tạo các vai trò khác
+    var roles = new[] { "User", "Staff", "Manager" };
+    foreach (var role in roles)
     {
-        await roleManager.CreateAsync(new IdentityRole("User"));
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 
-    // Tạo tài khoản Admin nếu chưa tồn tại
-    string adminEmail = "admin@example.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
+    // Tạo tài khoản Admin và Admin2
+    var adminUsers = new[]
     {
-        var admin = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
+        new { Email = "admin@example.com", Password = "Admin@123" },
+        new { Email = "admin2@example.com", Password = "Admin@123" }
+    };
 
-        var result = await userManager.CreateAsync(admin, "Admin@123");
-        if (result.Succeeded)
+    foreach (var adminInfo in adminUsers)
+    {
+        var adminUser = await userManager.FindByEmailAsync(adminInfo.Email);
+        if (adminUser == null)
         {
-            await userManager.AddToRoleAsync(admin, "Administrator");
+            var admin = new ApplicationUser
+            {
+                UserName = adminInfo.Email,
+                Email = adminInfo.Email,
+                EmailConfirmed = true,
+                FullName = "Administrator",
+                DateOfBirth = DateTime.Now,
+                Address = "Admin Address",
+                Gender = Gender.Male
+            };
+
+            var result = await userManager.CreateAsync(admin, adminInfo.Password);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, "Administrator");
+            }
         }
     }
 }

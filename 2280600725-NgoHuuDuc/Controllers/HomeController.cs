@@ -8,20 +8,31 @@ using NgoHuuDuc_2280600725.Models;
 using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace NgoHuuDuc_2280600725.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<HomeController> logger)
         {
             _context = context;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index(int? categoryId)
         {
+            if (User.IsInRole("Administrator"))
+            {
+                return RedirectToAction(nameof(Dashboard));
+            }
+
             var products = _context.Products.Include(p => p.Category).AsQueryable();
 
             if (categoryId.HasValue)
@@ -35,9 +46,84 @@ namespace NgoHuuDuc_2280600725.Controllers
             return View(await products.ToListAsync());
         }
 
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Dashboard()
+        {
+            try
+            {
+                // Đếm số lượng sản phẩm
+                ViewBag.ProductCount = await _context.Products.CountAsync();
+
+                // Đếm số lượng người dùng
+                ViewBag.UserCount = await _userManager.Users.CountAsync();
+
+                // Đếm số lượng danh mục
+                ViewBag.CategoryCount = await _context.Categories.CountAsync();
+
+                // Đếm số lượng đơn hàng
+                ViewBag.OrderCount = await _context.Orders.CountAsync();
+
+                // Lấy 5 sản phẩm mới nhất
+                ViewBag.RecentProducts = await _context.Products
+                    .Include(p => p.Category)
+                    .OrderByDescending(p => p.Id)
+                    .Take(5)
+                    .ToListAsync();
+
+                // Lấy 5 người dùng mới nhất
+                var recentUsers = await _userManager.Users
+                    .OrderByDescending(u => u.Id)
+                    .Take(5)
+                    .ToListAsync();
+
+                var recentUsersViewModel = new List<object>();
+                foreach (var user in recentUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    recentUsersViewModel.Add(new
+                    {
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Role = roles.FirstOrDefault() ?? "User"
+                    });
+                }
+
+                ViewBag.RecentUsers = recentUsersViewModel;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Dashboard action");
+                return View();
+            }
+        }
+
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Contact(ContactViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Ở đây bạn có thể thêm code để gửi email hoặc lưu thông tin liên hệ vào database
+                TempData["SuccessMessage"] = "Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất!";
+                return RedirectToAction(nameof(Contact));
+            }
+            return View(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -96,8 +182,8 @@ namespace NgoHuuDuc_2280600725.Controllers
             cart.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
-            return Json(new { 
-                success = true, 
+            return Json(new {
+                success = true,
                 cartCount = cart.Items.Sum(x => x.Quantity)
             });
         }
@@ -119,9 +205,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                     _context.CartItems.Remove(item);
                     cart.UpdatedAt = DateTime.Now;
                     await _context.SaveChangesAsync();
-                    
-                    return Json(new { 
-                        success = true, 
+
+                    return Json(new {
+                        success = true,
                         cartCount = cart.Items.Sum(x => x.Quantity)
                     });
                 }
@@ -162,9 +248,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                     item.Quantity = quantity;
                     cart.UpdatedAt = DateTime.Now;
                     await _context.SaveChangesAsync();
-                    
-                    return Json(new { 
-                        success = true, 
+
+                    return Json(new {
+                        success = true,
                         cartCount = cart.Items.Sum(x => x.Quantity)
                     });
                 }

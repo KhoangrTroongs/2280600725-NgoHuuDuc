@@ -1,0 +1,49 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <i class="fas fa-user-shield me-2"></i>
+        <span>Quản lý hệ thống</span>
+    </div>
+    <ul class="admin-sidebar-menu">
+        <li class="@(controller == "Product" ? "active" : "")">
+            <a asp-controller="Product" asp-action="Index">
+                <i class="fas fa-box me-2"></i>
+                <span>Quản lý sản phẩm</span>
+            </a>
+        </li>
+        <li class="@(controller == "Category" ? "active" : "")">
+            <a asp-controller="Category" asp-action="Index">
+                <i class="fas fa-tags me-2"></i>
+                <span>Quản lý danh mục</span>
+            </a>
+        </li>
+        <li class="@(controller == "Account" && action == "Index" ? "active" : "")">
+            <a asp-controller="Account" asp-action="Index">
+                <i class="fas fa-users me-2"></i>
+                <span>Quản lý người dùng</span>
+            </a>
+        </li>
+        <li class="@(controller == "RoleManagement" ? "active" : "")">
+            <a asp-controller="RoleManagement" asp-action="Index">
+                <i class="fas fa-user-tag me-2"></i>
+                <span>Quản lý vai trò</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                <span>Thống kê</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-cog me-2"></i>
+                <span>Cài đặt</span>
+            </a>
+        </li>
+    </ul>
+</div>

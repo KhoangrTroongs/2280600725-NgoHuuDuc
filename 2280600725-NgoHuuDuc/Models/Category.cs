@@ -19,10 +19,10 @@ namespace NgoHuuDuc_2280600725.Models
         [Required(ErrorMessage = "Tên danh mục không được để trống")]
         [StringLength(100, ErrorMessage = "Tên danh mục không được vượt quá 100 ký tự")]
         [Display(Name = "Tên danh mục")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         [Display(Name = "Mô tả")]
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         // Navigation property
         public virtual ICollection<Product> Products { get; set; }

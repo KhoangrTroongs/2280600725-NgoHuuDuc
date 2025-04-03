@@ -1,69 +1,118 @@
-﻿@model IEnumerable<NgoHuuDuc_2280600725.Models.Product>
+﻿@model NgoHuuDuc_2280600725.Helpers.PaginatedList<NgoHuuDuc_2280600725.Models.Product>
 @{
     ViewData["Title"] = "Sản phẩm";
 }
 
 <div class="row">
-    <div class="col-md-2">
-        <div class="list-group mb-4">
-            <a href="@Url.Action("Index", "Product")" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory == null ? "active" : "")">
-                Tất cả danh mục
-            </a>
-            @foreach (var category in ViewBag.Categories)
-            {
-                <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })"
-                   class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
-                    @category.Name
-                </a>
-            }
+    <div class="col-md-3">
+        <div class="dashboard-card mb-4">
+            <div class="card-header">
+                <span><i class="fas fa-list me-2"></i>Danh mục sản phẩm</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group category-list-elegant">
+                    <a href="@Url.Action("Index", "Product")" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory == null ? "active" : "")">
+                        <i class="fas fa-tags me-2"></i>Tất cả danh mục
+                    </a>
+                    @foreach (var category in ViewBag.Categories)
+                    {
+                        <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })"
+                           class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
+                            <i class="fas fa-tag me-2"></i>@category.Name
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
+
         @if (User.IsInRole("Administrator"))
         {
-            <div class="mb-4">
-                <a asp-action="Create" class="btn btn-primary w-100">Thêm sản phẩm mới</a>
+            <div class="dashboard-card mb-4">
+                <div class="card-header">
+                    <span><i class="fas fa-cog me-2"></i>Thao tác</span>
+                </div>
+                <div class="card-body">
+                    <a asp-action="Create" class="btn btn-elegant-primary w-100">
+                        <i class="fas fa-plus-circle me-2"></i>Thêm sản phẩm mới
+                    </a>
+                </div>
             </div>
         }
     </div>
-    <div class="col-md-10">
-        <h2>@(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory.Name)</h2>
-        @if (!Model.Any())
-        {
-            <p>Không có sản phẩm nào trong danh mục này.</p>
-        }
-        else
-        {
-            <div class="row">
-                @foreach (var item in Model)
+    <div class="col-md-9">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-tshirt me-2"></i>
+                    @(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory.Name)
+                </span>
+                <span class="badge bg-primary">@ViewBag.TotalItems sản phẩm</span>
+            </div>
+            <div class="card-body">
+                @if (!Model.Any())
                 {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Không có sản phẩm nào trong danh mục này.
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                @{
+                    int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+                }
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var item = Model[i];
+                    int productNumber = startIndex + i;
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 card-elegant">
                             @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
-                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 250px; object-fit: cover;">
                             }
                             else
                             {
-                                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
-                                    <span>Không có hình ảnh</span>
+                                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <span><i class="fas fa-image me-2"></i>Không có hình ảnh</span>
                                 </div>
                             }
                             <div class="card-body">
-                                <h5 class="card-title">@item.Name</h5>
-                                <p class="card-text text-muted">@item.Category.Name</p>
+                                <h5 class="card-title">
+                                    <span class="badge bg-elegant-secondary me-1">#@productNumber</span>
+                                    @item.Name
+                                </h5>
+                                <p class="card-text text-muted">
+                                    <i class="fas fa-tag me-1"></i>@item.Category.Name
+                                </p>
                                 <p class="card-text">@(
-                                    item.Description?.Length > 100 
-                                    ? item.Description.Substring(0, 100) + "..." 
+                                    item.Description?.Length > 100
+                                    ? item.Description.Substring(0, 100) + "..."
                                     : item.Description
                                 )</p>
-                                <p class="card-text"><strong>@item.Price.ToString("N0") VNĐ</strong></p>
+                                <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
                                 <div class="d-flex justify-content-between">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Chi tiết</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-elegant-secondary">
+                                        <i class="fas fa-info-circle me-1"></i>Chi tiết
+                                    </a>
                                     @if (User.IsInRole("Administrator"))
                                     {
                                         <div>
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Sửa</a>
-                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Xóa</a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-elegant-primary">
+                                                <i class="fas fa-edit me-1"></i>Sửa
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">
+                                                <i class="fas fa-trash-alt me-1"></i>Xóa
+                                            </a>
                                         </div>
+                                    }
+                                    else if (User.Identity.IsAuthenticated)
+                                    {
+                                        <a href="#" class="btn btn-elegant-primary add-to-cart" data-product-id="@item.Id">
+                                            <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
+                                        </a>
                                     }
                                 </div>
                             </div>
@@ -71,6 +120,66 @@
                     </div>
                 }
             </div>
-        }
+                }
+
+                <!-- Pagination -->
+                <div class="mt-4">
+                    @await Html.PartialAsync("_Pagination")
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add hover effect to product cards
+            $('.card-elegant').hover(function() {
+                $(this).addClass('shadow-lg').css('cursor', 'pointer');
+            }, function() {
+                $(this).removeClass('shadow-lg');
+            });
+
+            // Add to cart functionality
+            $('.add-to-cart').click(function(e) {
+                e.preventDefault();
+                var productId = $(this).data('product-id');
+
+                $.ajax({
+                    url: '/Home/AddToCart',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function(result) {
+                        updateCartCount();
+                        alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!');
+                    }
+                });
+            });
+
+            // Highlight active category with a pulse effect
+            if ($('.category-list-elegant .list-group-item.active').length > 0) {
+                $('.category-list-elegant .list-group-item.active').addClass('gold-pulse');
+            }
+
+            // Add click effect to category items
+            $('.category-list-elegant .list-group-item').click(function() {
+                // Store the href for navigation
+                var href = $(this).attr('href');
+
+                // Add a brief highlight effect before navigating
+                $(this).addClass('clicked');
+
+                // Navigate after a short delay to show the effect
+                setTimeout(function() {
+                    window.location.href = href;
+                }, 150);
+
+                return false; // Prevent default navigation
+            });
+        });
+    </script>
+}

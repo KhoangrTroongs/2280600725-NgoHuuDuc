@@ -7,6 +7,8 @@ using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Models.AccountViewModels;
 using NgoHuuDuc_2280600725.Models.ViewModels;
 using NgoHuuDuc_2280600725.Responsitories;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace NgoHuuDuc_2280600725.Controllers
 {
@@ -27,7 +29,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -37,7 +39,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -84,7 +86,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         // GET: /Account/Register
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
+        public IActionResult Register(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -94,7 +96,7 @@ namespace NgoHuuDuc_2280600725.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
@@ -124,12 +126,17 @@ namespace NgoHuuDuc_2280600725.Controllers
                     model.AvatarUrl = "/images/users/default-avatar.png";
                 }
 
-                var user = new IdentityUser
+                var user = new ApplicationUser
                 {
                     UserName = model.Email,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FullName = model.FullName,
+                    DateOfBirth = model.DateOfBirth,
+                    Address = model.Address ?? "",
+                    Gender = (Models.Gender)model.Gender,
+                    AvatarUrl = model.AvatarUrl
                 };
 
                 var result = await _userRepository.RegisterUserAsync(user, model.Password);
@@ -162,6 +169,80 @@ namespace NgoHuuDuc_2280600725.Controllers
         {
             var users = await _userRepository.GetAllUserDetailsAsync();
             return View(users);
+        }
+
+        // GET: Account/GetAllRoles
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetAllRoles()
+        {
+            var roles = await _userRepository.GetAllRolesAsync();
+            return Json(roles);
+        }
+
+        // GET: Account/GetUserRoles
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetUserRoles(string userId)
+        {
+            var roles = await _userRepository.GetUserRolesAsync(userId);
+            return Json(roles);
+        }
+
+        // POST: Account/UpdateRoles
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateRoles([FromBody] Dictionary<string, List<string>> userRoles)
+        {
+            // Log dữ liệu đầu vào để debug
+            Console.WriteLine($"Received data: {JsonSerializer.Serialize(userRoles)}");
+
+            if (userRoles == null || userRoles.Count == 0)
+            {
+                return Json(new { success = false, message = "Không có dữ liệu vai trò để cập nhật" });
+            }
+
+            try
+            {
+                var currentUser = await _userRepository.GetCurrentUserAsync();
+                var currentUserId = currentUser?.Id;
+
+                foreach (var entry in userRoles)
+                {
+                    var userId = entry.Key;
+                    var roles = entry.Value;
+
+                    // Đảm bảo roles không null
+                    if (roles == null)
+                    {
+                        roles = new List<string>();
+                    }
+
+                    // Kiểm tra nếu người dùng hiện tại là admin và đang cố gắng thay đổi vai trò của chính mình
+                    if (userId == currentUserId)
+                    {
+                        // Đảm bảo vai trò Administrator vẫn được giữ lại
+                        if (!roles.Contains("Administrator"))
+                        {
+                            roles.Add("Administrator");
+                        }
+                    }
+
+                    Console.WriteLine($"Updating roles for user {userId}: {JsonSerializer.Serialize(roles)}");
+                    var result = await _userRepository.UpdateUserRolesAsync(userId, roles);
+                    if (!result.Succeeded)
+                    {
+                        return Json(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+                    }
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in UpdateRoles: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet]

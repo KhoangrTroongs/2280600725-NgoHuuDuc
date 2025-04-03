@@ -1,0 +1,170 @@
+@model NgoHuuDuc_2280600725.Helpers.PaginatedList<NgoHuuDuc_2280600725.Models.Product>
+
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card card-elegant mb-4">
+            <div class="card-header">
+                <span><i class="fas fa-list me-2"></i>Danh mục sản phẩm</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group category-list-elegant">
+                    <a href="@Url.Action("Index", "Product")" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tags me-2"></i>Tất cả danh mục
+                    </a>
+                    @foreach (var category in ViewBag.Categories)
+                    {
+                        <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })"
+                           class="list-group-item list-group-item-action">
+                            <i class="fas fa-tag me-2"></i>@category.Name
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card card-elegant">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-search me-2"></i>
+                    Kết quả tìm kiếm cho: <strong>"@ViewBag.SearchKeyword"</strong>
+                </span>
+                <span class="badge bg-primary">@ViewBag.ResultCount kết quả</span>
+            </div>
+            <div class="card-body">
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong>@ViewBag.SearchKeyword</strong>".
+                        <p class="mt-2">Gợi ý:</p>
+                        <ul>
+                            <li>Kiểm tra lại chính tả</li>
+                            <li>Sử dụng các từ khóa khác</li>
+                            <li>Sử dụng các từ khóa ngắn hơn</li>
+                        </ul>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-elegant-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại trang sản phẩm
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @{
+                            int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+                        }
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var product = Model[i];
+                            int productNumber = startIndex + i;
+                            <div class="col-md-4 mb-4">
+                                <div class="card product-card h-100">
+                                    <div class="product-image-container">
+                                        <img src="@product.ImageUrl" class="card-img-top product-image" alt="@product.Name">
+                                    </div>
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title product-title">
+                                            <span class="badge bg-elegant-secondary me-1">#@productNumber</span>
+                                            @product.Name
+                                        </h5>
+                                        <p class="card-text product-category">
+                                            <span class="badge bg-elegant-secondary">@product.Category.Name</span>
+                                        </p>
+                                        <p class="card-text product-price mt-auto">@product.Price.ToString("N0") VNĐ</p>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-elegant-secondary">
+                                                <i class="fas fa-info-circle me-1"></i>Chi tiết
+                                            </a>
+                                            <button class="btn btn-elegant-primary add-to-cart-btn" data-product-id="@product.Id">
+                                                <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-4">
+                        @await Html.PartialAsync("_Pagination")
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Highlight search terms in product titles and descriptions
+            var keyword = '@ViewBag.SearchKeyword';
+            if (keyword) {
+                $('.product-title, .product-description').each(function () {
+                    var text = $(this).text();
+                    var regex = new RegExp('(' + keyword + ')', 'gi');
+                    var newText = text.replace(regex, '<span class="highlight">$1</span>');
+                    $(this).html(newText);
+                });
+            }
+
+            // Add to cart functionality
+            $('.add-to-cart-btn').click(function () {
+                var productId = $(this).data('product-id');
+                $.ajax({
+                    url: '/Home/AddToCart',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function (response) {
+                        if (response.success) {
+                            // Show success message
+                            Swal.fire({
+                                title: 'Thành công!',
+                                text: 'Đã thêm sản phẩm vào giỏ hàng',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#d4af37'
+                            });
+
+                            // Update cart count
+                            $('#cart-count').text(response.cartCount);
+                        } else {
+                            // Show error message
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#d4af37'
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#d4af37'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .highlight {
+        background-color: rgba(212, 175, 55, 0.3);
+        font-weight: bold;
+        padding: 0 2px;
+    }
+</style>

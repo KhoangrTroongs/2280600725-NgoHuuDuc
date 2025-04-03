@@ -1,0 +1,38 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="admin-icon-sidebar">
+    <div class="admin-icon-sidebar-brand">
+        <i class="fas fa-tachometer-alt"></i>
+    </div>
+    <ul class="admin-icon-sidebar-nav">
+        <li class="@(controller == "Product" ? "active" : "")">
+            <a asp-controller="Product" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Quản lý sản phẩm">
+                <i class="fas fa-box"></i>
+            </a>
+        </li>
+        <li class="@(controller == "Category" ? "active" : "")">
+            <a asp-controller="Category" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Quản lý danh mục">
+                <i class="fas fa-tags"></i>
+            </a>
+        </li>
+        <li class="@(controller == "Account" && action == "Index" ? "active" : "")">
+            <a asp-controller="Account" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Quản lý người dùng">
+                <i class="fas fa-users"></i>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Thống kê">
+                <i class="fas fa-chart-line"></i>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Cài đặt">
+                <i class="fas fa-cog"></i>
+            </a>
+        </li>
+    </ul>
+</div>
