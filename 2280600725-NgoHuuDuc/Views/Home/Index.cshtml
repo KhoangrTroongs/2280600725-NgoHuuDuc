@@ -2,7 +2,7 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div id="myCarousel" class="carousel slide mb-6" data-bs-ride="carousel">
+<div id="myCarousel" class="carousel slide mb-6 carousel-elegant" data-bs-ride="carousel">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1" aria-current="true"></button>
         <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
@@ -15,7 +15,7 @@
                 <div class="carousel-caption text-start">
                     <h1>Cửa hàng áo Vest.</h1>
                     <p class="opacity-75">Tổng hợp nhiều loại suit phù hợp cho từng mục đích của bạn.</p>
-                    <p><a class="btn btn-lg btn-primary" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a></p>
+                    <p><a class="btn btn-lg btn-elegant-primary" asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a></p>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                 <div class="carousel-caption">
                     <h1>Nhận đặt may.</h1>
                     <p>Lựa chọn kiểu dáng, loại vải, màu sắc phù hợp với mục đích của bạn.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Liên hệ với chúng tôi.</a></p>
+                    <p><a class="btn btn-lg btn-elegant-primary" href="#">Liên hệ với chúng tôi</a></p>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
                 <div class="carousel-caption text-end">
                     <h1>Cho thuê.</h1>
                     <p>Bạn muốn tiết kiệm chi phí, đến với chúng tôi.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Dịch vụ cho thuê</a></p>
+                    <p><a class="btn btn-lg btn-elegant-primary" href="#">Dịch vụ cho thuê</a></p>
                 </div>
             </div>
         </div>
@@ -77,25 +77,25 @@
 
 @* <hr class="featurette-divider"> *@
 
-<div class="container marketing">
+<div class="container marketing mt-5">
     <div class="row">
         <div class="col-lg-4 text-center">
-            <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple1">
+            <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple1">
             <h2 class="fw-normal">Hoàng Ân</h2>
             <p>Supper Support</p>
-            <p><a class="btn btn-secondary" href="https://github.com/SushiRedpanda" target="_blank">View details »</a></p>
+            <p><a class="btn btn-elegant-secondary" href="https://github.com/SushiRedpanda" target="_blank">Xem thêm »</a></p>
         </div>
         <div class="col-lg-4 text-center">
-            <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple2">
+            <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple2">
             <h2 class="fw-normal">Ngô Hữu Đức</h2>
             <p>Hàng không, ăn hàng ở không</p>
-            <p><a class="btn btn-secondary" href="https://github.com/khoangrtroongs" target="_blank">View details »</a></p>
+            <p><a class="btn btn-elegant-secondary" href="https://github.com/khoangrtroongs" target="_blank">Xem thêm »</a></p>
         </div>
         <div class="col-lg-4 text-center">
-            <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle" width="140" height="140" alt="Peple3">
+            <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple3">
             <h2 class="fw-normal">Nguyễn Quốc Trung</h2>
             <p>Fép đêêêêêêêêêêêêêêêê</p>
-            <p><a class="btn btn-secondary" href="https://github.com/TrungQNdev20" target="_blank">View details »</a></p>
+            <p><a class="btn btn-elegant-secondary" href="https://github.com/TrungQNdev20" target="_blank">Xem thêm »</a></p>
         </div>
     </div>
 
@@ -103,11 +103,11 @@
 
     <div class="row featurette">
         <div class="col-md-7">
-            <h2 class="featurette-heading fw-normal lh-1">Đa đang kiểu loại. <span class="text-body-secondary">Tìm mỏi con mắt luôn.<noframes></noframes>.</span></h2>
+            <h2 class="featurette-heading fw-normal lh-1">Đa dạng kiểu loại. <span class="text-body-secondary">Tìm mỏi con mắt luôn.</span></h2>
             <p class="lead">Đầy đủ các kiểu dáng. Phù hợp cho mọi lứa tuổi.</p>
         </div>
         <div class="col-md-5">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5" width="500" height="500" src="~/images/img/feat1.jpg" alt="Cuahang">
+            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/feat1.jpg" alt="Cuahang" style="border: 3px solid var(--elegant-gold-light);">
         </div>
     </div>
 
@@ -119,7 +119,7 @@
             <p class="lead">Với hơn 500 mẫu có sẵn, chúng tôi sẽ "tùy chỉnh" lại một bộ suit dành riêng cho bạn. Tha hồ lựa chọn kiểu dáng, kích thước không giới hạn, chất liệu vải đa dạng.</p>
         </div>
         <div class="col-md-5 order-md-1">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5" width="500" height="500" src="~/images/img/maydo.jpg" alt="Maydo">
+            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/maydo.jpg" alt="Maydo" style="border: 3px solid var(--elegant-gold-light);">
         </div>
     </div>
 
@@ -131,7 +131,7 @@
             <p class="lead">Bạn chỉ đi dự tiệc có một lần nhưng phải mua hẳn một bộ suit ? Đừng lo, bên chúng tôi sẽ cho bạn mượn.</p>
         </div>
         <div class="col-md-5">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5" width="500" height="500" src="~/images/img/wall2.jpg" alt="chomuon">
+            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/wall2.jpg" alt="chomuon" style="border: 3px solid var(--elegant-gold-light);">
         </div>
     </div>
 </div>

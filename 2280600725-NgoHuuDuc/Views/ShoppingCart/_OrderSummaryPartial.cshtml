@@ -1,0 +1,29 @@
+@model List<CartItem>
+
+@if (Model.Any())
+{
+    <div class="order-summary">
+        <ul class="list-group mb-3">
+            @foreach (var item in Model)
+            {
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">@item.ProductName</h6>
+                        <small class="text-muted">@item.Quantity x @item.Price.ToString("C")</small>
+                    </div>
+                    <span class="text-muted">@((item.Price * item.Quantity).ToString("C"))</span>
+                </li>
+            }
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Total</span>
+                <strong>@Model.Sum(i => i.Price * i.Quantity).ToString("C")</strong>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        Your cart is empty. Please add items to your cart before checkout.
+    </div>
+}

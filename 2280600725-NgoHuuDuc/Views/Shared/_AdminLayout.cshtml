@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Dashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/elegant-theme.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar" aria-label="Admin navigation">
+            <div class="sidebar-header d-flex justify-content-between align-items-center">
+                <h3>Elegant Suits</h3>
+                <button type="button" id="sidebarCollapse" class="btn btn-sm btn-elegant-gold" title="Thu gọn/Mở rộng">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Dashboard" ? "active" : "")">
+                    <a asp-controller="Home" asp-action="Dashboard" title="Dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Product" ? "active" : "")">
+                    <a asp-controller="Product" asp-action="Index" title="Sản phẩm">
+                        <i class="fas fa-box"></i>
+                        <span class="menu-text">Sản phẩm</span>
+                    </a>
+                </li>
+                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Category" ? "active" : "")">
+                    <a asp-controller="Category" asp-action="Index" title="Danh mục">
+                        <i class="fas fa-tags"></i>
+                        <span class="menu-text">Danh mục</span>
+                    </a>
+                </li>
+                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Account" ? "active" : "")">
+                    <a asp-controller="Account" asp-action="Index" title="Người dùng">
+                        <i class="fas fa-users"></i>
+                        <span class="menu-text">Người dùng</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" title="Thống kê">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="menu-text">Thống kê</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Top navigation">
+                <div class="container-fluid">
+                    <form class="d-flex" asp-controller="Product" asp-action="Search" method="get">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control form-control-sm search-input" placeholder="Tìm kiếm sản phẩm..." aria-label="Search" required>
+                            <button class="btn btn-elegant-primary btn-sm" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="ms-auto">
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-elegant-secondary dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-2"></i>@User.Identity?.Name
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="Details">
+                                        <i class="fas fa-user me-2"></i>Hồ sơ
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-cog me-2"></i>Cài đặt
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid h-100">
+                <h2 class="mb-4">@ViewData["Title"]</h2>
+                @RenderBody()
+            </div>
+
+            <footer class="mt-5 text-center">
+                <p>&copy; 2025 Elegant Suits - Admin Dashboard</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Toggle sidebar
+            $('#sidebarCollapse').on('click', function (e) {
+                e.preventDefault();
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+
+                // Store sidebar state in localStorage
+                localStorage.setItem('sidebarState', $('#sidebar').hasClass('active') ? 'collapsed' : 'expanded');
+            });
+
+            // Check if sidebar state is stored in localStorage
+            var sidebarState = localStorage.getItem('sidebarState');
+            if (sidebarState === 'collapsed') {
+                $('#sidebar').addClass('active');
+                $('#content').addClass('active');
+            }
+
+            // Add direct click handler to menu items to prevent any animation delay
+            $('#sidebar ul li a').on('click', function() {
+                // Add a class to body to disable transitions during page navigation
+                $('body').addClass('disable-transitions');
+            });
+
+            // Initialize Select2
+            $('.select2').select2();
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

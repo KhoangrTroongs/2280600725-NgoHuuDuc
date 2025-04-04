@@ -1,0 +1,738 @@
+/* Elegant Theme for Suit Store - Black and Gold */
+:root {
+    --elegant-black: #1a1a1a;
+    --elegant-dark: #222222;
+    --elegant-gold: #d4af37;
+    --elegant-gold-light: #e5c76b;
+    --elegant-gold-dark: #b38728;
+    --elegant-text: #f8f8f8;
+    --elegant-text-muted: #aaaaaa;
+    --elegant-border: #333333;
+    --elegant-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* General Body Styling */
+body {
+    background-color: #f8f8f8;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar Styling */
+.navbar-elegant {
+    background-color: var(--elegant-black) !important;
+    border-bottom: 1px solid var(--elegant-gold) !important;
+    box-shadow: 0 2px 10px var(--elegant-shadow) !important;
+}
+
+.navbar-elegant .navbar-brand {
+    color: var(--elegant-gold) !important;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.navbar-elegant .nav-link {
+    color: var(--elegant-text) !important;
+    transition: color 0.3s ease;
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    text-align: left;
+}
+
+.navbar-elegant .nav-link:hover {
+    color: var(--elegant-gold) !important;
+}
+
+.navbar-elegant button.nav-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.navbar-elegant .navbar-toggler {
+    border-color: var(--elegant-gold);
+}
+
+.navbar-elegant .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(212, 175, 55, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Search Form Styling */
+.search-form {
+    width: 250px;
+}
+
+.search-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--elegant-text);
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--elegant-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+    color: var(--elegant-text);
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+    .search-form {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+/* Badge Styling */
+.badge.bg-elegant-secondary {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.card-title .badge {
+    font-size: 0.7em;
+    vertical-align: middle;
+}
+
+/* Pagination Styling */
+.pagination-elegant .page-link {
+    color: var(--elegant-dark);
+    background-color: #fff;
+    border-color: var(--elegant-border);
+    transition: all 0.3s ease;
+}
+
+.pagination-elegant .page-link:hover {
+    color: var(--elegant-dark);
+    background-color: var(--elegant-gold-light);
+    border-color: var(--elegant-gold);
+}
+
+.pagination-elegant .page-item.active .page-link {
+    color: var(--elegant-dark);
+    background-color: var(--elegant-gold);
+    border-color: var(--elegant-gold-dark);
+}
+
+.pagination-elegant .page-item.disabled .page-link {
+    color: var(--elegant-text-muted);
+    background-color: #fff;
+    border-color: var(--elegant-border);
+}
+
+/* Dropdown Styling */
+.dropdown-menu-elegant {
+    background-color: var(--elegant-dark);
+    border: 1px solid var(--elegant-gold);
+    box-shadow: 0 4px 10px var(--elegant-shadow);
+}
+
+.dropdown-menu-elegant .dropdown-item {
+    color: var(--elegant-text);
+}
+
+.dropdown-menu-elegant .dropdown-item:hover {
+    background-color: var(--elegant-gold-dark);
+    color: white;
+}
+
+.dropdown-menu-elegant .dropdown-divider {
+    border-top: 1px solid var(--elegant-gold);
+    opacity: 0.3;
+}
+
+/* Button Styling */
+.btn-elegant-primary {
+    background-color: var(--elegant-gold);
+    border-color: var(--elegant-gold-dark);
+    color: var(--elegant-dark);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-elegant-primary:hover {
+    background-color: var(--elegant-gold-dark);
+    border-color: var(--elegant-gold-dark);
+    color: white;
+}
+
+.btn-elegant-secondary {
+    background-color: var(--elegant-dark);
+    border-color: var(--elegant-gold);
+    color: var(--elegant-gold);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-elegant-secondary:hover {
+    background-color: var(--elegant-gold);
+    border-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+}
+
+.btn-elegant-gold {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    border-color: var(--elegant-gold-dark);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-elegant-gold:hover {
+    background-color: var(--elegant-gold-dark);
+    color: white;
+    border-color: var(--elegant-gold-dark);
+}
+
+/* Card Styling */
+.card-elegant {
+    border: 1px solid var(--elegant-border);
+    box-shadow: 0 4px 8px var(--elegant-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-elegant:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--elegant-shadow);
+}
+
+.card-elegant .card-title {
+    color: var(--elegant-dark);
+    font-weight: 600;
+}
+
+.card-elegant .card-body {
+    padding: 1.5rem;
+}
+
+.card-elegant .card-footer {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-top: 1px solid var(--elegant-border);
+}
+
+.card-elegant .price {
+    color: var(--elegant-gold-dark);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Footer Styling */
+.footer-elegant {
+    background-color: var(--elegant-black);
+    color: var(--elegant-text);
+    border-top: 1px solid var(--elegant-gold);
+    margin-top: auto;
+}
+
+.footer-elegant a {
+    color: var(--elegant-gold);
+}
+
+.footer-elegant a:hover {
+    color: var(--elegant-gold-light);
+}
+
+/* Sticky Footer */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+.flex-grow-1 {
+    flex: 1 0 auto;
+}
+
+/* Carousel Styling */
+.carousel-elegant .carousel-caption {
+    background-color: rgba(26, 26, 26, 0.7);
+    padding: 20px;
+    border-left: 3px solid var(--elegant-gold);
+}
+
+.carousel-elegant .carousel-caption h1 {
+    color: var(--elegant-gold);
+    font-weight: 600;
+}
+
+.carousel-elegant .carousel-indicators button {
+    background-color: var(--elegant-gold);
+}
+
+/* Admin Icon Sidebar Styling */
+.admin-icon-sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    height: calc(100vh - 70px);
+    width: 60px;
+    background-color: var(--elegant-dark);
+    color: var(--elegant-text);
+    z-index: 1000;
+    box-shadow: 2px 0 5px var(--elegant-shadow);
+    transition: all 0.3s ease;
+}
+
+.admin-icon-sidebar-brand {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--elegant-gold);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.admin-icon-sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-icon-sidebar-nav li {
+    width: 100%;
+}
+
+.admin-icon-sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    color: var(--elegant-text);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.admin-icon-sidebar-nav li a:hover {
+    background-color: rgba(212, 175, 55, 0.1);
+    color: var(--elegant-gold);
+}
+
+.admin-icon-sidebar-nav li.active a {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+}
+
+.admin-icon-sidebar-nav li a i {
+    font-size: 1.2rem;
+}
+
+/* Admin Content Styling */
+.admin-mode-container {
+    padding-left: 60px;
+}
+
+.admin-content {
+    padding: 20px;
+    background-color: #fff;
+    min-height: calc(100vh - 70px);
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+/* Admin Sidebar Styling */
+.admin-sidebar {
+    background-color: var(--elegant-dark);
+    color: var(--elegant-text);
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--elegant-shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.admin-sidebar-header {
+    background-color: var(--elegant-black);
+    color: var(--elegant-gold);
+    padding: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--elegant-gold);
+}
+
+.admin-sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-sidebar-menu li {
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.admin-sidebar-menu li:last-child {
+    border-bottom: none;
+}
+
+.admin-sidebar-menu li a {
+    display: block;
+    padding: 12px 15px;
+    color: var(--elegant-text);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.admin-sidebar-menu li a:hover {
+    background-color: rgba(212, 175, 55, 0.1);
+    color: var(--elegant-gold);
+}
+
+.admin-sidebar-menu li.active a {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    font-weight: 600;
+}
+
+.admin-sidebar-menu li.active a i {
+    color: var(--elegant-dark);
+}
+
+/* Removed duplicate admin-content */
+
+/* Category List Styling */
+.category-list-elegant .list-group-item {
+    background-color: transparent;
+    border-color: var(--elegant-border);
+    color: var(--elegant-dark);
+    transition: all 0.3s ease;
+}
+
+.category-list-elegant .list-group-item:hover {
+    background-color: rgba(212, 175, 55, 0.1);
+}
+
+.category-list-elegant .list-group-item.active {
+    background-color: var(--elegant-gold);
+    border-color: var(--elegant-gold-dark);
+    color: var(--elegant-dark);
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.category-list-elegant .list-group-item.active i {
+    color: var(--elegant-dark);
+}
+
+/* User Badge */
+.user-badge {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    padding: 0.25rem 0.5rem;
+    border-radius: 50rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Cart Icon */
+.cart-icon {
+    color: var(--elegant-gold);
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.cart-count {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+}
+
+/* Featurette Styling */
+.featurette-heading {
+    color: var(--elegant-dark);
+}
+
+.featurette-heading .text-body-secondary {
+    color: var(--elegant-gold-dark) !important;
+}
+
+.featurette-divider {
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    margin: 3rem 0;
+}
+
+/* Marketing Section */
+.marketing h2 {
+    color: var(--elegant-dark);
+}
+
+.marketing .btn-secondary {
+    background-color: var(--elegant-dark);
+    border-color: var(--elegant-gold);
+    color: var(--elegant-gold);
+}
+
+.marketing .btn-secondary:hover {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+}
+
+/* Profile Image */
+.profile-img-elegant {
+    border: 3px solid var(--elegant-gold);
+}
+
+/* Back to top button */
+#btn-back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+    z-index: 99;
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+#btn-back-to-top:hover {
+    background-color: var(--elegant-gold-dark);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Animations */
+@keyframes goldPulse {
+    0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
+.gold-pulse {
+    animation: goldPulse 2s infinite;
+}
+
+/* Category item click effect */
+.category-list-elegant .list-group-item.clicked {
+    transform: scale(0.97);
+    background-color: var(--elegant-gold-light);
+    transition: all 0.15s ease;
+}
+
+/* Select2 Styling */
+.select2-container--default .select2-selection--multiple {
+    border-color: var(--elegant-border);
+    background-color: transparent;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--elegant-gold);
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--elegant-gold);
+    border-color: var(--elegant-gold-dark);
+    color: var(--elegant-dark);
+    font-weight: 500;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--elegant-dark);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: var(--elegant-black);
+    background-color: var(--elegant-gold-dark);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+}
+
+/* Order Styling */
+.card-elegant .card-header {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-bottom: 1px solid var(--elegant-gold);
+    padding: 0.75rem 1.25rem;
+}
+
+.badge.bg-success {
+    background-color: var(--elegant-gold) !important;
+    color: var(--elegant-dark);
+}
+
+.table tfoot {
+    font-weight: bold;
+    background-color: rgba(212, 175, 55, 0.05);
+}
+
+/* About Page Styling */
+.text-elegant-gold {
+    color: var(--elegant-gold);
+}
+
+.elegant-divider {
+    border-top: 2px solid var(--elegant-gold);
+    width: 100px;
+    margin: 0 auto;
+    opacity: 1;
+}
+
+.section-title {
+    position: relative;
+    margin-bottom: 1.5rem;
+    color: var(--elegant-dark);
+    font-weight: 600;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 50px;
+    height: 3px;
+    background-color: var(--elegant-gold);
+}
+
+.about-image {
+    border: 3px solid var(--elegant-gold-light);
+    transition: all 0.3s ease;
+}
+
+.about-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.mission-card {
+    background-color: rgba(212, 175, 55, 0.05);
+    border-left: 4px solid var(--elegant-gold);
+}
+
+.mission-text {
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 0;
+}
+
+.value-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.value-icon {
+    font-size: 2rem;
+    color: var(--elegant-gold);
+}
+
+.service-card {
+    background-color: #fff;
+    border-left: 3px solid var(--elegant-gold);
+    transition: all 0.3s ease;
+}
+
+.service-card:hover {
+    background-color: rgba(212, 175, 55, 0.05);
+    transform: translateX(5px);
+}
+
+.team-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 3px solid var(--elegant-gold);
+    transition: all 0.3s ease;
+}
+
+.team-img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+/* Contact Page Styling */
+.contact-info-card, .contact-form-card {
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.contact-info-card:hover, .contact-form-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.contact-item h5 {
+    color: var(--elegant-dark);
+    font-weight: 600;
+}
+
+.contact-link {
+    color: var(--elegant-dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+    color: var(--elegant-gold);
+}
+
+.social-icons {
+    margin-top: 15px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--elegant-dark);
+    color: var(--elegant-gold) !important;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark) !important;
+    transform: translateY(-3px);
+}
+
+.input-group-text {
+    background-color: var(--elegant-gold);
+    color: var(--elegant-dark);
+    border-color: var(--elegant-gold);
+}
+
+.map-container {
+    overflow: hidden;
+    border: 3px solid var(--elegant-gold-light);
+}
+
+/* Additional styling for category list */
+.category-list-elegant {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.category-list-elegant .list-group-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.category-list-elegant .list-group-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
