@@ -29,8 +29,8 @@
             </a>
         </li>
 
-        <li>
-            <a href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Thống kê">
+        <li class="@(controller == "Statistics" ? "active" : "")">
+            <a asp-controller="Statistics" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Thống kê">
                 <i class="fas fa-chart-line"></i>
             </a>
         </li>

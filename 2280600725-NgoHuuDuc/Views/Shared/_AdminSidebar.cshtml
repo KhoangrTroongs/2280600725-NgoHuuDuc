@@ -39,8 +39,8 @@
                 <span>Quản lý đơn hàng</span>
             </a>
         </li>
-        <li>
-            <a href="#">
+        <li class="@(controller == "Statistics" ? "active" : "")">
+            <a asp-controller="Statistics" asp-action="Index">
                 <i class="fas fa-chart-line me-2"></i>
                 <span>Thống kê</span>
             </a>
