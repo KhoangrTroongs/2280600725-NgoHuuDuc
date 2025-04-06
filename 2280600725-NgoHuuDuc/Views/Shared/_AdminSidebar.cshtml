@@ -33,6 +33,12 @@
                 <span>Quản lý vai trò</span>
             </a>
         </li>
+        <li class="@(controller == "Order" ? "active" : "")">
+            <a asp-controller="Order" asp-action="Index">
+                <i class="fas fa-shopping-cart me-2"></i>
+                <span>Quản lý đơn hàng</span>
+            </a>
+        </li>
         <li>
             <a href="#">
                 <i class="fas fa-chart-line me-2"></i>

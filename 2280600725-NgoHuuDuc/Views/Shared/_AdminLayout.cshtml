@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 </head>
+
 <body>
     <div class="wrapper">
         <!-- Sidebar -->
@@ -23,7 +25,8 @@
             </div>
 
             <ul class="list-unstyled components">
-                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Dashboard" ? "active" : "")">
+                <li
+                    class="@(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Dashboard" ? "active" : "")">
                     <a asp-controller="Home" asp-action="Dashboard" title="Dashboard">
                         <i class="fas fa-tachometer-alt"></i>
                         <span class="menu-text">Dashboard</span>
@@ -47,6 +50,12 @@
                         <span class="menu-text">Người dùng</span>
                     </a>
                 </li>
+                <li class="@(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")"></li>
+                    <a asp-controller="Order" asp-action="Index">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="menu-text">Quản lý đơn hàng</span>
+                    </a>
+                </li>
                 <li>
                     <a href="#" title="Thống kê">
                         <i class="fas fa-chart-bar"></i>
@@ -62,7 +71,8 @@
                 <div class="container-fluid">
                     <form class="d-flex" asp-controller="Product" asp-action="Search" method="get">
                         <div class="input-group">
-                            <input type="text" name="keyword" class="form-control form-control-sm search-input" placeholder="Tìm kiếm sản phẩm..." aria-label="Search" required>
+                            <input type="text" name="keyword" class="form-control form-control-sm search-input"
+                                placeholder="Tìm kiếm sản phẩm..." aria-label="Search" required>
                             <button class="btn btn-elegant-primary btn-sm" type="submit">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -71,7 +81,8 @@
 
                     <div class="ms-auto">
                         <div class="dropdown">
-                            <button type="button" class="btn btn-elegant-secondary dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="btn btn-elegant-secondary dropdown-toggle" id="userDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-user me-2"></i>@User.Identity?.Name
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -85,9 +96,12 @@
                                         <i class="fas fa-cog me-2"></i>Cài đặt
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout"
+                                        asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                                         <button type="submit" class="dropdown-item">
                                             <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                                         </button>
@@ -135,7 +149,7 @@
             }
 
             // Add direct click handler to menu items to prevent any animation delay
-            $('#sidebar ul li a').on('click', function() {
+            $('#sidebar ul li a').on('click', function () {
                 // Add a class to body to disable transitions during page navigation
                 $('body').addClass('disable-transitions');
             });
@@ -147,4 +161,5 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

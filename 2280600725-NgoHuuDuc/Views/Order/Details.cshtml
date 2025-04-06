@@ -3,31 +3,41 @@
 @using NgoHuuDuc_2280600725.Extensions
 
 @{
-    ViewData["Title"] = "Order Details";
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container mt-4">
+<div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>
+        <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-file-invoice me-2" style="color: var(--elegant-gold);"></i>
-            Order #@Model.Id Details
+            Chi tiết đơn hàng #@Model.Id
         </h1>
-        <a asp-action="MyOrders" class="btn btn-elegant-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+        <a asp-action="Index" class="btn btn-elegant-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
         </a>
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="row">
         <div class="col-md-6">
             <div class="card card-elegant mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Order Information</h5>
+                    <h5 class="mb-0">Thông tin đơn hàng</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Order Date:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
-                    <p><strong>Order Total:</strong> @Model.TotalPrice.ToString("C0")</p>
+                    <p><strong>Mã đơn hàng:</strong> #@Model.Id</p>
+                    <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Tổng tiền:</strong> @Model.TotalPrice.ToString("C0")</p>
                     <p>
-                        <strong>Status:</strong>
+                        <strong>Trạng thái:</strong>
                         @{
                             var badgeClass = Model.Status switch
                             {
@@ -48,32 +58,66 @@
         <div class="col-md-6">
             <div class="card card-elegant mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Shipping Information</h5>
+                    <h5 class="mb-0">Thông tin khách hàng</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Shipping Address:</strong> @Model.ShippingAddress</p>
+                    <p><strong>Họ tên:</strong> @(Model.User?.FullName ?? "Khách hàng không xác định")</p>
+                    <p><strong>Email:</strong> @(Model.User?.Email ?? "Không có thông tin")</p>
+                    <p><strong>Số điện thoại:</strong> @(Model.User?.PhoneNumber ?? "Không có thông tin")</p>
+                    <p><strong>Địa chỉ giao hàng:</strong> @Model.ShippingAddress</p>
                     @if (!string.IsNullOrEmpty(Model.Notes))
                     {
-                        <p><strong>Notes:</strong> @Model.Notes</p>
+                        <p><strong>Ghi chú:</strong> @Model.Notes</p>
                     }
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="card card-elegant mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Cập nhật trạng thái</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="UpdateStatus" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="status" class="form-label">Trạng thái mới</label>
+                            <select name="status" id="status" class="form-select">
+                                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    <option value="@((int)status)" selected="@(Model.Status == status)">
+                                        @status.GetDisplayName()
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Cập nhật trạng thái
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card card-elegant">
         <div class="card-header">
-            <h5 class="mb-0">Order Items</h5>
+            <h5 class="mb-0">Chi tiết sản phẩm</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
+                            <th>Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,7 +132,7 @@
                                             {
                                                 <img src="@item.Product.ImageUrl" alt="@item.Product.Name" style="width:50px; height:50px; object-fit:cover" class="me-2" />
                                             }
-                                            <span>@(item.Product?.Name ?? "Product not available")</span>
+                                            <span>@(item.Product?.Name ?? "Sản phẩm không tồn tại")</span>
                                         </div>
                                     </td>
                                     <td>@item.Price.ToString("C0")</td>
@@ -100,7 +144,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
                             <td><strong>@Model.TotalPrice.ToString("C0")</strong></td>
                         </tr>
                     </tfoot>

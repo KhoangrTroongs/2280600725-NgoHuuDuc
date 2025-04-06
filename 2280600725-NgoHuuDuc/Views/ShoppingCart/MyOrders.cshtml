@@ -1,4 +1,6 @@
 @model List<NgoHuuDuc_2280600725.Models.Order>
+@using NgoHuuDuc_2280600725.Models.Enums
+@using NgoHuuDuc_2280600725.Extensions
 
 @{
     ViewData["Title"] = "My Orders";
@@ -54,7 +56,19 @@
                                     <td>@order.TotalPrice.ToString("C0")</td>
                                     <td>@order.ShippingAddress</td>
                                     <td>
-                                        <span class="badge bg-success">Completed</span>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning",
+                                                OrderStatus.Confirmed => "bg-info",
+                                                OrderStatus.Shipping => "bg-primary",
+                                                OrderStatus.Delivered => "bg-success",
+                                                OrderStatus.Cancelled => "bg-danger",
+                                                OrderStatus.Returned => "bg-secondary",
+                                                _ => "bg-light"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@order.Status.GetDisplayName()</span>
                                     </td>
                                     <td>
                                         <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-elegant-secondary btn-sm">
