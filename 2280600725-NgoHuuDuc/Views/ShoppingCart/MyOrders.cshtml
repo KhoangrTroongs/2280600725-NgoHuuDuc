@@ -1,13 +1,15 @@
 @model List<NgoHuuDuc_2280600725.Models.Order>
+@using NgoHuuDuc_2280600725.Models.Enums
+@using NgoHuuDuc_2280600725.Extensions
 
 @{
-    ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "Đơn hàng của tôi";
 }
 
 <div class="container mt-4">
     <h1 class="mb-4">
         <i class="fas fa-shopping-bag me-2" style="color: var(--elegant-gold);"></i>
-        My Orders
+        Đơn hàng của tôi
     </h1>
 
     @if (TempData["ErrorMessage"] != null)
@@ -24,7 +26,7 @@
             @ViewBag.Message
             <p class="mt-2">
                 <a asp-controller="Home" asp-action="Index" class="btn btn-elegant-primary">
-                    <i class="fas fa-shopping-cart me-1"></i> Start Shopping
+                    <i class="fas fa-shopping-cart me-1"></i> Bắt đầu mua sắm
                 </a>
             </p>
         </div>
@@ -37,12 +39,12 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Order #</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Shipping Address</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Mã đơn hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Địa chỉ giao hàng</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,11 +56,23 @@
                                     <td>@order.TotalPrice.ToString("C0")</td>
                                     <td>@order.ShippingAddress</td>
                                     <td>
-                                        <span class="badge bg-success">Completed</span>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning",
+                                                OrderStatus.Confirmed => "bg-info",
+                                                OrderStatus.Shipping => "bg-primary",
+                                                OrderStatus.Delivered => "bg-success",
+                                                OrderStatus.Cancelled => "bg-danger",
+                                                OrderStatus.Returned => "bg-secondary",
+                                                _ => "bg-light"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@order.Status.GetDisplayName()</span>
                                     </td>
                                     <td>
                                         <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-elegant-secondary btn-sm">
-                                            <i class="fas fa-eye me-1"></i> View Details
+                                            <i class="fas fa-eye me-1"></i> Xem chi tiết
                                         </a>
                                     </td>
                                 </tr>

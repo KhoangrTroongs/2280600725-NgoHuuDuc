@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NgoHuuDuc_2280600725.Data;
 using NgoHuuDuc_2280600725.Extensions;
 using NgoHuuDuc_2280600725.Models;
+using NgoHuuDuc_2280600725.Models.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -129,6 +130,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                 order.UserId = user.Id;
                 order.OrderDate = DateTime.UtcNow;
                 order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
+                order.Status = OrderStatus.Pending;
                 order.OrderDetails = cart.Items.Select(i => new OrderDetail
                 {
                     ProductId = i.ProductId,

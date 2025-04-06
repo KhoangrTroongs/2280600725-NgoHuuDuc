@@ -1,0 +1,384 @@
+@model NgoHuuDuc_2280600725.Models.ViewModels.StatisticsViewModel
+@using NgoHuuDuc_2280600725.Models.Enums
+@using NgoHuuDuc_2280600725.Extensions
+
+@{
+    ViewData["Title"] = "Thống kê";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-line me-2" style="color: var(--elegant-gold);"></i>
+            Thống kê
+        </h1>
+    </div>
+
+    <!-- Bộ lọc thời gian -->
+    <div class="card card-elegant mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Từ ngày</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">Đến ngày</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng đơn hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Doanh thu
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("C0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng sản phẩm
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProducts</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tổng người dùng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalUsers</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê theo trạng thái đơn hàng -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card card-elegant mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold">Thống kê đơn hàng theo trạng thái</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-warning"></i> Chờ xác nhận (@Model.PendingOrders)
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> Đã xác nhận (@Model.ConfirmedOrders)
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Đang giao hàng (@Model.ShippingOrders)
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Đã giao hàng (@Model.DeliveredOrders)
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-danger"></i> Đã hủy (@Model.CancelledOrders)
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-secondary"></i> Hoàn trả (@Model.ReturnedOrders)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card card-elegant mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold">Thống kê doanh thu theo trạng thái</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4">
+                        <canvas id="revenueStatusChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-warning"></i> Chờ xác nhận (@Model.PendingRevenue.ToString("C0"))
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> Đã xác nhận (@Model.ConfirmedRevenue.ToString("C0"))
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Đang giao hàng (@Model.ShippingRevenue.ToString("C0"))
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Đã giao hàng (@Model.DeliveredRevenue.ToString("C0"))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê theo ngày -->
+    <div class="card card-elegant mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold">Thống kê doanh thu theo ngày</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-area">
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top sản phẩm bán chạy -->
+    <div class="card card-elegant mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold">Top sản phẩm bán chạy</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng đã bán</th>
+                            <th>Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.TopProducts)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.ProductName" style="width:50px; height:50px; object-fit:cover" class="me-2" />
+                                        }
+                                        <span>@product.ProductName</span>
+                                    </div>
+                                </td>
+                                <td>@product.Quantity</td>
+                                <td>@product.Revenue.ToString("C0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Biểu đồ trạng thái đơn hàng
+        var orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        var orderStatusChart = new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao hàng', 'Đã giao hàng', 'Đã hủy', 'Hoàn trả'],
+                datasets: [{
+                    data: [@Model.PendingOrders, @Model.ConfirmedOrders, @Model.ShippingOrders, @Model.DeliveredOrders, @Model.CancelledOrders, @Model.ReturnedOrders],
+                    backgroundColor: ['#f6c23e', '#36b9cc', '#4e73df', '#1cc88a', '#e74a3b', '#858796'],
+                    hoverBackgroundColor: ['#f6c23e', '#36b9cc', '#4e73df', '#1cc88a', '#e74a3b', '#858796'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
+        });
+
+        // Biểu đồ doanh thu theo trạng thái
+        var revenueStatusCtx = document.getElementById('revenueStatusChart').getContext('2d');
+        var revenueStatusChart = new Chart(revenueStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao hàng', 'Đã giao hàng', 'Đã hủy', 'Hoàn trả'],
+                datasets: [{
+                    data: [@Model.PendingRevenue, @Model.ConfirmedRevenue, @Model.ShippingRevenue, @Model.DeliveredRevenue, @Model.CancelledRevenue, @Model.ReturnedRevenue],
+                    backgroundColor: ['#f6c23e', '#36b9cc', '#4e73df', '#1cc88a', '#e74a3b', '#858796'],
+                    hoverBackgroundColor: ['#f6c23e', '#36b9cc', '#4e73df', '#1cc88a', '#e74a3b', '#858796'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
+        });
+
+        // Biểu đồ doanh thu theo ngày
+        var dailyRevenueCtx = document.getElementById('dailyRevenueChart').getContext('2d');
+        var dailyRevenueChart = new Chart(dailyRevenueCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.DailyStatistics.Select(d => $"'{d.Date.ToString("dd/MM")}'").ToArray()))],
+                datasets: [{
+                    label: "Doanh thu",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: [@string.Join(",", Model.DailyStatistics.Select(d => d.Revenue).ToArray())],
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'date'
+                        },
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, chart) {
+                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                            return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + ' đ';
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

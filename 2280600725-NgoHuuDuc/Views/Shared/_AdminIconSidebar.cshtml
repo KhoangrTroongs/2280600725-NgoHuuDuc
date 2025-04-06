@@ -23,9 +23,14 @@
                 <i class="fas fa-users"></i>
             </a>
         </li>
+        <li class="@(controller == "Order" ? "active" : "")">
+            <a asp-controller="Order" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Quản lý đơn hàng">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
+        </li>
 
-        <li>
-            <a href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Thống kê">
+        <li class="@(controller == "Statistics" ? "active" : "")">
+            <a asp-controller="Statistics" asp-action="Index" data-bs-toggle="tooltip" data-bs-placement="right" title="Thống kê">
                 <i class="fas fa-chart-line"></i>
             </a>
         </li>
