@@ -82,9 +82,9 @@ namespace NgoHuuDuc_2280600725.Data
 
             // Seed Categories
             builder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Điện thoại", Description = "Các loại điện thoại di động" },
-                new Category { Id = 2, Name = "Laptop", Description = "Các loại máy tính xách tay" },
-                new Category { Id = 3, Name = "Máy tính bảng", Description = "Các loại máy tính bảng" }
+                new Category { Id = 1, Name = "Veston", Description = "Các loại veston xịn xịn" },
+                new Category { Id = 2, Name = "Quần tây", Description = "Các loại quần tây tây - chất chơi người dơi" },
+                new Category { Id = 3, Name = "Áo sơ mi", Description = "Áo sơ mi 2 trong 1" }
             );
         }
 
