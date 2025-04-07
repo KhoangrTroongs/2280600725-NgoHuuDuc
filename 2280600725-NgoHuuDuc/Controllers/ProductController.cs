@@ -14,7 +14,6 @@ using NgoHuuDuc_2280600725.Responsitories;
 
 namespace NgoHuuDuc_2280600725.Controllers
 {
-    [Authorize]
     public class ProductController : Controller
     {
         private readonly IProductRepository _productRepository;
@@ -328,7 +327,6 @@ namespace NgoHuuDuc_2280600725.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
