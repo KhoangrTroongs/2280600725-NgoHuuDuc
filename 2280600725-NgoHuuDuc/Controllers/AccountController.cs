@@ -206,11 +206,19 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 var currentUser = await _userRepository.GetCurrentUserAsync();
                 var currentUserId = currentUser?.Id;
+                var currentUserEmail = currentUser?.Email;
 
                 foreach (var entry in userRoles)
                 {
                     var userId = entry.Key;
                     var roles = entry.Value;
+
+                    // Lấy thông tin người dùng cần cập nhật
+                    var userToUpdate = await _userRepository.GetUserByIdAsync(userId);
+                    if (userToUpdate == null)
+                    {
+                        return Json(new { success = false, message = $"Không tìm thấy người dùng với ID {userId}" });
+                    }
 
                     // Đảm bảo roles không null
                     if (roles == null)
@@ -219,12 +227,24 @@ namespace NgoHuuDuc_2280600725.Controllers
                     }
 
                     // Kiểm tra nếu người dùng hiện tại là admin và đang cố gắng thay đổi vai trò của chính mình
-                    if (userId == currentUserId)
+                    if (userId == currentUserId || userToUpdate.Email == currentUserEmail)
                     {
                         // Đảm bảo vai trò Administrator vẫn được giữ lại
                         if (!roles.Contains("Administrator"))
                         {
                             roles.Add("Administrator");
+                            Console.WriteLine("Added Administrator role back to current user");
+                        }
+                    }
+
+                    // Kiểm tra xem có ít nhất một admin trong hệ thống
+                    if (!roles.Contains("Administrator") && userToUpdate.Email == currentUserEmail)
+                    {
+                        // Kiểm tra xem có admin nào khác không
+                        var adminUsers = await _userRepository.GetUsersInRoleAsync("Administrator");
+                        if (adminUsers.Count <= 1) // Chỉ có người dùng hiện tại là admin
+                        {
+                            return Json(new { success = false, message = "Không thể xóa vai trò Administrator của bạn vì hệ thống cần ít nhất một quản trị viên" });
                         }
                     }
 
@@ -271,6 +291,23 @@ namespace NgoHuuDuc_2280600725.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateUser(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            var userDetails = await _userRepository.GetUserDetailsAsync(id);
+            if (userDetails == null)
+            {
+                return NotFound();
+            }
+            return View("Update", userDetails);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Update()
         {
             var currentUser = await _userRepository.GetCurrentUserAsync();
@@ -291,14 +328,36 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return View(model);
             }
 
+            // Xác định người dùng cần cập nhật
+            ApplicationUser userToUpdate;
+            string userId = model.Id;
+
+            // Kiểm tra xem người dùng hiện tại có quyền admin không
+            bool isAdmin = User.IsInRole("Administrator");
             var currentUser = await _userRepository.GetCurrentUserAsync();
-            if (currentUser == null)
+
+            // Nếu là admin và đang cập nhật người dùng khác
+            if (isAdmin && currentUser?.Id != userId)
             {
-                return NotFound();
+                userToUpdate = await _userRepository.GetUserByIdAsync(userId);
+                if (userToUpdate == null)
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                // Người dùng thông thường chỉ có thể cập nhật thông tin của chính họ
+                if (currentUser == null)
+                {
+                    return NotFound();
+                }
+                userToUpdate = currentUser;
+                userId = currentUser.Id;
             }
 
             // Get existing user details to preserve data
-            var existingUser = await _userRepository.GetUserDetailsAsync(currentUser.Id);
+            var existingUser = await _userRepository.GetUserDetailsAsync(userId);
 
             // Handle avatar upload
             if (avatarFile != null && avatarFile.Length > 0)
@@ -338,9 +397,16 @@ namespace NgoHuuDuc_2280600725.Controllers
             }
 
             // Update user information
-            var result = await _userRepository.UpdateUserAsync(currentUser, model);
+            var result = await _userRepository.UpdateUserAsync(userToUpdate, model);
             if (result.Succeeded)
             {
+                // Nếu là admin và đang cập nhật người dùng khác, chuyển về trang danh sách người dùng
+                if (isAdmin && currentUser?.Id != userId)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật thông tin người dùng thành công";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 return RedirectToAction(nameof(Details));
             }
 
@@ -370,15 +436,44 @@ namespace NgoHuuDuc_2280600725.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var result = await _userRepository.DeleteUserAsync(id);
-            if (result.Succeeded)
+            // Kiểm tra xem người dùng có phải là admin duy nhất không
+            var userToDelete = await _userRepository.GetUserByIdAsync(id);
+            if (userToDelete == null)
             {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
                 return RedirectToAction(nameof(Index));
             }
 
-            ModelState.AddModelError(string.Empty, "Không thể xóa người dùng này.");
-            var userDetails = await _userRepository.GetUserDetailsAsync(id);
-            return View(userDetails);
+            // Kiểm tra xem người dùng có vai trò Administrator không
+            var userRoles = await _userRepository.GetUserRolesAsync(id);
+            if (userRoles.Contains("Administrator"))
+            {
+                // Kiểm tra xem có admin nào khác không
+                var adminUsers = await _userRepository.GetUsersInRoleAsync("Administrator");
+                if (adminUsers.Count <= 1) // Chỉ có người dùng này là admin
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa quản trị viên duy nhất của hệ thống.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            // Kiểm tra xem người dùng có phải là người dùng hiện tại không
+            var currentUser = await _userRepository.GetCurrentUserAsync();
+            if (currentUser?.Id == id || currentUser?.Email == userToDelete.Email)
+            {
+                TempData["ErrorMessage"] = "Không thể xóa tài khoản của chính bạn.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _userRepository.DeleteUserAsync(id);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Xóa người dùng thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ErrorMessage"] = $"Không thể xóa người dùng: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+            return RedirectToAction(nameof(Index));
         }
 
         private void AddErrors(IdentityResult result)

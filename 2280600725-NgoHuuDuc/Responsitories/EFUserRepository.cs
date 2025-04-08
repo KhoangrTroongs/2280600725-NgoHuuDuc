@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NgoHuuDuc_2280600725.Data;
 using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Models.AccountViewModels;
 
@@ -16,17 +18,20 @@ namespace NgoHuuDuc_2280600725.Responsitories
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApplicationDbContext _context;
 
         public EFUserRepository(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _httpContextAccessor = httpContextAccessor;
+            _context = context;
         }
 
         public async Task<IdentityResult> RegisterUserAsync(ApplicationUser identityUser, string password)
@@ -88,11 +93,20 @@ namespace NgoHuuDuc_2280600725.Responsitories
 
         public async Task<IdentityResult> UpdateUserAsync(ApplicationUser user, UserDetailsViewModel model)
         {
+            // Cập nhật trực tiếp thuộc tính của ApplicationUser
             user.PhoneNumber = model.PhoneNumber;
             user.UserName = model.Email;
             user.Email = model.Email;
+            user.FullName = model.FullName;
+            user.Address = model.Address;
+            user.DateOfBirth = model.DateOfBirth;
 
-            // Lưu thông tin bổ sung vào UserClaims
+            if (!string.IsNullOrEmpty(model.AvatarUrl))
+            {
+                user.AvatarUrl = model.AvatarUrl;
+            }
+
+            // Cập nhật Claims để đảm bảo tương thích ngược
             var claims = await _userManager.GetClaimsAsync(user);
 
             await UpdateClaim(user, claims, "FullName", model.FullName);
@@ -121,9 +135,57 @@ namespace NgoHuuDuc_2280600725.Responsitories
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
-                return await _userManager.DeleteAsync(user);
+                // Xử lý các liên kết với dữ liệu khác trước khi xóa người dùng
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        // Cập nhật đơn hàng: đặt UserId = null thay vì xóa đơn hàng
+                        var orders = await _context.Orders.Where(o => o.UserId == id).ToListAsync();
+                        foreach (var order in orders)
+                        {
+                            order.UserId = null;
+                        }
+                        await _context.SaveChangesAsync();
+
+                        // Xóa giỏ hàng của người dùng
+                        var carts = await _context.Carts.Where(c => c.UserId == user.UserName).ToListAsync();
+                        foreach (var cart in carts)
+                        {
+                            var cartItems = await _context.CartItems.Where(ci => ci.CartId == cart.Id).ToListAsync();
+                            _context.CartItems.RemoveRange(cartItems);
+                            _context.Carts.Remove(cart);
+                        }
+                        await _context.SaveChangesAsync();
+
+                        // Xóa các claims của người dùng
+                        var claims = await _userManager.GetClaimsAsync(user);
+                        foreach (var claim in claims)
+                        {
+                            await _userManager.RemoveClaimAsync(user, claim);
+                        }
+
+                        // Xóa người dùng
+                        var result = await _userManager.DeleteAsync(user);
+                        if (result.Succeeded)
+                        {
+                            await transaction.CommitAsync();
+                            return result;
+                        }
+                        else
+                        {
+                            await transaction.RollbackAsync();
+                            return result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return IdentityResult.Failed(new IdentityError { Description = ex.Message });
+                    }
+                }
             }
-            return IdentityResult.Failed();
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
         }
 
         public async Task<ApplicationUser> GetCurrentUserAsync()
@@ -219,6 +281,11 @@ namespace NgoHuuDuc_2280600725.Responsitories
                 return await _userManager.RemoveFromRoleAsync(user, role);
             }
             return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+        }
+
+        public async Task<List<ApplicationUser>> GetUsersInRoleAsync(string roleName)
+        {
+            return (await _userManager.GetUsersInRoleAsync(roleName)).ToList();
         }
     }
 }

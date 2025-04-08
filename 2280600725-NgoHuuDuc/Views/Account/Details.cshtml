@@ -38,10 +38,18 @@
         </dl>
 
         <div class="form-group">
-            <a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-primary">Cập nhật thông tin</a>
-            @if (User.IsInRole("Administrator"))
+            @if (User.IsInRole("Administrator") && User.Identity?.Name != Model.Email)
             {
+                <a asp-action="UpdateUser" asp-route-id="@Model.Id" class="btn btn-primary">Cập nhật thông tin</a>
                 <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            }
+            else
+            {
+                <a asp-action="Update" class="btn btn-primary">Cập nhật thông tin</a>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                }
             }
         </div>
     </div>

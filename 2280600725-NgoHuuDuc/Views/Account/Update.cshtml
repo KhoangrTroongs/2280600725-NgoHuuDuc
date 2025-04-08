@@ -58,7 +58,14 @@
 
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                <a asp-action="Details" class="btn btn-secondary">Quay lại</a>
+                @if (User.IsInRole("Administrator") && User.Identity?.Name != Model.Email)
+                {
+                    <a asp-action="UserDetails" asp-route-id="@Model.Id" class="btn btn-secondary">Quay lại</a>
+                }
+                else
+                {
+                    <a asp-action="Details" class="btn btn-secondary">Quay lại</a>
+                }
             </div>
         </form>
     </div>

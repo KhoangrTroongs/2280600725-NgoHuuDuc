@@ -5,6 +5,22 @@
     ViewData["Title"] = "Quản lý người dùng & vai trò";
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 @if (TempData["Message"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show">
@@ -180,7 +196,12 @@
                 var dataToSend = {};
                 $.each(changedRoles, function(userId, roles) {
                     // Đảm bảo roles là một mảng
-                    dataToSend[userId] = Array.isArray(roles) ? roles : [];
+                    if (roles === null) {
+                        roles = [];
+                    } else if (!Array.isArray(roles)) {
+                        roles = [roles];
+                    }
+                    dataToSend[userId] = roles;
                 });
 
                 console.log('Data to send:', dataToSend);
