@@ -225,8 +225,8 @@ namespace NgoHuuDuc_2280600725.Responsitories
                 Address = claims.FirstOrDefault(c => c.Type == "Address")?.Value,
                 DateOfBirth = DateTime.TryParse(claims.FirstOrDefault(c => c.Type == "DateOfBirth")?.Value, out var dob) ? dob : DateTime.Now,
                 AvatarUrl = claims.FirstOrDefault(c => c.Type == "AvatarUrl")?.Value ?? "/images/users/default-avatar.png",
-                IsActive = !user.LockoutEnabled,
-                CreatedAt = user.LockoutEnd?.DateTime ?? DateTime.Now
+                IsActive = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.Now,
+                CreatedAt = DateTime.Now
             };
         }
 
@@ -286,6 +286,31 @@ namespace NgoHuuDuc_2280600725.Responsitories
         public async Task<List<ApplicationUser>> GetUsersInRoleAsync(string roleName)
         {
             return (await _userManager.GetUsersInRoleAsync(roleName)).ToList();
+        }
+
+        public async Task<IdentityResult> LockUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy người dùng" });
+            }
+
+            // Đặt thời gian khóa là 1 năm kể từ bây giờ
+            var lockoutEndDate = DateTimeOffset.Now.AddYears(1);
+            return await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);
+        }
+
+        public async Task<IdentityResult> UnlockUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy người dùng" });
+            }
+
+            // Đặt thời gian khóa là null để mở khóa tài khoản
+            return await _userManager.SetLockoutEndDateAsync(user, null);
         }
     }
 }

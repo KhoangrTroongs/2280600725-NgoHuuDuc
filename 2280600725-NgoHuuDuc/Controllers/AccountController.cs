@@ -431,6 +431,87 @@ namespace NgoHuuDuc_2280600725.Controllers
             return View(userDetails);
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockUser(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = "ID người dùng không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra xem người dùng có tồn tại không
+            var userToLock = await _userRepository.GetUserByIdAsync(id);
+            if (userToLock == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra xem người dùng có vai trò Administrator không
+            var userRoles = await _userRepository.GetUserRolesAsync(id);
+            if (userRoles.Contains("Administrator"))
+            {
+                // Kiểm tra xem có admin nào khác không
+                var adminUsers = await _userRepository.GetUsersInRoleAsync("Administrator");
+                if (adminUsers.Count <= 1) // Chỉ có người dùng này là admin
+                {
+                    TempData["ErrorMessage"] = "Không thể khóa quản trị viên duy nhất của hệ thống.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            // Kiểm tra xem người dùng có phải là người dùng hiện tại không
+            var currentUser = await _userRepository.GetCurrentUserAsync();
+            if (currentUser?.Id == id || currentUser?.Email == userToLock.Email)
+            {
+                TempData["ErrorMessage"] = "Không thể khóa tài khoản của chính bạn.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _userRepository.LockUserAsync(id);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Khóa người dùng thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ErrorMessage"] = $"Không thể khóa người dùng: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockUser(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = "ID người dùng không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra xem người dùng có tồn tại không
+            var userToUnlock = await _userRepository.GetUserByIdAsync(id);
+            if (userToUnlock == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _userRepository.UnlockUserAsync(id);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Mở khóa người dùng thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ErrorMessage"] = $"Không thể mở khóa người dùng: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]

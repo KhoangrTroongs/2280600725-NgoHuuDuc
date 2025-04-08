@@ -25,5 +25,7 @@ namespace NgoHuuDuc_2280600725.Responsitories
         Task<IdentityResult> UpdateUserRolesAsync(string userId, List<string> roles);
         Task<IdentityResult> RemoveFromRoleAsync(string userId, string role);
         Task<List<ApplicationUser>> GetUsersInRoleAsync(string roleName);
+        Task<IdentityResult> LockUserAsync(string userId);
+        Task<IdentityResult> UnlockUserAsync(string userId);
     }
 }
