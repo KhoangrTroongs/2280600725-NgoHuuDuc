@@ -66,7 +66,14 @@ namespace NgoHuuDuc_2280600725.Responsitories
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                return await _signInManager.PasswordSignInAsync(user, password, rememberMe, lockoutOnFailure: false);
+                // Kiểm tra xem tài khoản có bị khóa không
+                if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now)
+                {
+                    return SignInResult.LockedOut;
+                }
+
+                // Bật tính năng khóa tài khoản sau nhiều lần đăng nhập sai
+                return await _signInManager.PasswordSignInAsync(user, password, rememberMe, lockoutOnFailure: true);
             }
             return SignInResult.Failed;
         }
@@ -296,6 +303,13 @@ namespace NgoHuuDuc_2280600725.Responsitories
                 return IdentityResult.Failed(new IdentityError { Description = "Không tìm thấy người dùng" });
             }
 
+            // Đảm bảo tính năng khóa được bật cho người dùng này
+            var enableLockoutResult = await _userManager.SetLockoutEnabledAsync(user, true);
+            if (!enableLockoutResult.Succeeded)
+            {
+                return enableLockoutResult;
+            }
+
             // Đặt thời gian khóa là 1 năm kể từ bây giờ
             var lockoutEndDate = DateTimeOffset.Now.AddYears(1);
             return await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);
@@ -310,7 +324,14 @@ namespace NgoHuuDuc_2280600725.Responsitories
             }
 
             // Đặt thời gian khóa là null để mở khóa tài khoản
-            return await _userManager.SetLockoutEndDateAsync(user, null);
+            var result = await _userManager.SetLockoutEndDateAsync(user, null);
+            if (!result.Succeeded)
+            {
+                return result;
+            }
+
+            // Đặt lại số lần đăng nhập sai về 0
+            return await _userManager.ResetAccessFailedCountAsync(user);
         }
     }
 }

@@ -13,11 +13,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
+    // Cấu hình mật khẩu
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
+
+    // Cấu hình khóa tài khoản
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30); // Thời gian khóa mặc định
+    options.Lockout.MaxFailedAccessAttempts = 5; // Số lần đăng nhập sai tối đa
+    options.Lockout.AllowedForNewUsers = true; // Cho phép khóa tài khoản mới
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
