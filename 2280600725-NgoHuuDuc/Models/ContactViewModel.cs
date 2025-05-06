@@ -22,6 +22,9 @@ namespace NgoHuuDuc_2280600725.Models
         [Display(Name = "Tiêu đề")]
         public string Subject { get; set; } = "";
 
+        [Display(Name = "Sản phẩm quan tâm")]
+        public string? ProductInterest { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập nội dung")]
         [Display(Name = "Nội dung")]
         [StringLength(1000, MinimumLength = 10, ErrorMessage = "Nội dung phải từ 10 đến 1000 ký tự")]

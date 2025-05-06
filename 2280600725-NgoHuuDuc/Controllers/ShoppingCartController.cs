@@ -140,6 +140,24 @@ namespace NgoHuuDuc_2280600725.Controllers
 
                 _context.Orders.Add(order);
 
+                // Cập nhật số lượng sản phẩm trong kho
+                foreach (var item in cart.Items)
+                {
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        // Kiểm tra xem có đủ số lượng sản phẩm không
+                        if (product.Quantity < item.Quantity)
+                        {
+                            ModelState.AddModelError("", $"Sản phẩm '{item.ProductName}' chỉ còn {product.Quantity} sản phẩm trong kho.");
+                            return View(order);
+                        }
+
+                        // Giảm số lượng sản phẩm
+                        product.Quantity -= item.Quantity;
+                    }
+                }
+
                 // Remove cart items and cart after order is placed
                 _context.CartItems.RemoveRange(cart.Items);
                 _context.Carts.Remove(cart);

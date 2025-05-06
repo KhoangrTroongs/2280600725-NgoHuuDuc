@@ -20,6 +20,11 @@ namespace NgoHuuDuc_2280600725.Models.ViewModels
         [Display(Name = "Giá")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "Số lượng không được để trống")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
+        [Display(Name = "Số lượng")]
+        public int Quantity { get; set; } = 0;
+
         [Display(Name = "Hình ảnh")]
         public IFormFile? Image { get; set; }  // Make nullable
 

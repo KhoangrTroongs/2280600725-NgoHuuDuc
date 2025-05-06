@@ -24,6 +24,11 @@ namespace NgoHuuDuc_2280600725.Models
         [Display(Name = "Hình ảnh")]
         public string ImageUrl { get; set; } = "";
 
+        [Required(ErrorMessage = "Số lượng không được để trống")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
+        [Display(Name = "Số lượng")]
+        public int Quantity { get; set; } = 0;
+
         [Required(ErrorMessage = "Danh mục không được để trống")]
         [Display(Name = "Danh mục")]
         public int CategoryId { get; set; }

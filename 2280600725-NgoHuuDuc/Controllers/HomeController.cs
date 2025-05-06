@@ -109,8 +109,17 @@ namespace NgoHuuDuc_2280600725.Controllers
             return View();
         }
 
-        public IActionResult Contact()
+        public async Task<IActionResult> Contact(int? productId)
         {
+            if (productId.HasValue)
+            {
+                var product = await _context.Products.FindAsync(productId.Value);
+                if (product != null)
+                {
+                    ViewBag.ProductName = product.Name;
+                    ViewBag.ProductId = product.Id;
+                }
+            }
             return View();
         }
 
@@ -151,6 +160,15 @@ namespace NgoHuuDuc_2280600725.Controllers
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound();
 
+            // Kiểm tra số lượng sản phẩm còn lại
+            if (product.Quantity <= 0)
+            {
+                return Json(new {
+                    success = false,
+                    message = "Sản phẩm đã hết hàng"
+                });
+            }
+
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -179,6 +197,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                 cartItem.Quantity++;
             }
 
+            // Không giảm số lượng sản phẩm khi thêm vào giỏ hàng
+            // Số lượng sản phẩm sẽ giảm khi đơn hàng được tạo
+
             cart.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
@@ -202,6 +223,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                 var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
                 if (item != null)
                 {
+                    // Không cần tăng lại số lượng sản phẩm khi xóa khỏi giỏ hàng
+                    // vì số lượng sản phẩm không bị giảm khi thêm vào giỏ hàng
+
                     _context.CartItems.Remove(item);
                     cart.UpdatedAt = DateTime.Now;
                     await _context.SaveChangesAsync();
@@ -245,6 +269,26 @@ namespace NgoHuuDuc_2280600725.Controllers
                 var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
                 if (item != null)
                 {
+                    // Lấy sản phẩm để kiểm tra số lượng
+                    var product = await _context.Products.FindAsync(productId);
+                    if (product == null) return Json(new { success = false, message = "Sản phẩm không tồn tại" });
+
+                    // Tính toán sự thay đổi số lượng
+                    int quantityDifference = quantity - item.Quantity;
+
+                    // Kiểm tra xem có đủ số lượng sản phẩm không
+                    if (quantityDifference > 0 && product.Quantity < quantityDifference)
+                    {
+                        return Json(new {
+                            success = false,
+                            message = $"Chỉ còn {product.Quantity} sản phẩm trong kho"
+                        });
+                    }
+
+                    // Không cập nhật số lượng sản phẩm trong kho
+                    // Số lượng sản phẩm sẽ giảm khi đơn hàng được tạo
+
+                    // Cập nhật số lượng trong giỏ hàng
                     item.Quantity = quantity;
                     cart.UpdatedAt = DateTime.Now;
                     await _context.SaveChangesAsync();

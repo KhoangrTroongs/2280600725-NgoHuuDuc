@@ -23,15 +23,25 @@
                 <p class="card-text text-muted">Danh mục: @Model.Category?.Name</p>
                 <p class="card-text">@Model.Description</p>
                 <p class="card-text"><strong class="fs-4">Giá: @Model.Price.ToString("N0") VNĐ</strong></p>
+                <p class="card-text">Số lượng: <span class="badge bg-@(Model.Quantity > 0 ? "success" : "danger")">@(Model.Quantity > 0 ? Model.Quantity.ToString() : "Hết hàng")</span></p>
                 <div class="mt-4">
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <form asp-controller="Home" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form">
-                            <input type="hidden" name="productId" value="@Model.Id" />
-                            <button type="submit" class="btn btn-primary">
-                                <i class='bx bx-cart-add'></i> Thêm vào giỏ hàng
-                            </button>
-                        </form>
+                        @if (Model.Quantity > 0)
+                        {
+                            <form asp-controller="Home" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form">
+                                <input type="hidden" name="productId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-primary">
+                                    <i class='bx bx-cart-add'></i> Thêm vào giỏ hàng
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-controller="Home" asp-action="Contact" asp-route-productId="@Model.Id" class="btn btn-primary">
+                                <i class='bx bx-envelope'></i> Liên hệ đặt hàng
+                            </a>
+                        }
                     }
                     else
                     {

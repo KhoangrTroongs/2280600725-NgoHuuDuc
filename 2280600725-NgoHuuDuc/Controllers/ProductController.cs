@@ -140,6 +140,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 Price = model.Price,
+                Quantity = model.Quantity,
                 CategoryId = model.CategoryId,
                 ImageUrl = null
             };
@@ -195,6 +196,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
+                Quantity = product.Quantity,
                 CategoryId = product.CategoryId,
                 ExistingImageUrl = product.ImageUrl,
                 Categories = await _categoryRepository.GetAllCategoriesAsync()
@@ -229,6 +231,7 @@ namespace NgoHuuDuc_2280600725.Controllers
             product.Name = model.Name;
             product.Description = model.Description;
             product.Price = model.Price;
+            product.Quantity = model.Quantity;
             product.CategoryId = model.CategoryId;
 
             if (model.Image != null && model.Image.Length > 0)

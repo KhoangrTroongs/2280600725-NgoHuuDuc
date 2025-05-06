@@ -91,6 +91,12 @@
                                     : item.Description
                                 )</p>
                                 <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
+                                <p class="card-text">
+                                    Số lượng:
+                                    <span class="badge bg-@(item.Quantity > 0 ? "success" : "danger")">
+                                        @(item.Quantity > 0 ? item.Quantity.ToString() : "Hết hàng")
+                                    </span>
+                                </p>
                             </div>
                             <div class="card-footer bg-transparent">
                                 <div class="d-flex justify-content-between">
@@ -110,9 +116,18 @@
                                     }
                                     else if (User.Identity.IsAuthenticated)
                                     {
-                                        <a href="#" class="btn btn-elegant-primary add-to-cart" data-product-id="@item.Id">
-                                            <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
-                                        </a>
+                                        @if (item.Quantity > 0)
+                                        {
+                                            <a href="#" class="btn btn-elegant-primary add-to-cart" data-product-id="@item.Id">
+                                                <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Home" asp-action="Contact" asp-route-productId="@item.Id" class="btn btn-elegant-primary">
+                                                <i class="fas fa-envelope me-1"></i>Liên hệ đặt hàng
+                                            </a>
+                                        }
                                     }
                                     else
                                     {
@@ -157,8 +172,15 @@
                     type: 'POST',
                     data: { productId: productId },
                     success: function(result) {
-                        updateCartCount();
-                        alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                        if (result.success) {
+                            updateCartCount();
+                            alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                        } else {
+                            alert(result.message || 'Sản phẩm đã hết hàng, bạn có thể liên hệ để đặt hàng!');
+                            // Cập nhật UI nếu sản phẩm hết hàng
+                            var $button = $('.add-to-cart[data-product-id="' + productId + '"]');
+                            $button.replaceWith('<a href="/Home/Contact?productId=' + productId + '" class="btn btn-primary"><i class="fas fa-envelope me-1"></i>Liên hệ đặt hàng</a>');
+                        }
                     },
                     error: function() {
                         alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!');
