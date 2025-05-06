@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Tài khoản bị khóa";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-lock text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h1 class="h3 mb-3">@ViewData["Title"]</h1>
+                    <p class="lead mb-4">Tài khoản của bạn đã bị khóa vì lý do bảo mật hoặc vi phạm quy định.</p>
+                    <p>Vui lòng liên hệ với quản trị viên để được hỗ trợ mở khóa tài khoản.</p>
+                    <div class="mt-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Quay về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
