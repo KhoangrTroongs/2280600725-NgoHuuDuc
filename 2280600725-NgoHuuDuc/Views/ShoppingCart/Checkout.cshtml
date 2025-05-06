@@ -1,4 +1,8 @@
 @model Order
+@using Microsoft.EntityFrameworkCore
+@using NgoHuuDuc_2280600725.Data
+@using NgoHuuDuc_2280600725.Models
+@inject ApplicationDbContext Context
 
 <div class="container mt-4">
     <h2 class="mb-4">Checkout</h2>
@@ -22,14 +26,14 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="mb-3">
-                            <label asp-for="ShippingAddress" class="form-label">Shipping Address</label>
-                            <textarea asp-for="ShippingAddress" class="form-control" rows="3" required></textarea>
+                            <label for="ShippingAddress" class="form-label">Shipping Address</label>
+                            <textarea id="ShippingAddress" name="ShippingAddress" class="form-control" rows="3" required></textarea>
                             <span asp-validation-for="ShippingAddress" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Notes" class="form-label">Order Notes (Optional)</label>
-                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <label for="Notes" class="form-label">Order Notes (Optional)</label>
+                            <textarea id="Notes" name="Notes" class="form-control" rows="3"></textarea>
                         </div>
 
                         <div class="d-grid">
@@ -46,10 +50,38 @@
                     <h5 class="mb-0">Order Summary</h5>
                 </div>
                 <div class="card-body">
-                    <div id="order-summary">
-                        <!-- Order summary will be loaded here -->
-                        <p class="text-center">Loading order summary...</p>
-                    </div>
+                    @{
+                        var userId = User.Identity?.Name;
+                        var cart = await Context.Carts
+                            .Include(c => c.Items)
+                            .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                        if (cart != null && cart.Items.Any())
+                        {
+                            <ul class="list-group mb-3">
+                                @foreach (var item in cart.Items)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                                        <div>
+                                            <h6 class="my-0">@item.ProductName</h6>
+                                            <small class="text-muted">@item.Quantity x @item.Price.ToString("C")</small>
+                                        </div>
+                                        <span class="text-muted">@((item.Price * item.Quantity).ToString("C"))</span>
+                                    </li>
+                                }
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Total</span>
+                                    <strong>@cart.Items.Sum(i => i.Price * i.Quantity).ToString("C")</strong>
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                Your cart is empty. Please add items to your cart before checkout.
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </div>
@@ -57,23 +89,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Load order summary
-            $.ajax({
-                url: '/ShoppingCart/GetOrderSummary',
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                success: function(data) {
-                    $('#order-summary').html(data);
-                },
-                error: function() {
-                    $('#order-summary').html('<p class="text-danger">Failed to load order summary</p>');
-                }
-            });
-        });
-    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

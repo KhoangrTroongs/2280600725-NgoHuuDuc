@@ -72,8 +72,27 @@ namespace NgoHuuDuc_2280600725.Responsitories
                     return SignInResult.LockedOut;
                 }
 
+                // Kiểm tra xem tài khoản có bị vô hiệu hóa không
+                if (!user.IsActive)
+                {
+                    return SignInResult.NotAllowed;
+                }
+
+                // Đảm bảo đăng xuất trước khi đăng nhập để tránh xung đột cookie
+                await _signInManager.SignOutAsync();
+
                 // Bật tính năng khóa tài khoản sau nhiều lần đăng nhập sai
-                return await _signInManager.PasswordSignInAsync(user, password, rememberMe, lockoutOnFailure: true);
+                var result = await _signInManager.PasswordSignInAsync(user, password, rememberMe, lockoutOnFailure: true);
+
+                // Nếu đăng nhập thành công, ghi log
+                if (result.Succeeded)
+                {
+                    // Tạm thời bỏ cập nhật LastLoginTime vì chưa có migration
+                    // user.LastLoginTime = DateTime.Now;
+                    // await _userManager.UpdateAsync(user);
+                }
+
+                return result;
             }
             return SignInResult.Failed;
         }

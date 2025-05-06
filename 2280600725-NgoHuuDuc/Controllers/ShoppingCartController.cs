@@ -95,85 +95,113 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 if (!ModelState.IsValid)
                 {
+                    foreach (var modelState in ModelState.Values)
+                    {
+                        foreach (var error in modelState.Errors)
+                        {
+                            Console.WriteLine($"Validation error: {error.ErrorMessage}");
+                        }
+                    }
                     return View(order);
                 }
 
+                // Lấy thông tin người dùng
                 var userId = User.Identity?.Name;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Checkout", "ShoppingCart") });
+                    return RedirectToAction("Login", "Account");
                 }
 
+                // Lấy thông tin giỏ hàng
                 var cart = await _context.Carts
                     .Include(c => c.Items)
-                    .ThenInclude(i => i.Product)
                     .FirstOrDefaultAsync(c => c.UserId == userId);
 
-                if (cart == null)
-                {
-                    TempData["ErrorMessage"] = "Your cart could not be found. Please try again.";
-                    return RedirectToAction("Index", "Home");
-                }
-
-                if (cart.Items.Count == 0)
+                if (cart == null || !cart.Items.Any())
                 {
                     TempData["ErrorMessage"] = "Your cart is empty. Please add items to your cart before checkout.";
                     return RedirectToAction("Index", "Home");
                 }
 
-                var user = await _userManager.GetUserAsync(User);
+                // Lấy thông tin người dùng
+                var user = await _userManager.FindByNameAsync(userId);
                 if (user == null)
                 {
-                    return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Checkout", "ShoppingCart") });
+                    TempData["ErrorMessage"] = "Không thể tìm thấy thông tin người dùng.";
+                    return RedirectToAction("Login", "Account");
                 }
 
-                order.UserId = user.Id;
-                order.OrderDate = DateTime.UtcNow;
-                order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
-                order.Status = OrderStatus.Pending;
-                order.OrderDetails = cart.Items.Select(i => new OrderDetail
+                // Tạo đơn hàng mới
+                var newOrder = new Order
                 {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    Price = i.Price
-                }).ToList();
+                    UserId = user.Id, // Sử dụng ID thực của người dùng
+                    OrderDate = DateTime.Now,
+                    TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity),
+                    Status = OrderStatus.Pending,
+                    ShippingAddress = order.ShippingAddress,
+                    Notes = order.Notes
+                };
 
-                _context.Orders.Add(order);
+                _context.Orders.Add(newOrder);
+                await _context.SaveChangesAsync();
 
-                // Cập nhật số lượng sản phẩm trong kho
+                // Tạo chi tiết đơn hàng
                 foreach (var item in cart.Items)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
                     if (product != null)
                     {
-                        // Kiểm tra xem có đủ số lượng sản phẩm không
+                        // Kiểm tra số lượng
                         if (product.Quantity < item.Quantity)
                         {
-                            ModelState.AddModelError("", $"Sản phẩm '{item.ProductName}' chỉ còn {product.Quantity} sản phẩm trong kho.");
+                            TempData["ErrorMessage"] = $"Sản phẩm '{item.ProductName}' chỉ còn {product.Quantity} sản phẩm trong kho.";
+                            _context.Orders.Remove(newOrder);
+                            await _context.SaveChangesAsync();
                             return View(order);
                         }
 
-                        // Giảm số lượng sản phẩm
+                        // Tạo chi tiết đơn hàng
+                        var orderDetail = new OrderDetail
+                        {
+                            OrderId = newOrder.Id,
+                            ProductId = item.ProductId,
+                            Quantity = item.Quantity,
+                            Price = item.Price
+                        };
+
+                        _context.Add(orderDetail);
+
+                        // Cập nhật số lượng sản phẩm
                         product.Quantity -= item.Quantity;
+                        _context.Update(product);
                     }
                 }
 
-                // Remove cart items and cart after order is placed
+                // Xóa giỏ hàng
                 _context.CartItems.RemoveRange(cart.Items);
                 _context.Carts.Remove(cart);
 
+                // Lưu thay đổi
                 await _context.SaveChangesAsync();
 
-                // Redirect to order completed page
-                return View("OrderCompleted", order.Id);
+                return RedirectToAction("OrderCompleted", new { id = newOrder.Id });
             }
             catch (Exception ex)
             {
-                // Log lỗi
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Error in Checkout: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+
                 TempData["ErrorMessage"] = "An error occurred while processing your order. Please try again.";
-                return RedirectToAction("Index", "ShoppingCart");
+                return RedirectToAction("Index");
             }
+        }
+
+        public IActionResult OrderCompleted(int id)
+        {
+            return View(id);
         }
 
         public async Task<IActionResult> GetOrderSummary()

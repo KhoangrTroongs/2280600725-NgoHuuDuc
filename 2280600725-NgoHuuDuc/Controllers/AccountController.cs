@@ -60,6 +60,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return View(model);
             }
 
+            // Clear existing cookies
+            await _userRepository.SignOutAsync();
+
             var result = await _userRepository.PasswordSignInAsync(model.Email, model.Password, model.RememberMe);
             if (result == null)
             {
@@ -70,7 +73,19 @@ namespace NgoHuuDuc_2280600725.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation(1, "Đăng nhập thành công.");
-                return RedirectToLocal(returnUrl);
+
+                // Thêm debug log
+                _logger.LogInformation("Redirecting to: {0}", returnUrl ?? "/");
+
+                // Đảm bảo returnUrl là local
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction(nameof(HomeController.Index), "Home");
+                }
             }
 
             if (result.IsLockedOut)
@@ -567,12 +582,17 @@ namespace NgoHuuDuc_2280600725.Controllers
 
         private IActionResult RedirectToLocal(string returnUrl)
         {
-            if (Url.IsLocalUrl(returnUrl))
+            // Thêm debug log
+            _logger.LogInformation("RedirectToLocal called with returnUrl: {0}", returnUrl ?? "null");
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
+                _logger.LogInformation("Redirecting to local URL: {0}", returnUrl);
                 return Redirect(returnUrl);
             }
             else
             {
+                _logger.LogInformation("Redirecting to Home/Index");
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
