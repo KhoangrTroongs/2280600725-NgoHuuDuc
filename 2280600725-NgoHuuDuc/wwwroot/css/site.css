@@ -28,3 +28,40 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* 3D Model Viewer Styles */
+.product-view-container {
+  position: relative;
+}
+
+.product-view {
+  transition: all 0.3s ease;
+}
+
+.product-view.active {
+  display: block;
+}
+
+#model-container {
+  border-radius: 0.25rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.view-toggle-buttons {
+  margin-top: 10px;
+}
+
+/* Add a small instruction overlay for 3D viewer */
+#product-3d-view::after {
+  content: "Kéo để xoay • Cuộn để phóng to/thu nhỏ";
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+}

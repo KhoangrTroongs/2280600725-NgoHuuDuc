@@ -1,0 +1,75 @@
+<script>
+    // Simple function to show 3D model
+    function show3DModel(containerId, modelUrl) {
+        console.log(`Showing 3D model in container: ${containerId}, model: ${modelUrl}`);
+
+        // Get container element
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container not found: ${containerId}`);
+            return false;
+        }
+
+        try {
+            // Check if model URL is valid
+            if (!modelUrl || modelUrl.trim() === '') {
+                console.error('Model URL is empty');
+                showModelError(container, 'Không tìm thấy đường dẫn đến mô hình 3D');
+                return false;
+            }
+
+            // Convert model URL to use the new controller
+            let modelApiUrl = modelUrl;
+            if (modelUrl.startsWith('/models/products/')) {
+                // Extract the filename from the URL
+                const filename = modelUrl.split('/').pop();
+                modelApiUrl = `/model/products/${filename}`;
+            }
+
+            // Create a button to open the model in a new window
+            container.innerHTML = `
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <img src="/images/3d-model-icon.png" alt="3D Model" style="max-width: 150px; max-height: 150px;" onerror="this.src='/images/3d-icon.svg'">
+                    </div>
+                    <p class="mb-3">Mô hình 3D đã sẵn sàng để xem</p>
+                    <a href="/model-viewer.html?model=${encodeURIComponent(modelApiUrl)}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-cube me-2"></i> Mở mô hình 3D trong cửa sổ mới
+                    </a>
+                    <p class="mt-3 text-muted small">Đường dẫn mô hình: ${modelApiUrl}</p>
+                </div>
+            `;
+
+            return true;
+        } catch (error) {
+            console.error('Error showing 3D model:', error);
+            showModelError(container, `Lỗi: ${error.message}`);
+            return false;
+        }
+    }
+
+    // Show error message
+    function showModelError(container, message) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <h4>Không thể tải mô hình 3D</h4>
+                <p>${message || 'Lỗi không xác định'}</p>
+                <p>Có thể do một trong các nguyên nhân sau:</p>
+                <ul>
+                    <li>Định dạng file không được hỗ trợ (chỉ hỗ trợ các file .glb, .gltf)</li>
+                    <li>Đường dẫn đến file không chính xác</li>
+                    <li>File mô hình bị hỏng</li>
+                </ul>
+            </div>
+        `;
+    }
+
+    // For backward compatibility
+    const ThreeModelViewer = {
+        init: function(containerId, modelUrl) {
+            return show3DModel(containerId, modelUrl);
+        }
+    };
+
+    const ModelViewerHelper = ThreeModelViewer;
+</script>

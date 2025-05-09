@@ -142,7 +142,8 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Price = model.Price,
                 Quantity = model.Quantity,
                 CategoryId = model.CategoryId,
-                ImageUrl = null
+                ImageUrl = null,
+                Model3DUrl = null
             };
 
             if (model.Image != null && model.Image.Length > 0)
@@ -159,6 +160,27 @@ namespace NgoHuuDuc_2280600725.Controllers
                 }
 
                 product.ImageUrl = await SaveImage(model.Image);
+            }
+
+            if (model.Model3D != null && model.Model3D.Length > 0)
+            {
+                // Check if the file is a valid 3D model (glb, gltf, obj)
+                var validExtensions = new[] { ".glb", ".gltf", ".obj" };
+                var extension = Path.GetExtension(model.Model3D.FileName).ToLowerInvariant();
+
+                if (!validExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("Model3D", "File phải là mô hình 3D hợp lệ (.glb, .gltf, .obj)");
+                    return View(model);
+                }
+
+                if (model.Model3D.Length > 20 * 1024 * 1024) // 20MB limit for 3D models
+                {
+                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 20MB");
+                    return View(model);
+                }
+
+                product.Model3DUrl = await SaveModel3D(model.Model3D);
             }
 
             try
@@ -199,6 +221,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Quantity = product.Quantity,
                 CategoryId = product.CategoryId,
                 ExistingImageUrl = product.ImageUrl,
+                ExistingModel3DUrl = product.Model3DUrl,
                 Categories = await _categoryRepository.GetAllCategoriesAsync()
             };
 
@@ -263,6 +286,40 @@ namespace NgoHuuDuc_2280600725.Controllers
                 product.ImageUrl = await SaveImage(model.Image);
             }
 
+            if (model.Model3D != null && model.Model3D.Length > 0)
+            {
+                // Check if the file is a valid 3D model (glb, gltf, obj)
+                var validExtensions = new[] { ".glb", ".gltf", ".obj" };
+                var extension = Path.GetExtension(model.Model3D.FileName).ToLowerInvariant();
+
+                if (!validExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("Model3D", "File phải là mô hình 3D hợp lệ (.glb, .gltf, .obj)");
+                    model.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                    return View(model);
+                }
+
+                if (model.Model3D.Length > 20 * 1024 * 1024) // 20MB limit for 3D models
+                {
+                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 20MB");
+                    model.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                    return View(model);
+                }
+
+                // Delete the old 3D model if it exists
+                if (!string.IsNullOrEmpty(product.Model3DUrl))
+                {
+                    var oldModelPath = Path.Combine(_webHostEnvironment.WebRootPath, product.Model3DUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(oldModelPath))
+                    {
+                        System.IO.File.Delete(oldModelPath);
+                    }
+                }
+
+                // Save the new 3D model
+                product.Model3DUrl = await SaveModel3D(model.Model3D);
+            }
+
             try
             {
                 await _productRepository.UpdateProductAsync(product);
@@ -325,6 +382,16 @@ namespace NgoHuuDuc_2280600725.Controllers
                 }
             }
 
+            // Remove associated 3D model file if it exists
+            if (!string.IsNullOrEmpty(product.Model3DUrl))
+            {
+                var modelPath = Path.Combine(_webHostEnvironment.WebRootPath, product.Model3DUrl.TrimStart('/'));
+                if (System.IO.File.Exists(modelPath))
+                {
+                    System.IO.File.Delete(modelPath);
+                }
+            }
+
             await _productRepository.DeleteProductAsync(product.Id);
             TempData["Success"] = "Sản phẩm đã được xóa thành công.";
             return RedirectToAction(nameof(Index));
@@ -361,6 +428,22 @@ namespace NgoHuuDuc_2280600725.Controllers
             }
 
             return "/images/products/" + uniqueFileName;
+        }
+
+        private async Task<string> SaveModel3D(IFormFile model)
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "models/products");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await model.CopyToAsync(fileStream);
+            }
+
+            return "/models/products/" + uniqueFileName;
         }
     }
 }

@@ -31,6 +31,12 @@ namespace NgoHuuDuc_2280600725.Models.ViewModels
         [Display(Name = "Hình ảnh hiện tại")]
         public string? ExistingImageUrl { get; set; }  // Make nullable
 
+        [Display(Name = "Mô hình 3D")]
+        public IFormFile? Model3D { get; set; }
+
+        [Display(Name = "Mô hình 3D hiện tại")]
+        public string? ExistingModel3DUrl { get; set; }
+
         [Required(ErrorMessage = "Danh mục không được để trống")]
         [Display(Name = "Danh mục")]
         public int CategoryId { get; set; }

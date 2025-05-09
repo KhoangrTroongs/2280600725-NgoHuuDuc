@@ -24,6 +24,9 @@ namespace NgoHuuDuc_2280600725.Models
         [Display(Name = "Hình ảnh")]
         public string ImageUrl { get; set; } = "";
 
+        [Display(Name = "Mô hình 3D")]
+        public string? Model3DUrl { get; set; }
+
         [Required(ErrorMessage = "Số lượng không được để trống")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
         [Display(Name = "Số lượng")]

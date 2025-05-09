@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Button, Image, Spinner, Form, Alert } from 'react-bootstrap';
+import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
+import { Container, Row, Col, Button, Image, Spinner, Form, Alert, Nav } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { CartContext } from '../../contexts/CartContext';
+
+// Lazy load the 3D model viewer to improve initial load performance
+const ThreeJSModelViewer = lazy(() => import('../3d/ThreeJSModelViewer'));
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -12,6 +15,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [viewMode, setViewMode] = useState('image');
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
@@ -74,19 +78,19 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     setError('');
     setSuccess('');
-    
+
     if (!product) return;
-    
+
     if (product.quantity <= 0) {
       setError('Sản phẩm đã hết hàng.');
       return;
     }
-    
+
     if (quantity > product.quantity) {
       setError(`Chỉ còn ${product.quantity} sản phẩm trong kho.`);
       return;
     }
-    
+
     const result = await addToCart(product.id, quantity);
     if (result.success) {
       setSuccess('Đã thêm sản phẩm vào giỏ hàng.');
@@ -121,30 +125,64 @@ const ProductDetail = () => {
     <Container className="py-4">
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
-      
+
       <Row>
         <Col md={6}>
-          <Image 
-            src={product.imageUrl || "https://via.placeholder.com/600x600?text=No+Image"} 
-            alt={product.name} 
-            fluid 
-            className="product-detail-image"
-          />
+          <div className="product-view-container mb-3">
+            {/* Image View */}
+            {viewMode === 'image' && (
+              <Image
+                src={product.imageUrl || "https://via.placeholder.com/600x600?text=No+Image"}
+                alt={product.name}
+                fluid
+                className="product-detail-image"
+              />
+            )}
+
+            {/* 3D Model View */}
+            {viewMode === '3d' && product.model3DUrl && (
+              <Suspense fallback={<div className="text-center p-5"><Spinner animation="border" /></div>}>
+                <ThreeJSModelViewer modelUrl={product.model3DUrl} height="400px" />
+              </Suspense>
+            )}
+
+            {/* View Toggle Buttons */}
+            {product.model3DUrl && (
+              <Nav variant="tabs" className="mt-2">
+                <Nav.Item>
+                  <Nav.Link
+                    active={viewMode === 'image'}
+                    onClick={() => setViewMode('image')}
+                  >
+                    Hình ảnh
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    active={viewMode === '3d'}
+                    onClick={() => setViewMode('3d')}
+                  >
+                    Xem 3D
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
+            )}
+          </div>
         </Col>
         <Col md={6}>
           <h1>{product.name}</h1>
           <h3 className="text-danger">{product.price.toLocaleString('vi-VN')} đ</h3>
-          
+
           <div className="mb-3">
             <p><strong>Danh mục:</strong> {product.categoryName}</p>
             <p><strong>Tình trạng:</strong> {product.quantity > 0 ? `Còn hàng (${product.quantity} sản phẩm)` : 'Hết hàng'}</p>
           </div>
-          
+
           <div className="mb-4">
             <h5>Mô tả sản phẩm:</h5>
             <p>{product.description || 'Không có mô tả cho sản phẩm này.'}</p>
           </div>
-          
+
           {product.quantity > 0 ? (
             <>
               <div className="mb-3">
@@ -163,7 +201,7 @@ const ProductDetail = () => {
                   <Button variant="outline-secondary" onClick={increaseQuantity}>+</Button>
                 </div>
               </div>
-              
+
               <div className="d-grid gap-2">
                 <Button variant="primary" size="lg" onClick={handleAddToCart}>
                   Thêm vào giỏ hàng
@@ -185,7 +223,7 @@ const ProductDetail = () => {
           )}
         </Col>
       </Row>
-      
+
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <div className="mt-5">
@@ -194,10 +232,10 @@ const ProductDetail = () => {
             {relatedProducts.map(relatedProduct => (
               <Col key={relatedProduct.id} md={3} sm={6} className="mb-4">
                 <div className="card h-100 product-card">
-                  <img 
-                    src={relatedProduct.imageUrl || "https://via.placeholder.com/300x300?text=No+Image"} 
-                    className="card-img-top product-image" 
-                    alt={relatedProduct.name} 
+                  <img
+                    src={relatedProduct.imageUrl || "https://via.placeholder.com/300x300?text=No+Image"}
+                    className="card-img-top product-image"
+                    alt={relatedProduct.name}
                   />
                   <div className="card-body d-flex flex-column">
                     <h5 className="card-title">{relatedProduct.name}</h5>

@@ -14,6 +14,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="ExistingImageUrl" />
+            <input type="hidden" asp-for="ExistingModel3DUrl" />
             <div class="form-group mb-3">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
@@ -55,6 +56,23 @@
             <img src="@Model.ExistingImageUrl" alt="Hình ảnh hiện tại" style="max-width: 200px; max-height: 200px;" />
         </div>
         <span class="text-muted">Tải lên hình ảnh mới để thay thế hình ảnh hiện tại</span>
+    </div>
+}
+
+            <div class="form-group mb-3">
+                <label asp-for="Model3D" class="control-label">Mô hình 3D (không bắt buộc)</label>
+                <input asp-for="Model3D" type="file" class="form-control" accept=".glb,.gltf,.obj" />
+                <span asp-validation-for="Model3D" class="text-danger"></span>
+            </div>
+
+@if (!string.IsNullOrEmpty(Model.ExistingModel3DUrl))
+{
+    <div class="form-group mb-3">
+        <label class="control-label">Mô hình 3D hiện tại</label>
+        <div>
+            <p><i class="fas fa-cube"></i> @System.IO.Path.GetFileName(Model.ExistingModel3DUrl)</p>
+        </div>
+        <span class="text-muted">Tải lên mô hình 3D mới để thay thế mô hình hiện tại</span>
     </div>
 }
 
