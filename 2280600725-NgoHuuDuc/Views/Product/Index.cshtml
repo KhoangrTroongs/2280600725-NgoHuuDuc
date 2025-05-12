@@ -4,7 +4,7 @@
 }
 
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="dashboard-card mb-4">
             <div class="card-header">
                 <span><i class="fas fa-list me-2"></i>Danh mục sản phẩm</span>
@@ -39,7 +39,7 @@
             </div>
         }
     </div>
-    <div class="col-md-9">
+    <div class="col-md-10">
         <div class="dashboard-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>
@@ -49,98 +49,271 @@
                 <span class="badge bg-primary">@ViewBag.TotalItems sản phẩm</span>
             </div>
             <div class="card-body">
-                @if (!Model.Any())
+                @if (User.IsInRole("Administrator"))
                 {
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>Không có sản phẩm nào trong danh mục này.
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <button id="selectAllBtn" class="btn btn-sm btn-outline-secondary me-2">
+                                <i class="fas fa-check-square me-1"></i>Chọn tất cả
+                            </button>
+                            <button id="deselectAllBtn" class="btn btn-sm btn-outline-secondary me-2">
+                                <i class="fas fa-square me-1"></i>Bỏ chọn tất cả
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-elegant-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-cogs me-1"></i>Thao tác hàng loạt
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="bulkDeleteBtn">
+                                            <i class="fas fa-trash-alt me-1 text-danger"></i>Xóa đã chọn
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="bulkUpdateStockBtn">
+                                            <i class="fas fa-boxes me-1 text-primary"></i>Cập nhật tồn kho
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group ms-2">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-file-excel me-1"></i>Excel
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="bulkExportBtn">
+                                            <i class="fas fa-file-export me-1 text-success"></i>Xuất Excel
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="importExcelBtn">
+                                            <i class="fas fa-file-import me-1 text-primary"></i>Nhập từ Excel
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Excel/DownloadTemplate" target="_blank">
+                                            <i class="fas fa-download me-1 text-info"></i>Tải mẫu Excel
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="input-group input-group-sm me-2" style="width: 250px;">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                                <button class="btn btn-elegant-primary" type="button" id="searchBtn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-sort me-1"></i>Sắp xếp
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="name-asc">Tên A-Z</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="name-desc">Tên Z-A</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="price-asc">Giá tăng dần</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="price-desc">Giá giảm dần</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="stock-asc">Tồn kho tăng dần</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="stock-desc">Tồn kho giảm dần</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-filter me-1"></i>Lọc
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item filter-option" href="#" data-filter="all">Tất cả sản phẩm</a></li>
+                                    <li><a class="dropdown-item filter-option" href="#" data-filter="in-stock">Còn hàng</a></li>
+                                    <li><a class="dropdown-item filter-option" href="#" data-filter="out-of-stock">Hết hàng</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
+
+                    <form id="bulkActionForm" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="40px">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                            </div>
+                                        </th>
+                                        <th width="60px">ID</th>
+                                        <th width="80px">Hình ảnh</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th width="150px">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4">
+                                                <div class="alert alert-info mb-0">
+                                                    <i class="fas fa-info-circle me-2"></i>Không có sản phẩm nào trong danh mục này.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+
+                                        for (int i = 0; i < Model.Count; i++)
+                                        {
+                                            var item = Model[i];
+                                            int productNumber = startIndex + i;
+                                            <tr>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input product-checkbox" type="checkbox" name="selectedProducts" value="@item.Id">
+                                                    </div>
+                                                </td>
+                                                <td>@item.Id</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                    {
+                                                        <img src="@item.ImageUrl" class="img-thumbnail" alt="@item.Name" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                            <i class="fas fa-image"></i>
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", new { id = item.Id })" class="text-decoration-none fw-bold product-name">
+                                                        @item.Name
+                                                    </a>
+                                                    @if (!string.IsNullOrEmpty(item.Model3DUrl))
+                                                    {
+                                                        <span class="badge bg-info ms-1" title="Có mô hình 3D">
+                                                            <i class="fas fa-cube"></i>
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-elegant-secondary">@item.Category.Name</span>
+                                                </td>
+                                                <td class="product-price">@item.Price.ToString("N0") VNĐ</td>
+                                                <td>
+                                                    <span class="badge bg-@(item.Quantity > 0 ? "success" : "danger") product-stock">
+                                                        @(item.Quantity > 0 ? item.Quantity.ToString() : "Hết hàng")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-elegant-primary" title="Sửa">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-elegant-secondary" title="Chi tiết">
+                                                            <i class="fas fa-info-circle"></i>
+                                                        </a>
+                                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Xóa">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-success quick-edit-btn"
+                                                                data-id="@item.Id"
+                                                                data-name="@item.Name"
+                                                                data-price="@item.Price"
+                                                                data-stock="@item.Quantity"
+                                                                title="Sửa nhanh">
+                                                            <i class="fas fa-bolt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
                 }
                 else
                 {
                     <div class="row">
-                @{
-                    int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
-                }
-                @for (int i = 0; i < Model.Count; i++)
-                {
-                    var item = Model[i];
-                    int productNumber = startIndex + i;
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 card-elegant">
-                            @if (!string.IsNullOrEmpty(item.ImageUrl))
-                            {
-                                <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 250px; object-fit: cover;">
-                            }
-                            else
-                            {
-                                <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
-                                    <span><i class="fas fa-image me-2"></i>Không có hình ảnh</span>
+                    @{
+                        int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+                    }
+
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var item = Model[i];
+                        int productNumber = startIndex + i;
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 card-elegant">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 250px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                        <span><i class="fas fa-image me-2"></i>Không có hình ảnh</span>
+                                    </div>
+                                }
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <span class="badge bg-elegant-secondary me-1">#@productNumber</span>
+                                        @item.Name
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        <i class="fas fa-tag me-1"></i>@item.Category.Name
+                                    </p>
+                                    <p class="card-text">@(
+                                        item.Description?.Length > 100
+                                        ? item.Description.Substring(0, 100) + "..."
+                                        : item.Description
+                                    )</p>
+                                    <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
+                                    <p class="card-text">
+                                        Số lượng:
+                                        <span class="badge bg-@(item.Quantity > 0 ? "success" : "danger")">
+                                            @(item.Quantity > 0 ? item.Quantity.ToString() : "Hết hàng")
+                                        </span>
+                                    </p>
                                 </div>
-                            }
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <span class="badge bg-elegant-secondary me-1">#@productNumber</span>
-                                    @item.Name
-                                </h5>
-                                <p class="card-text text-muted">
-                                    <i class="fas fa-tag me-1"></i>@item.Category.Name
-                                </p>
-                                <p class="card-text">@(
-                                    item.Description?.Length > 100
-                                    ? item.Description.Substring(0, 100) + "..."
-                                    : item.Description
-                                )</p>
-                                <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
-                                <p class="card-text">
-                                    Số lượng:
-                                    <span class="badge bg-@(item.Quantity > 0 ? "success" : "danger")">
-                                        @(item.Quantity > 0 ? item.Quantity.ToString() : "Hết hàng")
-                                    </span>
-                                </p>
-                            </div>
-                            <div class="card-footer bg-transparent">
-                                <div class="d-flex justify-content-between">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-elegant-secondary">
-                                        <i class="fas fa-info-circle me-1"></i>Chi tiết
-                                    </a>
-                                    @if (User.IsInRole("Administrator"))
-                                    {
-                                        <div>
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-elegant-primary">
-                                                <i class="fas fa-edit me-1"></i>Sửa
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">
-                                                <i class="fas fa-trash-alt me-1"></i>Xóa
-                                            </a>
-                                        </div>
-                                    }
-                                    else if (User.Identity.IsAuthenticated)
-                                    {
-                                        @if (item.Quantity > 0)
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-elegant-secondary">
+                                            <i class="fas fa-info-circle me-1"></i>Chi tiết
+                                        </a>
+                                        @if (User.Identity.IsAuthenticated)
                                         {
-                                            <a href="#" class="btn btn-elegant-primary add-to-cart" data-product-id="@item.Id">
-                                                <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
-                                            </a>
+                                            @if (item.Quantity > 0)
+                                            {
+                                                <a href="#" class="btn btn-elegant-primary add-to-cart" data-product-id="@item.Id">
+                                                    <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Home" asp-action="Contact" asp-route-productId="@item.Id" class="btn btn-elegant-primary">
+                                                    <i class="fas fa-envelope me-1"></i>Liên hệ đặt hàng
+                                                </a>
+                                            }
                                         }
                                         else
                                         {
-                                            <a asp-controller="Home" asp-action="Contact" asp-route-productId="@item.Id" class="btn btn-elegant-primary">
-                                                <i class="fas fa-envelope me-1"></i>Liên hệ đặt hàng
+                                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = item.Id })" class="btn btn-elegant-primary">
+                                                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập để mua
                                             </a>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = item.Id })" class="btn btn-elegant-primary">
-                                            <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập để mua
-                                        </a>
-                                    }
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    }
                     </div>
-                }
-            </div>
                 }
 
                 <!-- Pagination -->
@@ -208,6 +381,496 @@
 
                 return false; // Prevent default navigation
             });
+
+            // Admin table functionality
+            if ($('#selectAll').length > 0) {
+                // Select all checkbox
+                $('#selectAll').change(function() {
+                    $('.product-checkbox').prop('checked', $(this).prop('checked'));
+                    updateSelectedCount();
+                });
+
+                // Individual checkbox change
+                $('.product-checkbox').change(function() {
+                    updateSelectedCount();
+                    // If any checkbox is unchecked, uncheck the "select all" checkbox
+                    if (!$(this).prop('checked')) {
+                        $('#selectAll').prop('checked', false);
+                    }
+                    // If all checkboxes are checked, check the "select all" checkbox
+                    else if ($('.product-checkbox:checked').length === $('.product-checkbox').length) {
+                        $('#selectAll').prop('checked', true);
+                    }
+                });
+
+                // Select all button
+                $('#selectAllBtn').click(function() {
+                    $('.product-checkbox').prop('checked', true);
+                    $('#selectAll').prop('checked', true);
+                    updateSelectedCount();
+                });
+
+                // Deselect all button
+                $('#deselectAllBtn').click(function() {
+                    $('.product-checkbox').prop('checked', false);
+                    $('#selectAll').prop('checked', false);
+                    updateSelectedCount();
+                });
+
+                // Update selected count
+                function updateSelectedCount() {
+                    var count = $('.product-checkbox:checked').length;
+                    if (count > 0) {
+                        $('#bulkDeleteBtn').text('Xóa ' + count + ' sản phẩm đã chọn');
+                        $('#bulkUpdateStockBtn').text('Cập nhật tồn kho ' + count + ' sản phẩm');
+                        $('#bulkExportBtn').text('Xuất ' + count + ' sản phẩm ra Excel');
+                    } else {
+                        $('#bulkDeleteBtn').text('Xóa đã chọn');
+                        $('#bulkUpdateStockBtn').text('Cập nhật tồn kho');
+                        $('#bulkExportBtn').text('Xuất Excel');
+                    }
+                }
+
+                // Bulk delete
+                $('#bulkDeleteBtn').click(function(e) {
+                    e.preventDefault();
+                    var selectedIds = [];
+                    $('.product-checkbox:checked').each(function() {
+                        selectedIds.push(parseInt($(this).val()));
+                    });
+
+                    if (selectedIds.length === 0) {
+                        alert('Vui lòng chọn ít nhất một sản phẩm để xóa.');
+                        return;
+                    }
+
+                    if (confirm('Bạn có chắc chắn muốn xóa ' + selectedIds.length + ' sản phẩm đã chọn?')) {
+                        $.ajax({
+                            url: '/api/BulkProducts/delete',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(selectedIds),
+                            success: function(result) {
+                                if (result.success) {
+                                    alert(result.message);
+                                    location.reload();
+                                } else {
+                                    alert(result.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                alert('Có lỗi xảy ra khi xóa sản phẩm: ' + error);
+                            }
+                        });
+                    }
+                });
+
+                // Bulk update stock
+                $('#bulkUpdateStockBtn').click(function(e) {
+                    e.preventDefault();
+                    var selectedIds = [];
+                    $('.product-checkbox:checked').each(function() {
+                        selectedIds.push(parseInt($(this).val()));
+                    });
+
+                    if (selectedIds.length === 0) {
+                        alert('Vui lòng chọn ít nhất một sản phẩm để cập nhật tồn kho.');
+                        return;
+                    }
+
+                    var newStock = prompt('Nhập số lượng tồn kho mới cho ' + selectedIds.length + ' sản phẩm đã chọn:');
+                    if (newStock !== null) {
+                        var quantity = parseInt(newStock);
+                        if (isNaN(quantity) || quantity < 0) {
+                            alert('Số lượng không hợp lệ. Vui lòng nhập số nguyên không âm.');
+                            return;
+                        }
+
+                        $.ajax({
+                            url: '/api/BulkProducts/updateStock',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                ids: selectedIds,
+                                quantity: quantity
+                            }),
+                            success: function(result) {
+                                if (result.success) {
+                                    alert(result.message);
+                                    location.reload();
+                                } else {
+                                    alert(result.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                alert('Có lỗi xảy ra khi cập nhật tồn kho: ' + error);
+                            }
+                        });
+                    }
+                });
+
+                // Bulk export
+                $('#bulkExportBtn').click(function(e) {
+                    e.preventDefault();
+                    var selectedIds = [];
+                    $('.product-checkbox:checked').each(function() {
+                        selectedIds.push($(this).val());
+                    });
+
+                    // Nếu không có sản phẩm nào được chọn, xuất tất cả sản phẩm
+                    if (selectedIds.length === 0) {
+                        // Lấy tất cả ID sản phẩm hiển thị (sau khi lọc nếu có)
+                        $('tbody tr:visible').each(function() {
+                            var id = $(this).find('.product-checkbox').val();
+                            if (id) {
+                                selectedIds.push(id);
+                            }
+                        });
+
+                        if (selectedIds.length === 0) {
+                            alert('Không có sản phẩm nào để xuất Excel.');
+                            return;
+                        }
+                    }
+
+                    // Tạo URL với tham số ids
+                    var url = '/Excel/ExportProducts?ids=' + selectedIds.join(',');
+
+                    // Mở URL trong tab mới để tải file
+                    window.open(url, '_blank');
+                });
+
+                // Search functionality
+                $('#searchBtn').click(function() {
+                    var searchText = $('#searchInput').val().toLowerCase();
+                    if (searchText.trim() === '') {
+                        $('tbody tr').show();
+                        return;
+                    }
+
+                    $('tbody tr').each(function() {
+                        var found = false;
+                        var productName = $(this).find('.product-name').text().toLowerCase();
+                        var productCategory = $(this).find('.badge.bg-elegant-secondary').text().toLowerCase();
+                        var productPrice = $(this).find('.product-price').text().toLowerCase();
+
+                        if (productName.includes(searchText) ||
+                            productCategory.includes(searchText) ||
+                            productPrice.includes(searchText)) {
+                            found = true;
+                        }
+
+                        if (found) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                });
+
+                // Search on enter key
+                $('#searchInput').keypress(function(e) {
+                    if (e.which === 13) {
+                        $('#searchBtn').click();
+                        return false;
+                    }
+                });
+
+                // Sorting functionality
+                $('.sort-option').click(function(e) {
+                    e.preventDefault();
+                    var sortType = $(this).data('sort');
+                    var rows = $('tbody tr').get();
+
+                    rows.sort(function(a, b) {
+                        var A, B;
+
+                        if (sortType === 'name-asc' || sortType === 'name-desc') {
+                            A = $(a).find('.product-name').text().toUpperCase();
+                            B = $(b).find('.product-name').text().toUpperCase();
+                            return sortType === 'name-asc' ? (A < B ? -1 : A > B ? 1 : 0) : (A > B ? -1 : A < B ? 1 : 0);
+                        }
+                        else if (sortType === 'price-asc' || sortType === 'price-desc') {
+                            A = parseInt($(a).find('.product-price').text().replace(/\D/g, ''));
+                            B = parseInt($(b).find('.product-price').text().replace(/\D/g, ''));
+                            return sortType === 'price-asc' ? (A - B) : (B - A);
+                        }
+                        else if (sortType === 'stock-asc' || sortType === 'stock-desc') {
+                            var stockA = $(a).find('.product-stock').text();
+                            var stockB = $(b).find('.product-stock').text();
+
+                            if (stockA === 'Hết hàng') A = 0;
+                            else A = parseInt(stockA);
+
+                            if (stockB === 'Hết hàng') B = 0;
+                            else B = parseInt(stockB);
+
+                            return sortType === 'stock-asc' ? (A - B) : (B - A);
+                        }
+
+                        return 0;
+                    });
+
+                    $.each(rows, function(index, row) {
+                        $('tbody').append(row);
+                    });
+                });
+
+                // Filtering functionality
+                $('.filter-option').click(function(e) {
+                    e.preventDefault();
+                    var filterType = $(this).data('filter');
+
+                    // Highlight active filter
+                    $('.filter-option').removeClass('active');
+                    $(this).addClass('active');
+
+                    // Show all rows first
+                    $('tbody tr').show();
+
+                    // Apply filter
+                    if (filterType === 'in-stock') {
+                        $('tbody tr').each(function() {
+                            var stockText = $(this).find('.product-stock').text();
+                            if (stockText === 'Hết hàng') {
+                                $(this).hide();
+                            }
+                        });
+                    } else if (filterType === 'out-of-stock') {
+                        $('tbody tr').each(function() {
+                            var stockText = $(this).find('.product-stock').text();
+                            if (stockText !== 'Hết hàng') {
+                                $(this).hide();
+                            }
+                        });
+                    }
+
+                    // Update selected count after filtering
+                    updateSelectedCount();
+
+                    // Update filter button text
+                    var filterText = 'Lọc';
+                    if (filterType === 'in-stock') filterText = 'Còn hàng';
+                    else if (filterType === 'out-of-stock') filterText = 'Hết hàng';
+
+                    $('.btn-group:last .dropdown-toggle').html('<i class="fas fa-filter me-1"></i>' + filterText);
+                });
+
+                // Quick edit functionality
+                $('.quick-edit-btn').click(function() {
+                    var id = $(this).data('id');
+                    var name = $(this).data('name');
+                    var price = $(this).data('price');
+                    var stock = $(this).data('stock');
+
+                    // Create modal for quick edit if it doesn't exist
+                    if ($('#quickEditModal').length === 0) {
+                        var modalHtml = `
+                        <div class="modal fade" id="quickEditModal" tabindex="-1" aria-labelledby="quickEditModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="quickEditModalLabel">Sửa nhanh sản phẩm</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="quickEditForm">
+                                            <input type="hidden" id="quickEditId">
+                                            <div class="mb-3">
+                                                <label for="quickEditName" class="form-label">Tên sản phẩm</label>
+                                                <input type="text" class="form-control" id="quickEditName">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quickEditPrice" class="form-label">Giá</label>
+                                                <input type="number" class="form-control" id="quickEditPrice">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quickEditStock" class="form-label">Tồn kho</label>
+                                                <input type="number" class="form-control" id="quickEditStock">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="button" class="btn btn-primary" id="saveQuickEdit">Lưu thay đổi</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                        $('body').append(modalHtml);
+
+                        // Save quick edit
+                        $('#saveQuickEdit').click(function() {
+                            var editId = $('#quickEditId').val();
+                            var editName = $('#quickEditName').val();
+                            var editPrice = $('#quickEditPrice').val();
+                            var editStock = $('#quickEditStock').val();
+
+                            if (!editName || editName.trim() === '') {
+                                alert('Tên sản phẩm không được để trống');
+                                return;
+                            }
+
+                            if (isNaN(editPrice) || parseFloat(editPrice) < 0) {
+                                alert('Giá không hợp lệ');
+                                return;
+                            }
+
+                            if (isNaN(editStock) || parseInt(editStock) < 0) {
+                                alert('Số lượng không hợp lệ');
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '/api/BulkProducts/quickEdit',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    id: parseInt(editId),
+                                    name: editName,
+                                    price: parseFloat(editPrice),
+                                    quantity: parseInt(editStock)
+                                }),
+                                success: function(result) {
+                                    if (result.success) {
+                                        alert(result.message);
+                                        $('#quickEditModal').modal('hide');
+                                        location.reload();
+                                    } else {
+                                        alert(result.message);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + error);
+                                }
+                            });
+                        });
+                    }
+
+                    // Set values in modal
+                    $('#quickEditId').val(id);
+                    $('#quickEditName').val(name);
+                    $('#quickEditPrice').val(price);
+                    $('#quickEditStock').val(stock);
+
+                    // Show modal
+                    var quickEditModal = new bootstrap.Modal(document.getElementById('quickEditModal'));
+                    quickEditModal.show();
+                });
+
+
+
+
+
+                // Tạo modal nhập Excel
+                if ($('#importExcelModal').length === 0) {
+                    var importModalHtml = `
+                    <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="importExcelModalLabel">Nhập sản phẩm từ Excel</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="importExcelForm" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="excelFile" class="form-label">Chọn file Excel</label>
+                                            <input type="file" class="form-control" id="excelFile" accept=".xlsx">
+                                            <div class="form-text">Chỉ hỗ trợ file Excel (.xlsx)</div>
+                                        </div>
+                                    </form>
+                                    <div id="importResult" class="d-none">
+                                        <div class="alert alert-info">
+                                            <h6>Kết quả nhập</h6>
+                                            <p>Tổng số dòng: <span id="totalRows">0</span></p>
+                                            <p>Thành công: <span id="successCount">0</span></p>
+                                            <p>Lỗi: <span id="errorCount">0</span></p>
+                                        </div>
+                                        <div id="errorList" class="d-none">
+                                            <h6>Danh sách lỗi:</h6>
+                                            <ul id="errorListItems" class="text-danger"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="button" class="btn btn-primary" id="importExcelSubmit">Nhập dữ liệu</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    $('body').append(importModalHtml);
+
+                    // Xử lý sự kiện nhập Excel
+                    $('#importExcelBtn').click(function(e) {
+                        e.preventDefault();
+                        $('#importResult').addClass('d-none');
+                        $('#errorList').addClass('d-none');
+                        $('#excelFile').val('');
+                        var importExcelModal = new bootstrap.Modal(document.getElementById('importExcelModal'));
+                        importExcelModal.show();
+                    });
+
+                    $('#importExcelSubmit').click(function() {
+                        var fileInput = $('#excelFile')[0];
+                        if (fileInput.files.length === 0) {
+                            alert('Vui lòng chọn file Excel');
+                            return;
+                        }
+
+                        var formData = new FormData();
+                        formData.append('file', fileInput.files[0]);
+
+                        $.ajax({
+                            url: '/Excel/ImportProducts',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            beforeSend: function() {
+                                $('#importExcelSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+                            },
+                            success: function(result) {
+                                $('#importExcelSubmit').prop('disabled', false).text('Nhập dữ liệu');
+
+                                if (result.success) {
+                                    $('#importResult').removeClass('d-none');
+                                    $('#totalRows').text(result.totalRows || 0);
+                                    $('#successCount').text(result.successCount);
+                                    $('#errorCount').text(result.errorCount);
+
+                                    if (result.errorCount > 0) {
+                                        $('#errorList').removeClass('d-none');
+                                        $('#errorListItems').empty();
+
+                                        result.errors.forEach(function(error) {
+                                            $('#errorListItems').append('<li>' + error + '</li>');
+                                        });
+                                    } else {
+                                        $('#errorList').addClass('d-none');
+                                    }
+
+                                    // Nếu nhập thành công, reload sau 3 giây
+                                    if (result.successCount > 0) {
+                                        setTimeout(function() {
+                                            location.reload();
+                                        }, 3000);
+                                    }
+                                } else {
+                                    alert(result.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                $('#importExcelSubmit').prop('disabled', false).text('Nhập dữ liệu');
+                                alert('Có lỗi xảy ra khi nhập Excel: ' + error);
+                            }
+                        });
+                    });
+                }
+            }
         });
     </script>
 }
