@@ -1,0 +1,181 @@
+@model NgoHuuDuc_2280600725.Controllers.ProductController.ManageProductSizesViewModel
+@{
+    ViewData["Title"] = "Quản lý kích cỡ sản phẩm";
+}
+
+<div class="container">
+    <h2>Quản lý kích cỡ sản phẩm: @Model.Product.Name</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Thêm kích cỡ mới</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddProductSize" method="post">
+                        <input type="hidden" name="productId" value="@Model.Product.Id" />
+
+                        <div class="mb-3">
+                            <label for="size" class="form-label">Kích cỡ</label>
+                            <input type="text" class="form-control" id="size" name="size" required placeholder="Ví dụ: S, M, L, XL, 38, 40, 42..." />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Số lượng</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required min="0" value="0" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Thêm kích cỡ</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Thông tin sản phẩm</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Tên sản phẩm:</strong> @Model.Product.Name
+                    </div>
+                    <div class="mb-3">
+                        <strong>Giá:</strong> @Model.Product.Price.ToString("N0") VNĐ
+                    </div>
+                    <div class="mb-3">
+                        <strong>Tổng số lượng:</strong> @Model.Product.Quantity
+                    </div>
+                    <div class="mb-3">
+                        <strong>Danh mục:</strong> @Model.Product.Category?.Name
+                    </div>
+
+                    <a asp-action="Edit" asp-route-id="@Model.Product.Id" class="btn btn-outline-primary">Quay lại trang chỉnh sửa</a>
+                    <a asp-action="Details" asp-route-id="@Model.Product.Id" class="btn btn-outline-secondary">Xem chi tiết sản phẩm</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Danh sách kích cỡ</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Sizes.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Kích cỡ</th>
+                                        <th>Số lượng</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var size in Model.Sizes.OrderBy(s => s.Size))
+                                    {
+                                        <tr>
+                                            <td>@size.Size</td>
+                                            <td>@size.Quantity</td>
+                                            <td>
+                                                <form asp-action="DeleteProductSize" method="post" class="d-inline">
+                                                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+                                                    <input type="hidden" name="size" value="@size.Size" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa kích cỡ này?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-primary btn-sm edit-size-btn"
+                                                        data-size="@size.Size"
+                                                        data-quantity="@size.Quantity">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Chưa có kích cỡ nào cho sản phẩm này. Hãy thêm kích cỡ mới.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa kích cỡ -->
+<div class="modal fade" id="editSizeModal" tabindex="-1" aria-labelledby="editSizeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSizeModalLabel">Chỉnh sửa kích cỡ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddProductSize" method="post" id="editSizeForm">
+                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+
+                    <div class="mb-3">
+                        <label for="editSize" class="form-label">Kích cỡ</label>
+                        <input type="text" class="form-control" id="editSize" name="size" required readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editQuantity" class="form-label">Số lượng</label>
+                        <input type="number" class="form-control" id="editQuantity" name="quantity" required min="0" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý sự kiện khi nhấn nút chỉnh sửa kích cỡ
+            $('.edit-size-btn').click(function() {
+                var size = $(this).data('size');
+                var quantity = $(this).data('quantity');
+
+                $('#editSize').val(size);
+                $('#editQuantity').val(quantity);
+
+                $('#editSizeModal').modal('show');
+            });
+
+            // Xử lý sự kiện khi nhấn nút lưu thay đổi
+            $('#saveEditBtn').click(function() {
+                $('#editSizeForm').submit();
+            });
+        });
+    </script>
+}

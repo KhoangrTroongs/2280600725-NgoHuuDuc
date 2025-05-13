@@ -90,9 +90,9 @@ const OrderDetail = () => {
           Quay lại
         </Button>
       </div>
-      
+
       {error && <Alert variant="danger">{error}</Alert>}
-      
+
       <Row>
         <Col md={8}>
           <Card className="mb-4">
@@ -104,6 +104,7 @@ const OrderDetail = () => {
                 <thead>
                   <tr>
                     <th>Sản phẩm</th>
+                    <th>Kích cỡ</th>
                     <th>Giá</th>
                     <th>Số lượng</th>
                     <th>Tổng</th>
@@ -114,10 +115,10 @@ const OrderDetail = () => {
                     <tr key={item.id}>
                       <td>
                         <div className="d-flex align-items-center">
-                          <Image 
-                            src={item.productImageUrl || "https://via.placeholder.com/80x80?text=No+Image"} 
-                            alt={item.productName} 
-                            className="cart-item-image me-3" 
+                          <Image
+                            src={item.productImageUrl || "https://via.placeholder.com/80x80?text=No+Image"}
+                            alt={item.productName}
+                            className="cart-item-image me-3"
                           />
                           <div>
                             <Link to={`/products/${item.productId}`} className="text-decoration-none">
@@ -125,6 +126,13 @@ const OrderDetail = () => {
                             </Link>
                           </div>
                         </div>
+                      </td>
+                      <td>
+                        {item.size ? (
+                          <Badge bg="info">{item.size}</Badge>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
                       </td>
                       <td>{item.price.toLocaleString('vi-VN')} đ</td>
                       <td>{item.quantity}</td>
@@ -136,7 +144,7 @@ const OrderDetail = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col md={4}>
           <Card className="mb-4">
             <Card.Header>
@@ -149,7 +157,7 @@ const OrderDetail = () => {
               <p><strong>Tổng tiền:</strong> {order.totalPrice.toLocaleString('vi-VN')} đ</p>
             </Card.Body>
           </Card>
-          
+
           <Card>
             <Card.Header>
               <h5 className="mb-0">Thông tin giao hàng</h5>

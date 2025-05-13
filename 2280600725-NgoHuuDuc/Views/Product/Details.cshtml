@@ -4,6 +4,97 @@
     var has3DModel = !string.IsNullOrEmpty(Model.Model3DUrl);
 }
 
+<style>
+    /* CSS cho phần size */
+    .size-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .size-box:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+
+    .size-box.selected {
+        border-color: #0d6efd;
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .size-box.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+
+    /* CSS cho phần đánh giá */
+    .stars {
+        color: #ffc107;
+    }
+
+    /* CSS cho đánh giá sao kiểu nhấp */
+    .stars-select {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .star-icon {
+        cursor: pointer;
+        font-size: 1.8rem;
+        padding: 0 0.1rem;
+        color: #ddd;
+    }
+
+    .star-icon i {
+        transition: all 0.2s;
+    }
+
+    .star-icon.active i {
+        color: #ffc107;
+    }
+
+    .star-icon:hover i {
+        color: #ffc107;
+    }
+
+    .rating-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .rating-text {
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="card mb-3">
     <div class="row g-0">
         <div class="col-md-4">
@@ -11,13 +102,22 @@
                 <div id="product-image-view" class="product-view active">
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
-                        <img src="@Model.ImageUrl" class="img-fluid rounded-start" alt="@Model.Name" style="max-height: 400px; object-fit: cover;">
+                        <div class="position-relative">
+                            <img src="@Model.ImageUrl" class="img-fluid rounded-start" alt="@Model.Name" style="max-height: 400px; object-fit: cover;">
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <form asp-action="DeleteImage" asp-route-id="@Model.Id" method="post" class="position-absolute" style="top: 10px; right: 10px;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa hình ảnh này?');">
+                                        <i class="fas fa-trash"></i> Xóa hình ảnh
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     }
                     else
                     {
-                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 400px;">
-                            <span>Không có hình ảnh</span>
-                        </div>
+                        <img src="/images/no-image.svg" class="img-fluid rounded-start" alt="Không có hình ảnh" style="max-height: 400px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
                     }
                 </div>
 
@@ -33,6 +133,15 @@
                     <div class="view-toggle-buttons mt-2 d-flex">
                         <button id="view-image-btn" class="btn btn-sm btn-primary active me-2">Xem hình ảnh</button>
                         <button id="view-3d-btn" class="btn btn-sm btn-outline-primary">Xem mô hình 3D</button>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <form asp-action="DeleteModel3D" asp-route-id="@Model.Id" method="post" class="ms-auto">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa mô hình 3D này?');">
+                                    <i class="fas fa-trash"></i> Xóa mô hình 3D
+                                </button>
+                            </form>
+                        }
                     </div>
                 }
             </div>
@@ -41,32 +150,191 @@
             <div class="card-body">
                 <h2 class="card-title">@Model.Name</h2>
                 <p class="card-text text-muted">Danh mục: @Model.Category?.Name</p>
-                <p class="card-text">@Model.Description</p>
-                <p class="card-text"><strong class="fs-4">Giá: @Model.Price.ToString("N0") VNĐ</strong></p>
-                <p class="card-text">Số lượng: <span class="badge bg-@(Model.Quantity > 0 ? "success" : "danger")">@(Model.Quantity > 0 ? Model.Quantity.ToString() : "Hết hàng")</span></p>
-                <div class="mt-4">
-                    @if (User.Identity.IsAuthenticated)
+                @{
+                    var description = Model.Description;
+                    var sizeTag = "[SIZES]";
+                    var endSizeTag = "[/SIZES]";
+                    var reviewTag = "[REVIEWS]";
+                    var endReviewTag = "[/REVIEWS]";
+
+                    // Loại bỏ phần kỹ thuật khỏi mô tả
+                    if (!string.IsNullOrEmpty(description))
                     {
-                        @if (Model.Quantity > 0)
+                        if (description.Contains(sizeTag) && description.Contains(endSizeTag))
                         {
-                            <form asp-controller="Home" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form">
-                                <input type="hidden" name="productId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-primary">
-                                    <i class='bx bx-cart-add'></i> Thêm vào giỏ hàng
-                                </button>
-                            </form>
+                            var startIndex = description.IndexOf(sizeTag);
+                            var endIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
                         }
-                        else
+
+                        if (description.Contains(reviewTag) && description.Contains(endReviewTag))
                         {
-                            <a asp-controller="Home" asp-action="Contact" asp-route-productId="@Model.Id" class="btn btn-primary">
-                                <i class='bx bx-envelope'></i> Liên hệ đặt hàng
-                            </a>
+                            var startIndex = description.IndexOf(reviewTag);
+                            var endIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
                         }
+
+                        // Loại bỏ khoảng trắng thừa
+                        description = description.Trim();
+                    }
+                }
+
+                @if (!string.IsNullOrEmpty(description))
+                {
+                    <p class="card-text">@description</p>
+                }
+                <p class="card-text"><strong class="fs-4">Giá: @Model.Price.ToString("N0") VNĐ</strong></p>
+
+                <!-- Hiển thị đánh giá sản phẩm -->
+                @{
+                    var reviews = new List<ReviewViewModel>();
+                    var reviewSection = "";
+
+                    if (!string.IsNullOrEmpty(Model.Description) &&
+                        Model.Description.Contains(reviewTag) &&
+                        Model.Description.Contains(endReviewTag))
+                    {
+                        var startIndex = Model.Description.IndexOf(reviewTag) + reviewTag.Length;
+                        var endIndex = Model.Description.IndexOf(endReviewTag);
+                        if (startIndex < endIndex)
+                        {
+                            reviewSection = Model.Description.Substring(startIndex, endIndex - startIndex);
+
+                            var reviewPairs = reviewSection.Split('|');
+                            foreach (var pair in reviewPairs)
+                            {
+                                if (!string.IsNullOrEmpty(pair))
+                                {
+                                    var parts = pair.Split(new[] { "~~" }, StringSplitOptions.None);
+                                    if (parts.Length >= 5)
+                                    {
+                                        reviews.Add(new ReviewViewModel
+                                        {
+                                            UserId = parts[0],
+                                            UserName = parts[1],
+                                            Rating = int.TryParse(parts[2], out int r) ? r : 5,
+                                            Date = DateTime.TryParse(parts[3], out DateTime d) ? d : DateTime.Now,
+                                            Comment = parts[4]
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    double averageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+                    int reviewCount = reviews.Count;
+                }
+
+                <div class="product-rating mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Round(averageRating))
+                                {
+                                    <i class="fas fa-star text-warning"></i>
+                                }
+                                else if (i - 0.5 <= averageRating)
+                                {
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star text-secondary"></i>
+                                }
+                            }
+                        </div>
+                        <span class="ms-2">@averageRating.ToString("0.0") (@reviewCount đánh giá)</span>
+                    </div>
+                </div>
+
+                @functions {
+                    public class ReviewViewModel
+                    {
+                        public string UserId { get; set; } = "";
+                        public string UserName { get; set; } = "";
+                        public int Rating { get; set; }
+                        public DateTime Date { get; set; }
+                        public string Comment { get; set; } = "";
+                    }
+                }
+
+                <!-- Hiển thị số lượng tổng (chỉ cho admin) -->
+                @if (User.IsInRole("Administrator"))
+                {
+                    <p class="card-text">Số lượng: <span class="badge bg-@(Model.Quantity > 0 ? "success" : "danger")">@(Model.Quantity > 0 ? Model.Quantity.ToString() : "Hết hàng")</span></p>
+                }
+                else
+                {
+                    <p class="card-text">Tình trạng: <span class="badge bg-@(Model.Quantity > 0 ? "success" : "danger")">@(Model.Quantity > 0 ? "Còn hàng" : "Hết hàng")</span></p>
+                }
+
+                <!-- Hiển thị các size có sẵn -->
+                @{
+                    var sizeQuantities = new Dictionary<string, int>();
+                    var sizeSection = "";
+
+                    if (!string.IsNullOrEmpty(Model.Description) &&
+                        Model.Description.Contains(sizeTag) &&
+                        Model.Description.Contains(endSizeTag))
+                    {
+                        var startIndex = Model.Description.IndexOf(sizeTag) + sizeTag.Length;
+                        var endIndex = Model.Description.IndexOf(endSizeTag);
+                        if (startIndex < endIndex)
+                        {
+                            sizeSection = Model.Description.Substring(startIndex, endIndex - startIndex);
+
+                            var sizePairs = sizeSection.Split(',');
+                            foreach (var pair in sizePairs)
+                            {
+                                var parts = pair.Split(':');
+                                if (parts.Length == 2 && int.TryParse(parts[1], out int qty))
+                                {
+                                    sizeQuantities[parts[0].Trim()] = qty;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                @if (sizeQuantities.Any())
+                {
+                    <div class="product-sizes mb-3">
+                        <p class="mb-1">Kích cỡ có sẵn:</p>
+                        <div class="d-flex flex-wrap">
+                            @foreach (var size in sizeQuantities.OrderBy(s => s.Key))
+                            {
+                                <div class="size-box me-2 mb-2 @(size.Value > 0 ? "" : "disabled")"
+                                     data-size="@size.Key"
+                                     data-quantity="@size.Value"
+                                     title="@(size.Value > 0 ? (User.IsInRole("Administrator") ? $"Còn {size.Value} sản phẩm" : "Còn hàng") : "Hết hàng")">
+                                    @size.Key
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="mt-4">
+                    @if (Model.Quantity > 0)
+                    {
+                        <form asp-controller="Home" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class='bx bx-cart-add'></i> Thêm vào giỏ hàng
+                            </button>
+                        </form>
                     }
                     else
                     {
-                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="btn btn-primary">
-                            <i class='bx bx-log-in'></i> Đăng nhập để mua hàng
+                        <a asp-controller="Home" asp-action="Contact" asp-route-productId="@Model.Id" class="btn btn-primary">
+                            <i class='bx bx-envelope'></i> Liên hệ đặt hàng
                         </a>
                     }
                     <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
@@ -75,6 +343,185 @@
                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a>
                         <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
                     }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Phần đánh giá sản phẩm -->
+<div class="card mt-4">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="product-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="true">
+                    Đánh giá (@reviewCount)
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="product-tab-content">
+            <div class="tab-pane fade show active" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                <!-- Hiển thị đánh giá -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="review-summary p-3 border rounded">
+                            <h4 class="mb-3">Đánh giá trung bình</h4>
+                            <div class="d-flex align-items-center mb-3">
+                                <h2 class="me-2 mb-0">@averageRating.ToString("0.0")</h2>
+                                <div>
+                                    <div class="stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Round(averageRating))
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else if (i - 0.5 <= averageRating)
+                                            {
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-secondary"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <div class="text-muted">@reviewCount đánh giá</div>
+                                </div>
+                            </div>
+
+                            <!-- Thống kê đánh giá -->
+                            @for (int i = 5; i >= 1; i--)
+                            {
+                                int count = reviews.Count(r => r.Rating == i);
+                                double percent = reviewCount > 0 ? (double)count / reviewCount * 100 : 0;
+
+                                <div class="d-flex align-items-center mb-1">
+                                    <div class="me-2">@i <i class="fas fa-star text-warning"></i></div>
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <div class="ms-2">@count</div>
+                                </div>
+                            }
+
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <button class="btn btn-primary mt-3 w-100" id="write-review-btn">Viết đánh giá</button>
+                            }
+                            else
+                            {
+                                <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })" class="btn btn-outline-primary mt-3 w-100">
+                                    Đăng nhập để đánh giá
+                                </a>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <!-- Form đánh giá -->
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div id="review-form" class="mb-4 p-3 border rounded" style="display: none;">
+                                <h4 class="mb-3">Viết đánh giá của bạn</h4>
+                                <form asp-controller="Product" asp-action="AddReview" method="post" id="review-form-submit" class="needs-validation" novalidate>
+                                    <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Đánh giá</label>
+                                        <div class="rating-input">
+                                            <div class="d-flex mb-2">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="Rating" id="rating@i" value="@i" required>
+                                                        <label class="form-check-label" for="rating@i">@i <i class="fas fa-star text-warning"></i></label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="rating-text mt-2">Chọn số sao để đánh giá</div>
+                                        <div class="invalid-feedback">Vui lòng chọn số sao đánh giá</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="comment" class="form-label">Bình luận</label>
+                                        <textarea class="form-control" id="comment" name="Comment" rows="3" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này"></textarea>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary me-2" id="cancel-review-btn">Hủy</button>
+                                        <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                                    </div>
+                                </form>
+                            </div>
+                        }
+
+                        <!-- Danh sách đánh giá -->
+                        <div class="reviews-list">
+                            @if (reviews.Any())
+                            {
+                                foreach (var review in reviews.OrderByDescending(r => r.Date))
+                                {
+                                    <div class="review-item mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-2">
+                                                    <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">@review.UserName</div>
+                                                    <div class="text-muted small">@review.Date.ToString("dd/MM/yyyy")</div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="stars me-3">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-secondary"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                @if (User.IsInRole("Administrator"))
+                                                {
+                                                    <form asp-action="DeleteReview" method="post" class="d-inline">
+                                                        <input type="hidden" name="productId" value="@Model.Id" />
+                                                        <input type="hidden" name="userId" value="@review.UserId" />
+                                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                                onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(review.Comment))
+                                        {
+                                            <p class="mb-0">@review.Comment</p>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center p-4">
+                                    <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <button class="btn btn-outline-primary" id="be-first-review-btn">Hãy là người đầu tiên đánh giá</button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,27 +550,27 @@
                     $('#view-3d-btn').addClass('btn-primary').removeClass('btn-outline-primary');
                     $('#view-image-btn').removeClass('btn-primary').addClass('btn-outline-primary');
 
-                    // Initialize 3D viewer if not already initialized
-                    if (!window.modelViewerInitialized) {
-                        console.log('Initializing model viewer...');
+                    // Always reinitialize the 3D viewer when switching to 3D view
+                    // This ensures it works correctly after page reloads or model changes
+                    window.modelViewerInitialized = false;
+                    console.log('Initializing model viewer...');
 
-                        try {
-                            const modelUrl = '@Model.Model3DUrl';
-                            console.log('Model URL:', modelUrl);
+                    try {
+                        const modelUrl = '@Model.Model3DUrl';
+                        console.log('Model URL:', modelUrl);
 
-                            // Khởi tạo model viewer
-                            const success = show3DModel('model-container', modelUrl);
-                            window.modelViewerInitialized = success;
+                        // Khởi tạo model viewer
+                        const success = show3DModel('model-container', modelUrl);
+                        window.modelViewerInitialized = success;
 
-                            if (!window.modelViewerInitialized) {
-                                console.error('Failed to initialize model viewer');
-                            }
-                        } catch (error) {
-                            console.error('Error initializing model viewer:', error);
-                            $('#model-container').html(`<div class="alert alert-danger">
-                                <p>Lỗi khi khởi tạo trình xem 3D: ${error.message || 'Không xác định'}</p>
-                            </div>`);
+                        if (!window.modelViewerInitialized) {
+                            console.error('Failed to initialize model viewer');
                         }
+                    } catch (error) {
+                        console.error('Error initializing model viewer:', error);
+                        $('#model-container').html(`<div class="alert alert-danger">
+                            <p>Lỗi khi khởi tạo trình xem 3D: ${error.message || 'Không xác định'}</p>
+                        </div>`);
                     }
                 });
 
@@ -134,9 +581,30 @@
 
     <script>
         $(document).ready(function () {
+            // Xử lý form thêm vào giỏ hàng
             $('.add-to-cart-form').on('submit', function (e) {
                 e.preventDefault();
                 var form = $(this);
+
+                // Kiểm tra xem người dùng đã đăng nhập chưa
+                var isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+                if (!isAuthenticated) {
+                    // Chuyển hướng đến trang đăng nhập
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                // Kiểm tra xem đã chọn size chưa (nếu có size)
+                if ($('.size-box').length > 0 && !$('.size-box.selected').length) {
+                    alert('Vui lòng chọn kích cỡ trước khi thêm vào giỏ hàng.');
+                    return;
+                }
+
+                // Thêm size vào form nếu đã chọn
+                if ($('.size-box.selected').length) {
+                    var selectedSize = $('.size-box.selected').data('size');
+                    form.append('<input type="hidden" name="size" value="' + selectedSize + '">');
+                }
 
                 $.ajax({
                     url: form.attr('action'),
@@ -148,12 +616,87 @@
                             $('.badge.bg-danger').text(response.cartCount);
                             // Optional: Show success message
                             alert('Đã thêm sản phẩm vào giỏ hàng!');
+                        } else if (response.message) {
+                            alert(response.message);
                         }
                     },
-                    error: function () {
-                        alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            // Người dùng chưa đăng nhập
+                            window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                        } else {
+                            alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+                        }
                     }
                 });
+            });
+
+            // Xử lý chọn size
+            $('.size-box').on('click', function() {
+                if ($(this).hasClass('disabled')) {
+                    return;
+                }
+
+                $('.size-box').removeClass('selected');
+                $(this).addClass('selected');
+            });
+
+            // Xử lý hiển thị form đánh giá
+            $('#write-review-btn, #be-first-review-btn').on('click', function() {
+                $('#review-form').slideDown();
+            });
+
+            // Xử lý ẩn form đánh giá
+            $('#cancel-review-btn').on('click', function() {
+                $('#review-form').slideUp();
+            });
+
+            // Xử lý đánh giá sao khi nhấp
+            $('.form-check-input[name="Rating"]').on('change', function() {
+                var rating = $(this).val();
+
+                // Cập nhật hiển thị mô tả đánh giá
+                $('.rating-text').text(rating + ' sao: ' + getRatingText(rating));
+
+                console.log('Đã chọn ' + rating + ' sao');
+            });
+
+            // Hàm lấy mô tả cho số sao
+            function getRatingText(rating) {
+                switch(parseInt(rating)) {
+                    case 1: return 'Rất tệ';
+                    case 2: return 'Tệ';
+                    case 3: return 'Bình thường';
+                    case 4: return 'Tốt';
+                    case 5: return 'Rất tốt';
+                    default: return 'Chọn số sao để đánh giá';
+                }
+            }
+
+            // Xử lý kiểm tra form trước khi gửi
+            $('#review-form-submit').on('submit', function(event) {
+                var form = $(this);
+                var selectedRating = $('input[name="Rating"]:checked').val();
+
+                // Kiểm tra xem đã chọn số sao chưa
+                if (!selectedRating) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $('.rating-text').addClass('text-danger').text('Vui lòng chọn số sao đánh giá');
+                    return false;
+                }
+
+                // Hiển thị thông báo đang gửi
+                if (form[0].checkValidity() !== false) {
+                    $('.rating-text').removeClass('text-danger');
+
+                    // Log thông tin đánh giá để kiểm tra
+                    console.log('Gửi đánh giá:');
+                    console.log('- Số sao: ' + selectedRating);
+                    console.log('- Bình luận: ' + $('#comment').val());
+                }
+
+                form.addClass('was-validated');
             });
         });
     </script>

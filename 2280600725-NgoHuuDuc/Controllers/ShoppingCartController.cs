@@ -166,7 +166,8 @@ namespace NgoHuuDuc_2280600725.Controllers
                             OrderId = newOrder.Id,
                             ProductId = item.ProductId,
                             Quantity = item.Quantity,
-                            Price = item.Price
+                            Price = item.Price,
+                            Size = item.Size // Thêm thông tin size
                         };
 
                         _context.Add(orderDetail);

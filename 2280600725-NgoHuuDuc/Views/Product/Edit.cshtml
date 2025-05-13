@@ -32,8 +32,14 @@
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Quantity" class="control-label"></label>
-                <input asp-for="Quantity" class="form-control" type="number" min="0" />
+                <div class="input-group">
+                    <input asp-for="Quantity" class="form-control" type="number" min="0" />
+                    <a asp-action="ManageProductSizes" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                        <i class="fas fa-tshirt"></i> Quản lý kích cỡ
+                    </a>
+                </div>
                 <span asp-validation-for="Quantity" class="text-danger"></span>
+                <small class="form-text text-muted">Số lượng tổng của tất cả các kích cỡ. Sử dụng nút "Quản lý kích cỡ" để thêm/sửa/xóa kích cỡ.</small>
             </div>
             <div class="form-group mb-3">
                 <label asp-for="CategoryId" class="control-label"></label>
@@ -48,16 +54,28 @@
                 <span asp-validation-for="Image" class="text-danger"></span>
             </div>
 
-@if (!string.IsNullOrEmpty(Model.ExistingImageUrl))
-{
-    <div class="form-group mb-3">
-        <label class="control-label">Hình ảnh hiện tại</label>
-        <div>
+<div class="form-group mb-3">
+    <label class="control-label">Hình ảnh hiện tại</label>
+    <div>
+        @if (!string.IsNullOrEmpty(Model.ExistingImageUrl))
+        {
             <img src="@Model.ExistingImageUrl" alt="Hình ảnh hiện tại" style="max-width: 200px; max-height: 200px;" />
-        </div>
-        <span class="text-muted">Tải lên hình ảnh mới để thay thế hình ảnh hiện tại</span>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="text-muted">Tải lên hình ảnh mới để thay thế hình ảnh hiện tại</span>
+                <a asp-action="DeleteImageGet" asp-route-id="@Model.Id" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa hình ảnh này?');">
+                    <i class="fas fa-trash-alt"></i> Xóa hình ảnh
+                </a>
+            </div>
+        }
+        else
+        {
+            <img src="/images/no-image.svg" alt="Không có hình ảnh" style="max-width: 200px; max-height: 200px;" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'" />
+            <div class="mt-2">
+                <span class="text-muted">Sản phẩm chưa có hình ảnh. Vui lòng tải lên hình ảnh.</span>
+            </div>
+        }
     </div>
-}
+</div>
 
             <div class="form-group mb-3">
                 <label asp-for="Model3D" class="control-label">Mô hình 3D (không bắt buộc)</label>
@@ -72,7 +90,12 @@
         <div>
             <p><i class="fas fa-cube"></i> @System.IO.Path.GetFileName(Model.ExistingModel3DUrl)</p>
         </div>
-        <span class="text-muted">Tải lên mô hình 3D mới để thay thế mô hình hiện tại</span>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="text-muted">Tải lên mô hình 3D mới để thay thế mô hình hiện tại</span>
+            <a asp-action="DeleteModel3DGet" asp-route-id="@Model.Id" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa mô hình 3D này?');">
+                <i class="fas fa-trash-alt"></i> Xóa mô hình 3D
+            </a>
+        </div>
     </div>
 }
 

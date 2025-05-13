@@ -115,6 +115,7 @@
                     <thead>
                         <tr>
                             <th>Sản phẩm</th>
+                            <th>Kích cỡ</th>
                             <th>Đơn giá</th>
                             <th>Số lượng</th>
                             <th>Thành tiền</th>
@@ -135,6 +136,16 @@
                                             <span>@(item.Product?.Name ?? "Sản phẩm không tồn tại")</span>
                                         </div>
                                     </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Size))
+                                        {
+                                            <span class="badge bg-info">@item.Size</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
                                     <td>@item.Price.ToString("C0")</td>
                                     <td>@item.Quantity</td>
                                     <td>@((item.Price * item.Quantity).ToString("C0"))</td>
@@ -144,7 +155,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                            <td colspan="4" class="text-end"><strong>Tổng cộng:</strong></td>
                             <td><strong>@Model.TotalPrice.ToString("C0")</strong></td>
                         </tr>
                     </tfoot>

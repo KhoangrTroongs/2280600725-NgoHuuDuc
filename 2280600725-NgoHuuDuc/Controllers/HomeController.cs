@@ -154,7 +154,7 @@ namespace NgoHuuDuc_2280600725.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId)
+        public async Task<IActionResult> AddToCart(int productId, string size = null)
         {
             var userId = User.Identity.Name;
             var product = await _context.Products.FindAsync(productId);
@@ -179,7 +179,12 @@ namespace NgoHuuDuc_2280600725.Controllers
                 _context.Carts.Add(cart);
             }
 
-            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            // Nếu có size, tìm cartItem với cùng productId và size
+            // Nếu không có size, tìm cartItem chỉ với productId
+            var cartItem = size != null
+                ? cart.Items.FirstOrDefault(i => i.ProductId == productId && i.Size == size)
+                : cart.Items.FirstOrDefault(i => i.ProductId == productId && i.Size == null);
+
             if (cartItem == null)
             {
                 cartItem = new CartItem
@@ -188,7 +193,8 @@ namespace NgoHuuDuc_2280600725.Controllers
                     ProductName = product.Name,
                     Price = product.Price,
                     Quantity = 1,
-                    ImageUrl = product.ImageUrl
+                    ImageUrl = product.ImageUrl,
+                    Size = size
                 };
                 cart.Items.Add(cartItem);
             }

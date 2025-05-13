@@ -39,6 +39,8 @@ namespace NgoHuuDuc_2280600725.DTOs
 
         public int Quantity { get; set; }
 
+        public string? Size { get; set; }
+
         public string? ProductImageUrl { get; set; }
     }
 

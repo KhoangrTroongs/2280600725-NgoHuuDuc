@@ -5,6 +5,12 @@ namespace NgoHuuDuc_2280600725.Models
 {
     public class Product
     {
+        public Product()
+        {
+            ProductSizes = new List<ProductSize>();
+            ProductReviews = new List<ProductReview>();
+        }
+
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
@@ -36,8 +42,19 @@ namespace NgoHuuDuc_2280600725.Models
         [Display(Name = "Danh mục")]
         public int CategoryId { get; set; }
 
-        // Navigation property
+        // Navigation properties
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
+
+        // New navigation properties
+        public virtual ICollection<ProductSize> ProductSizes { get; set; }
+        public virtual ICollection<ProductReview> ProductReviews { get; set; }
+
+        // Computed properties
+        [NotMapped]
+        public double AverageRating => ProductReviews.Any() ? ProductReviews.Average(r => r.Rating) : 0;
+
+        [NotMapped]
+        public int ReviewCount => ProductReviews.Count;
     }
 }

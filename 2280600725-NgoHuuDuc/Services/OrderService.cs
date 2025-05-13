@@ -105,7 +105,8 @@ namespace NgoHuuDuc_2280600725.Services
                 {
                     ProductId = item.ProductId,
                     Price = item.Price,
-                    Quantity = item.Quantity
+                    Quantity = item.Quantity,
+                    Size = item.Size // Thêm thông tin size
                 };
                 order.OrderDetails.Add(orderDetail);
 
@@ -219,6 +220,7 @@ namespace NgoHuuDuc_2280600725.Services
                     ProductName = od.Product?.Name ?? "Unknown Product",
                     Price = od.Price,
                     Quantity = od.Quantity,
+                    Size = od.Size, // Thêm thông tin size
                     ProductImageUrl = od.Product?.ImageUrl
                 }).ToList() ?? new List<OrderDetailDTO>()
             };

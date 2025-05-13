@@ -37,8 +37,33 @@ namespace NgoHuuDuc_2280600725.Responsitories
 
         public async Task UpdateProductAsync(Product product)
         {
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                // Lấy sản phẩm hiện tại từ cơ sở dữ liệu
+                var existingProduct = await _context.Products.FindAsync(product.Id);
+                if (existingProduct == null)
+                {
+                    throw new Exception($"Product with ID {product.Id} not found");
+                }
+
+                // Cập nhật các thuộc tính cơ bản
+                existingProduct.Name = product.Name;
+                existingProduct.Description = product.Description;
+                existingProduct.Price = product.Price;
+                existingProduct.Quantity = product.Quantity;
+                existingProduct.CategoryId = product.CategoryId;
+                existingProduct.ImageUrl = product.ImageUrl;
+                existingProduct.Model3DUrl = product.Model3DUrl;
+
+                // Lưu thay đổi
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi và ném lại ngoại lệ
+                Console.WriteLine($"Error updating product: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task DeleteProductAsync(int id)

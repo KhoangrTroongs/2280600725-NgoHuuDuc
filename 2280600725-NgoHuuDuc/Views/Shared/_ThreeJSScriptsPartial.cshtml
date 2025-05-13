@@ -1,3 +1,7 @@
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+
 <script>
     // Simple function to show 3D model
     function show3DModel(containerId, modelUrl) {
@@ -26,18 +30,206 @@
                 modelApiUrl = `/model/products/${filename}`;
             }
 
-            // Create a button to open the model in a new window
-            container.innerHTML = `
-                <div class="text-center p-4">
-                    <div class="mb-3">
-                        <img src="/images/3d-model-icon.png" alt="3D Model" style="max-width: 150px; max-height: 150px;" onerror="this.src='/images/3d-icon.svg'">
-                    </div>
-                    <p class="mb-3">Mô hình 3D đã sẵn sàng để xem</p>
-                    <a href="/model-viewer.html?model=${encodeURIComponent(modelApiUrl)}" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-cube me-2"></i> Mở mô hình 3D trong cửa sổ mới
-                    </a>
-                </div>
-            `;
+            // Show loading indicator
+            container.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Đang tải mô hình 3D...</p></div>';
+
+            // Initialize Three.js scene and store in global variables
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f8f8);
+
+            // Create camera and store in global variable
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Create renderer and store in global variable
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+
+            // Add controls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.0;
+
+            // Load model
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                modelApiUrl,
+                (gltf) => {
+                    // Clear loading indicator
+                    container.innerHTML = '';
+
+                    // Create a container for the renderer and color controls
+                    const viewerContainer = document.createElement('div');
+                    viewerContainer.style.position = 'relative';
+                    viewerContainer.style.width = '100%';
+                    viewerContainer.style.height = '100%';
+
+                    // Add renderer to the container
+                    viewerContainer.appendChild(renderer.domElement);
+
+                    // Create color picker controls
+                    const colorControls = document.createElement('div');
+                    colorControls.className = 'color-controls';
+                    colorControls.style.position = 'absolute';
+                    colorControls.style.bottom = '10px';
+                    colorControls.style.left = '10px';
+                    colorControls.style.zIndex = '100';
+                    colorControls.style.background = 'rgba(255, 255, 255, 0.7)';
+                    colorControls.style.padding = '5px';
+                    colorControls.style.borderRadius = '5px';
+
+                    // Add color options with more vibrant colors for better visibility
+                    const colors = [
+                        { name: 'Đen', hex: '#000000' },
+                        { name: 'Xanh đậm', hex: '#0a3d62' },
+                        { name: 'Xám', hex: '#4b4b4b' },
+                        { name: 'Nâu', hex: '#6f4e37' },
+                        { name: 'Đỏ đô', hex: '#8b0000' },
+                        { name: 'Xanh lá', hex: '#2ecc71' },
+                        { name: 'Cam', hex: '#e67e22' },
+                        { name: 'Tím', hex: '#9b59b6' }
+                    ];
+
+                    colorControls.innerHTML = '<div style="margin-bottom: 5px; font-weight: bold;">Màu sắc:</div>';
+
+                    colors.forEach(color => {
+                        const colorBtn = document.createElement('button');
+                        colorBtn.style.width = '30px';
+                        colorBtn.style.height = '30px';
+                        colorBtn.style.backgroundColor = color.hex;
+                        colorBtn.style.margin = '0 5px 5px 0';
+                        colorBtn.style.border = '2px solid #ddd';
+                        colorBtn.style.borderRadius = '50%';
+                        colorBtn.style.cursor = 'pointer';
+                        colorBtn.title = color.name;
+
+                        colorBtn.onclick = function() {
+                            changeModelColor(gltf.scene, color.hex);
+                            // Highlight selected color
+                            document.querySelectorAll('.color-controls button').forEach(btn => {
+                                btn.style.border = '2px solid #ddd';
+                            });
+                            this.style.border = '2px solid #000';
+                        };
+
+                        colorControls.appendChild(colorBtn);
+                    });
+
+                    // Add reset button
+                    const resetBtn = document.createElement('button');
+                    resetBtn.innerHTML = 'Màu gốc';
+                    resetBtn.className = 'btn btn-sm btn-outline-secondary';
+                    resetBtn.style.display = 'block';
+                    resetBtn.style.marginTop = '5px';
+                    resetBtn.onclick = function() {
+                        resetModelColor(gltf.scene);
+                        // Reset button highlights
+                        document.querySelectorAll('.color-controls button').forEach(btn => {
+                            btn.style.border = '2px solid #ddd';
+                        });
+                    };
+
+                    colorControls.appendChild(resetBtn);
+                    viewerContainer.appendChild(colorControls);
+
+                    // Add the container to the DOM
+                    container.appendChild(viewerContainer);
+
+                    // Center model
+                    const box = new THREE.Box3().setFromObject(gltf.scene);
+                    const center = new THREE.Vector3();
+                    box.getCenter(center);
+                    const size = new THREE.Vector3();
+                    box.getSize(size);
+
+                    // Reset model position to center
+                    gltf.scene.position.x = -center.x;
+                    gltf.scene.position.y = -center.y;
+                    gltf.scene.position.z = -center.z;
+
+                    // Adjust camera position based on model size
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const fov = camera.fov * (Math.PI / 180);
+                    let cameraDistance = maxDim / (2 * Math.tan(fov / 2));
+                    cameraDistance *= 1.5;
+                    camera.position.z = cameraDistance;
+
+                    // Add model to scene
+                    scene.add(gltf.scene);
+
+                    // Debug: Log all materials in the model
+                    console.log('Model loaded, analyzing materials:');
+                    const materialNames = [];
+                    gltf.scene.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(mat => {
+                                    materialNames.push({
+                                        name: mat.name || 'unnamed',
+                                        color: mat.color ? `rgb(${Math.round(mat.color.r*255)},${Math.round(mat.color.g*255)},${Math.round(mat.color.b*255)})` : 'unknown',
+                                        metalness: mat.metalness,
+                                        roughness: mat.roughness,
+                                        opacity: mat.opacity,
+                                        transparent: mat.transparent
+                                    });
+                                });
+                            } else {
+                                materialNames.push({
+                                    name: child.material.name || 'unnamed',
+                                    color: child.material.color ? `rgb(${Math.round(child.material.color.r*255)},${Math.round(child.material.color.g*255)},${Math.round(child.material.color.b*255)})` : 'unknown',
+                                    metalness: child.material.metalness,
+                                    roughness: child.material.roughness,
+                                    opacity: child.material.opacity,
+                                    transparent: child.material.transparent
+                                });
+                            }
+                        }
+                    });
+                    console.table(materialNames);
+
+                    // Start animation loop
+                    animate();
+                },
+                (xhr) => {
+                    // Show loading progress
+                    if (xhr.lengthComputable) {
+                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                        container.innerHTML = `<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Đang tải mô hình 3D: ${percent}%</p></div>`;
+                    }
+                },
+                (error) => {
+                    // Show error
+                    showModelError(container, `Lỗi khi tải mô hình: ${error.message || 'Không xác định'}`);
+                    console.error('Error loading model:', error);
+                }
+            );
+
+            // Handle window resize
+            function handleResize() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+
+            window.addEventListener('resize', handleResize);
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
 
             return true;
         } catch (error) {
@@ -45,6 +237,159 @@
             showModelError(container, `Lỗi: ${error.message}`);
             return false;
         }
+    }
+
+    // Global variables for 3D scene
+    let originalMaterials = null;
+    let currentModel = null;
+    let scene = null;
+    let camera = null;
+    let renderer = null;
+
+    // Function to change model color - simplified approach
+    function changeModelColor(model, colorHex) {
+        // Store the current model for reference
+        currentModel = model;
+
+        // Convert hex to THREE.js color
+        const color = new THREE.Color(colorHex);
+
+        // Store original materials if not already stored
+        if (!originalMaterials) {
+            // Create a deep clone of all materials
+            originalMaterials = [];
+
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    // Log for debugging
+                    console.log('Found mesh:', child.name);
+
+                    // Store original material with reference to the mesh
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach((mat, index) => {
+                            originalMaterials.push({
+                                mesh: child,
+                                index: index,
+                                material: mat.clone()
+                            });
+                            // Log material properties
+                            console.log(`Material ${index}:`, mat.name, mat.color);
+                        });
+                    } else {
+                        originalMaterials.push({
+                            mesh: child,
+                            material: child.material.clone()
+                        });
+                        // Log material properties
+                        console.log('Material:', child.material.name, child.material.color);
+                    }
+                }
+            });
+        }
+
+        // Apply color change only to vest (dark colored materials)
+        console.log('Changing color to:', colorHex);
+
+        // Force material update by creating new materials
+        model.traverse((child) => {
+            if (child.isMesh && child.material) {
+                console.log('Examining mesh:', child.name);
+
+                // Apply color change
+                if (Array.isArray(child.material)) {
+                    for (let i = 0; i < child.material.length; i++) {
+                        const oldMat = child.material[i];
+
+                        // Calculate brightness of the material color (0-1)
+                        const oldColor = oldMat.color;
+                        const brightness = (oldColor.r + oldColor.g + oldColor.b) / 3;
+
+                        // Only change dark materials (likely the vest)
+                        // Skip bright materials (likely the shirt)
+                        if (brightness < 0.5) {
+                            console.log(`Material ${i} is dark (brightness: ${brightness.toFixed(2)}), changing color`);
+
+                            // Create a new material with the same properties
+                            const newMat = oldMat.clone();
+                            // Set the new color
+                            newMat.color.set(color);
+                            // Make sure the material knows it needs to update
+                            newMat.needsUpdate = true;
+
+                            // Replace the old material with the new one
+                            child.material[i] = newMat;
+
+                            console.log(`Updated material ${i}:`, oldMat.name, 'Old color:', oldMat.color, 'New color:', newMat.color);
+                        } else {
+                            console.log(`Material ${i} is bright (brightness: ${brightness.toFixed(2)}), skipping`);
+                        }
+                    }
+                } else {
+                    const oldMat = child.material;
+
+                    // Calculate brightness of the material color (0-1)
+                    const oldColor = oldMat.color;
+                    const brightness = (oldColor.r + oldColor.g + oldColor.b) / 3;
+
+                    // Only change dark materials (likely the vest)
+                    // Skip bright materials (likely the shirt)
+                    if (brightness < 0.5) {
+                        console.log(`Material is dark (brightness: ${brightness.toFixed(2)}), changing color`);
+
+                        // Create a new material with the same properties
+                        const newMat = oldMat.clone();
+                        // Set the new color
+                        newMat.color.set(color);
+                        // Make sure the material knows it needs to update
+                        newMat.needsUpdate = true;
+
+                        // Replace the old material with the new one
+                        child.material = newMat;
+
+                        console.log('Updated material:', oldMat.name, 'Old color:', oldMat.color, 'New color:', newMat.color);
+                    } else {
+                        console.log(`Material is bright (brightness: ${brightness.toFixed(2)}), skipping`);
+                    }
+                }
+            }
+        });
+
+        // Force scene update
+        renderer.render(scene, camera);
+    }
+
+    // Function to reset model to original colors
+    function resetModelColor(model) {
+        if (!originalMaterials || !currentModel) {
+            console.log('No original materials to restore');
+            return;
+        }
+
+        console.log('Restoring original materials');
+
+        // Restore all original materials
+        originalMaterials.forEach(item => {
+            if (item.mesh) {
+                if (typeof item.index !== 'undefined') {
+                    // For array materials
+                    if (Array.isArray(item.mesh.material) && item.index < item.mesh.material.length) {
+                        const newMat = item.material.clone();
+                        newMat.needsUpdate = true;
+                        item.mesh.material[item.index] = newMat;
+                        console.log(`Restored array material ${item.index} for mesh:`, item.mesh.name);
+                    }
+                } else {
+                    // For single materials
+                    const newMat = item.material.clone();
+                    newMat.needsUpdate = true;
+                    item.mesh.material = newMat;
+                    console.log('Restored material for mesh:', item.mesh.name);
+                }
+            }
+        });
+
+        // Force scene update
+        renderer.render(scene, camera);
     }
 
     // Show error message

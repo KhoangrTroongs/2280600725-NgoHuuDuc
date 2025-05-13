@@ -11,5 +11,6 @@ namespace NgoHuuDuc_2280600725.Models
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public string ImageUrl { get; set; } = "";
+        public string? Size { get; set; }
     }
 }

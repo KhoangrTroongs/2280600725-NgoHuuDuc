@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="400px" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#f0f0f0"/>
+  <g fill="#cccccc">
+    <path d="M200,100 L250,180 L150,180 Z"/>
+    <circle cx="250" cy="120" r="15"/>
+    <rect x="100" y="200" width="200" height="120" rx="5"/>
+  </g>
+  <text x="200" y="350" font-family="Arial" font-size="24" text-anchor="middle" fill="#666666">Không có hình ảnh</text>
+</svg>

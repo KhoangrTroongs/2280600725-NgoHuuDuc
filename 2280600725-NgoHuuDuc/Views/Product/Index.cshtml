@@ -276,9 +276,9 @@
                                     )</p>
                                     <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
                                     <p class="card-text">
-                                        Số lượng:
+                                        Tình trạng:
                                         <span class="badge bg-@(item.Quantity > 0 ? "success" : "danger")">
-                                            @(item.Quantity > 0 ? item.Quantity.ToString() : "Hết hàng")
+                                            @(item.Quantity > 0 ? "Còn hàng" : "Hết hàng")
                                         </span>
                                     </p>
                                 </div>

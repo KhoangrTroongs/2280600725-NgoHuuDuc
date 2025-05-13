@@ -19,6 +19,8 @@ namespace NgoHuuDuc_2280600725.Data
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductSize> ProductSizes { get; set; }
+        public DbSet<ProductReview> ProductReviews { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -79,6 +81,23 @@ namespace NgoHuuDuc_2280600725.Data
                 .HasOne(od => od.Product)
                 .WithMany()
                 .HasForeignKey(od => od.ProductId);
+
+            // ProductSize configuration
+            builder.Entity<ProductSize>()
+                .HasOne(ps => ps.Product)
+                .WithMany(p => p.ProductSizes)
+                .HasForeignKey(ps => ps.ProductId);
+
+            // ProductReview configuration
+            builder.Entity<ProductReview>()
+                .HasOne(pr => pr.Product)
+                .WithMany(p => p.ProductReviews)
+                .HasForeignKey(pr => pr.ProductId);
+
+            builder.Entity<ProductReview>()
+                .HasOne(pr => pr.User)
+                .WithMany()
+                .HasForeignKey(pr => pr.UserId);
 
             // Seed Categories
             builder.Entity<Category>().HasData(
