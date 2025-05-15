@@ -47,6 +47,7 @@
                 <label asp-for="Description" class="control-label"></label>
                 <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
+                <small class="form-text text-muted">Mô tả sản phẩm. Thông tin về kích thước sẽ được quản lý riêng bằng nút "Quản lý kích cỡ" ở phần số lượng.</small>
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Price" class="control-label"></label>
@@ -55,8 +56,14 @@
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Quantity" class="control-label"></label>
-                <input asp-for="Quantity" class="form-control" type="number" min="0" />
+                <div class="input-group">
+                    <input asp-for="Quantity" class="form-control" type="number" min="0" />
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sizesModal">
+                        <i class="fas fa-tshirt"></i> Quản lý kích cỡ
+                    </button>
+                </div>
                 <span asp-validation-for="Quantity" class="text-danger"></span>
+                <small class="form-text text-muted">Số lượng tổng của tất cả các kích cỡ. Sử dụng nút "Quản lý kích cỡ" để thêm/sửa/xóa kích cỡ.</small>
             </div>
             <div class="form-group mb-3">
                 <label asp-for="CategoryId" class="control-label">Danh mục *</label>
@@ -89,8 +96,290 @@
     </div>
 </div>
 
+<!-- Modal quản lý kích cỡ -->
+<div class="modal fade" id="sizesModal" tabindex="-1" aria-labelledby="sizesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sizesModalLabel">Quản lý kích cỡ sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>Thêm kích cỡ mới</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="sizeInput" class="form-label">Kích cỡ</label>
+                                    <input type="text" class="form-control" id="sizeInput" required placeholder="Ví dụ: S, M, L, XL, 38, 40, 42..." />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="quantityInput" class="form-label">Số lượng</label>
+                                    <input type="number" class="form-control" id="quantityInput" required min="0" value="0" />
+                                </div>
+                                <button type="button" class="btn btn-primary" id="addSizeBtn">Thêm kích cỡ</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Danh sách kích cỡ</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="sizesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Kích cỡ</th>
+                                                <th>Số lượng</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Danh sách kích cỡ sẽ được thêm vào đây bằng JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="noSizesMessage" class="alert alert-info">
+                                    Chưa có kích cỡ nào cho sản phẩm này. Hãy thêm kích cỡ mới.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="saveSizesBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa kích cỡ -->
+<div class="modal fade" id="editSizeModal" tabindex="-1" aria-labelledby="editSizeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSizeModalLabel">Chỉnh sửa kích cỡ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="editSizeInput" class="form-label">Kích cỡ</label>
+                    <input type="text" class="form-control" id="editSizeInput" required readonly />
+                </div>
+                <div class="mb-3">
+                    <label for="editQuantityInput" class="form-label">Số lượng</label>
+                    <input type="number" class="form-control" id="editQuantityInput" required min="0" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm input ẩn để lưu thông tin kích cỡ -->
+<input type="hidden" id="productSizes" name="ProductSizes" />
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            // Khởi tạo mảng lưu trữ kích cỡ
+            var sizes = [];
+
+            // Hiển thị/ẩn thông báo không có kích cỡ
+            function updateNoSizesMessage() {
+                if (sizes.length === 0) {
+                    $('#noSizesMessage').show();
+                    $('#sizesTable').hide();
+                } else {
+                    $('#noSizesMessage').hide();
+                    $('#sizesTable').show();
+                }
+            }
+
+            // Cập nhật bảng kích cỡ
+            function updateSizesTable() {
+                var tbody = $('#sizesTable tbody');
+                tbody.empty();
+
+                sizes.forEach(function(item) {
+                    var row = $('<tr>');
+                    row.append($('<td>').text(item.size));
+                    row.append($('<td>').text(item.quantity));
+
+                    var actionsCell = $('<td>');
+
+                    // Nút xóa
+                    var deleteBtn = $('<button>')
+                        .addClass('btn btn-danger btn-sm me-1')
+                        .attr('type', 'button')
+                        .attr('data-size', item.size)
+                        .html('<i class="fas fa-trash"></i>')
+                        .click(function() {
+                            if (confirm('Bạn có chắc chắn muốn xóa kích cỡ này?')) {
+                                var sizeToDelete = $(this).data('size');
+                                sizes = sizes.filter(function(s) {
+                                    return s.size !== sizeToDelete;
+                                });
+                                updateSizesTable();
+                                updateTotalQuantity();
+                                updateNoSizesMessage();
+                            }
+                        });
+
+                    // Nút sửa
+                    var editBtn = $('<button>')
+                        .addClass('btn btn-primary btn-sm')
+                        .attr('type', 'button')
+                        .attr('data-size', item.size)
+                        .attr('data-quantity', item.quantity)
+                        .html('<i class="fas fa-edit"></i>')
+                        .click(function() {
+                            var size = $(this).data('size');
+                            var quantity = $(this).data('quantity');
+
+                            $('#editSizeInput').val(size);
+                            $('#editQuantityInput').val(quantity);
+
+                            $('#editSizeModal').modal('show');
+                        });
+
+                    actionsCell.append(deleteBtn);
+                    actionsCell.append(editBtn);
+                    row.append(actionsCell);
+
+                    tbody.append(row);
+                });
+
+                // Cập nhật input ẩn
+                updateSizesInput();
+            }
+
+            // Cập nhật tổng số lượng
+            function updateTotalQuantity() {
+                var total = 0;
+                sizes.forEach(function(item) {
+                    total += parseInt(item.quantity);
+                });
+                $('#Quantity').val(total);
+            }
+
+            // Cập nhật input ẩn
+            function updateSizesInput() {
+                $('#productSizes').val(JSON.stringify(sizes));
+            }
+
+            // Khởi tạo
+            updateNoSizesMessage();
+
+            // Xử lý sự kiện khi nhấn nút thêm kích cỡ
+            $('#addSizeBtn').click(function() {
+                var size = $('#sizeInput').val().trim();
+                var quantity = parseInt($('#quantityInput').val());
+
+                if (!size) {
+                    alert('Vui lòng nhập kích cỡ');
+                    return;
+                }
+
+                if (isNaN(quantity) || quantity < 0) {
+                    alert('Số lượng phải là số không âm');
+                    return;
+                }
+
+                // Kiểm tra xem kích cỡ đã tồn tại chưa
+                var existingSize = sizes.find(function(item) {
+                    return item.size === size;
+                });
+
+                if (existingSize) {
+                    alert('Kích cỡ này đã tồn tại. Vui lòng sử dụng chức năng chỉnh sửa.');
+                    return;
+                }
+
+                // Thêm kích cỡ mới
+                sizes.push({
+                    size: size,
+                    quantity: quantity
+                });
+
+                // Cập nhật giao diện
+                updateSizesTable();
+                updateTotalQuantity();
+                updateNoSizesMessage();
+
+                // Xóa dữ liệu nhập
+                $('#sizeInput').val('');
+                $('#quantityInput').val(0);
+            });
+
+            // Xử lý sự kiện khi nhấn nút lưu chỉnh sửa
+            $('#saveEditBtn').click(function() {
+                var size = $('#editSizeInput').val();
+                var quantity = parseInt($('#editQuantityInput').val());
+
+                if (isNaN(quantity) || quantity < 0) {
+                    alert('Số lượng phải là số không âm');
+                    return;
+                }
+
+                // Cập nhật kích cỡ
+                var sizeIndex = sizes.findIndex(function(item) {
+                    return item.size === size;
+                });
+
+                if (sizeIndex !== -1) {
+                    sizes[sizeIndex].quantity = quantity;
+
+                    // Cập nhật giao diện
+                    updateSizesTable();
+                    updateTotalQuantity();
+
+                    // Đóng modal
+                    $('#editSizeModal').modal('hide');
+                }
+            });
+
+            // Xử lý sự kiện khi nhấn nút lưu thay đổi
+            $('#saveSizesBtn').click(function() {
+                // Đóng modal
+                $('#sizesModal').modal('hide');
+            });
+
+            // Xử lý sự kiện khi submit form
+            $('form').submit(function() {
+                // Thêm thông tin kích cỡ vào mô tả sản phẩm
+                if (sizes.length > 0) {
+                    var sizeSection = sizes.map(function(item) {
+                        return item.size + ':' + item.quantity;
+                    }).join(',');
+
+                    var description = $('#Description').val() || '';
+
+                    // Thêm phần kích cỡ vào cuối mô tả
+                    if (description) {
+                        description += '\n\n';
+                    }
+                    description += '[SIZES]' + sizeSection + '[/SIZES]';
+
+                    $('#Description').val(description);
+                }
+
+                return true;
+            });
+        });
+    </script>
 }

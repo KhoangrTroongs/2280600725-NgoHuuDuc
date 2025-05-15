@@ -143,7 +143,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Price = model.Price,
                 Quantity = model.Quantity,
                 CategoryId = model.CategoryId,
-                ImageUrl = "/images/products/no-image.svg",
+                ImageUrl = "/images/no-image.svg",
                 Model3DUrl = null
             };
 
@@ -434,7 +434,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                     System.IO.File.Delete(imagePath);
                 }
 
-                product.ImageUrl = "/images/products/no-image.svg";
+                product.ImageUrl = "/images/no-image.svg";
                 await _productRepository.UpdateProductAsync(product);
                 TempData["Success"] = "Hình ảnh sản phẩm đã được thay thế bằng hình ảnh mặc định.";
             }
@@ -463,7 +463,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                     System.IO.File.Delete(imagePath);
                 }
 
-                product.ImageUrl = "/images/products/no-image.svg";
+                product.ImageUrl = "/images/no-image.svg";
                 await _productRepository.UpdateProductAsync(product);
                 TempData["Success"] = "Hình ảnh sản phẩm đã được thay thế bằng hình ảnh mặc định.";
             }

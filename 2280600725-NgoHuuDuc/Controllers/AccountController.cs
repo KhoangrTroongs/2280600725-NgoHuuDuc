@@ -114,56 +114,84 @@ namespace NgoHuuDuc_2280600725.Controllers
         public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+
+            // Kiểm tra xác thực mật khẩu trước khi xử lý
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Mật khẩu xác nhận không khớp với mật khẩu đã nhập.");
+                _logger.LogWarning("Đăng ký thất bại: Mật khẩu xác nhận không khớp");
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
-                // Xử lý upload avatar
-                if (model.AvatarFile != null && model.AvatarFile.Length > 0)
+                try
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "users");
-                    if (!Directory.Exists(uploadsFolder))
+                    // Xử lý upload avatar
+                    if (model.AvatarFile != null && model.AvatarFile.Length > 0)
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "users");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + model.AvatarFile.FileName;
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.AvatarFile.CopyToAsync(fileStream);
+                        }
+
+                        model.AvatarUrl = "/images/users/" + uniqueFileName;
+                    }
+                    else
+                    {
+                        // Gán ảnh mặc định nếu không có upload
+                        model.AvatarUrl = "/images/users/default-avatar.png";
                     }
 
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + model.AvatarFile.FileName;
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    var user = new ApplicationUser
                     {
-                        await model.AvatarFile.CopyToAsync(fileStream);
+                        UserName = model.Email,
+                        Email = model.Email,
+                        PhoneNumber = model.PhoneNumber,
+                        EmailConfirmed = true,
+                        FullName = model.FullName,
+                        DateOfBirth = model.DateOfBirth,
+                        Address = model.Address ?? "",
+                        Gender = (Models.Gender)model.Gender,
+                        AvatarUrl = model.AvatarUrl
+                    };
+
+                    var result = await _userRepository.RegisterUserAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        await _userRepository.AddUserDetailsAsync(user, model);
+                        await _userRepository.AssignRoleAsync(model.Email, "User");
+                        await _userRepository.SignInUserAsync(model.Email, isPersistent: false);
+                        _logger.LogInformation("Đăng ký thành công cho người dùng: {Email}", model.Email);
+                        return RedirectToLocal(returnUrl);
                     }
 
-                    model.AvatarUrl = "/images/users/" + uniqueFileName;
+                    _logger.LogWarning("Đăng ký thất bại: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                    AddErrors(result);
                 }
-                else
+                catch (Exception ex)
                 {
-                    // Gán ảnh mặc định nếu không có upload
-                    model.AvatarUrl = "/images/users/default-avatar.png";
+                    _logger.LogError(ex, "Lỗi trong quá trình đăng ký: {Message}", ex.Message);
+                    ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.");
                 }
-
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    EmailConfirmed = true,
-                    FullName = model.FullName,
-                    DateOfBirth = model.DateOfBirth,
-                    Address = model.Address ?? "",
-                    Gender = (Models.Gender)model.Gender,
-                    AvatarUrl = model.AvatarUrl
-                };
-
-                var result = await _userRepository.RegisterUserAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    await _userRepository.AddUserDetailsAsync(user, model);
-                    await _userRepository.AssignRoleAsync(model.Email, "User");
-                    await _userRepository.SignInUserAsync(model.Email, isPersistent: false);
-                    return RedirectToLocal(returnUrl);
-                }
-                AddErrors(result);
             }
+            else
+            {
+                // Log lỗi validation để debug
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _logger.LogWarning("Đăng ký thất bại do lỗi validation: {Errors}", string.Join(", ", errors));
+            }
+
+            // Trả về view với model để hiển thị lỗi
             return View(model);
         }
 

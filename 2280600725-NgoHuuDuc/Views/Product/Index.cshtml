@@ -269,11 +269,48 @@
                                     <p class="card-text text-muted">
                                         <i class="fas fa-tag me-1"></i>@item.Category.Name
                                     </p>
-                                    <p class="card-text">@(
-                                        item.Description?.Length > 100
-                                        ? item.Description.Substring(0, 100) + "..."
-                                        : item.Description
-                                    )</p>
+                                    @{
+                                        var description = item.Description;
+                                        var sizeTag = "[SIZES]";
+                                        var endSizeTag = "[/SIZES]";
+                                        var reviewTag = "[REVIEWS]";
+                                        var endReviewTag = "[/REVIEWS]";
+
+                                        // Loại bỏ phần kỹ thuật khỏi mô tả
+                                        if (!string.IsNullOrEmpty(description))
+                                        {
+                                            // Loại bỏ phần kích thước
+                                            if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                                            {
+                                                var sizeStartIndex = description.IndexOf(sizeTag);
+                                                var sizeEndIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                                                if (sizeStartIndex < sizeEndIndex)
+                                                {
+                                                    description = description.Remove(sizeStartIndex, sizeEndIndex - sizeStartIndex);
+                                                }
+                                            }
+
+                                            // Loại bỏ phần đánh giá
+                                            if (description.Contains(reviewTag) && description.Contains(endReviewTag))
+                                            {
+                                                var reviewStartIndex = description.IndexOf(reviewTag);
+                                                var reviewEndIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                                                if (reviewStartIndex < reviewEndIndex)
+                                                {
+                                                    description = description.Remove(reviewStartIndex, reviewEndIndex - reviewStartIndex);
+                                                }
+                                            }
+
+                                            // Loại bỏ khoảng trắng thừa
+                                            description = description.Trim();
+                                        }
+
+                                        // Cắt ngắn mô tả nếu quá dài
+                                        var displayDescription = description?.Length > 100
+                                            ? description.Substring(0, 100) + "..."
+                                            : description;
+                                    }
+                                    <p class="card-text">@displayDescription</p>
                                     <p class="card-text price">@item.Price.ToString("N0") VNĐ</p>
                                     <p class="card-text">
                                         Tình trạng:

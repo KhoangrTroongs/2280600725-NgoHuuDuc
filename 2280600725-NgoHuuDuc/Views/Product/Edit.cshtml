@@ -22,8 +22,45 @@
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                @{
+                    var description = Model.Description;
+                    var sizeTag = "[SIZES]";
+                    var endSizeTag = "[/SIZES]";
+                    var reviewTag = "[REVIEWS]";
+                    var endReviewTag = "[/REVIEWS]";
+
+                    // Loại bỏ phần kỹ thuật khỏi mô tả
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        // Loại bỏ phần kích thước
+                        if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                        {
+                            var startIndex = description.IndexOf(sizeTag);
+                            var endIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
+                        }
+
+                        // Loại bỏ phần đánh giá
+                        if (description.Contains(reviewTag) && description.Contains(endReviewTag))
+                        {
+                            var startIndex = description.IndexOf(reviewTag);
+                            var endIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
+                        }
+
+                        // Loại bỏ khoảng trắng thừa
+                        description = description.Trim();
+                    }
+                }
+                <textarea asp-for="Description" class="form-control" rows="3">@description</textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
+                <small class="form-text text-muted">Mô tả sản phẩm. Thông tin về kích thước sẽ được quản lý riêng.</small>
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Price" class="control-label"></label>

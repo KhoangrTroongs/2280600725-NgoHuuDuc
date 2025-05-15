@@ -40,7 +40,7 @@
             <div class="form-group mb-3">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
                 <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <span asp-validation-for="ConfirmPassword" class="text-danger" id="confirmPasswordError"></span>
             </div>
 
             <div class="form-group mb-3">
@@ -71,4 +71,55 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        // Thêm xác thực client-side cho mật khẩu xác nhận
+        $(document).ready(function() {
+            // Kiểm tra mật khẩu xác nhận khi người dùng nhập
+            $("#ConfirmPassword").on("input", function() {
+                var password = $("#Password").val();
+                var confirmPassword = $(this).val();
+
+                if (password !== confirmPassword) {
+                    // Hiển thị lỗi nếu mật khẩu không khớp
+                    $(this).addClass("is-invalid");
+                    $("#confirmPasswordError").text("Mật khẩu xác nhận không khớp với mật khẩu đã nhập.");
+                    $("#confirmPasswordError").show();
+                } else {
+                    // Xóa lỗi nếu mật khẩu khớp
+                    $(this).removeClass("is-invalid");
+                    $("#confirmPasswordError").text("");
+                    $("#confirmPasswordError").hide();
+                }
+            });
+
+            // Kiểm tra lại khi mật khẩu thay đổi
+            $("#Password").on("input", function() {
+                // Kích hoạt sự kiện input trên ConfirmPassword để kiểm tra lại
+                $("#ConfirmPassword").trigger("input");
+            });
+
+            // Kiểm tra trước khi submit form
+            $("form").on("submit", function(e) {
+                var password = $("#Password").val();
+                var confirmPassword = $("#ConfirmPassword").val();
+
+                if (password !== confirmPassword) {
+                    e.preventDefault(); // Ngăn form submit
+                    $("#ConfirmPassword").addClass("is-invalid");
+                    $("#confirmPasswordError").text("Mật khẩu xác nhận không khớp với mật khẩu đã nhập.");
+                    $("#confirmPasswordError").show();
+
+                    // Cuộn đến vị trí lỗi
+                    $('html, body').animate({
+                        scrollTop: $("#ConfirmPassword").offset().top - 100
+                    }, 200);
+
+                    return false;
+                }
+
+                return true;
+            });
+        });
+    </script>
 }

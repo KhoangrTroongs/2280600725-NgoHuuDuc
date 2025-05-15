@@ -36,11 +36,11 @@ namespace NgoHuuDuc_2280600725.Services
         {
             var products = await _productRepository.GetProductsByCategoryAsync(categoryId, pageIndex, pageSize);
             var productDtos = products.Select(MapToProductDTO).ToList();
-            
+
             return new PaginatedList<ProductDTO>(
-                productDtos, 
-                products.TotalItems, 
-                products.PageIndex, 
+                productDtos,
+                products.TotalItems,
+                products.PageIndex,
                 products.PageSize);
         }
 
@@ -67,7 +67,7 @@ namespace NgoHuuDuc_2280600725.Services
             }
 
             await _productRepository.AddProductAsync(product);
-            
+
             // Fetch the product with category to return complete DTO
             var createdProduct = await _productRepository.GetProductByIdAsync(product.Id);
             return MapToProductDTO(createdProduct);
@@ -94,13 +94,13 @@ namespace NgoHuuDuc_2280600725.Services
                 {
                     DeleteImage(product.ImageUrl);
                 }
-                
+
                 // Save new image
                 product.ImageUrl = await SaveImage(image);
             }
 
             await _productRepository.UpdateProductAsync(product);
-            
+
             // Fetch updated product with category
             var updatedProduct = await _productRepository.GetProductByIdAsync(id);
             return MapToProductDTO(updatedProduct);
@@ -134,11 +134,11 @@ namespace NgoHuuDuc_2280600725.Services
         {
             var products = await _productRepository.SearchProductsAsync(keyword, pageIndex, pageSize);
             var productDtos = products.Select(MapToProductDTO).ToList();
-            
+
             return new PaginatedList<ProductDTO>(
-                productDtos, 
-                products.TotalItems, 
-                products.PageIndex, 
+                productDtos,
+                products.TotalItems,
+                products.PageIndex,
                 products.PageSize);
         }
 
@@ -172,11 +172,46 @@ namespace NgoHuuDuc_2280600725.Services
 
         private ProductDTO MapToProductDTO(Product product)
         {
+            var description = product.Description;
+            var sizeTag = "[SIZES]";
+            var endSizeTag = "[/SIZES]";
+            var reviewTag = "[REVIEWS]";
+            var endReviewTag = "[/REVIEWS]";
+
+            // Loại bỏ phần kỹ thuật khỏi mô tả cho API
+            if (!string.IsNullOrEmpty(description))
+            {
+                // Loại bỏ phần kích thước
+                if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                {
+                    var startIndex = description.IndexOf(sizeTag);
+                    var endIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                    if (startIndex < endIndex)
+                    {
+                        description = description.Remove(startIndex, endIndex - startIndex);
+                    }
+                }
+
+                // Loại bỏ phần đánh giá
+                if (description.Contains(reviewTag) && description.Contains(endReviewTag))
+                {
+                    var startIndex = description.IndexOf(reviewTag);
+                    var endIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                    if (startIndex < endIndex)
+                    {
+                        description = description.Remove(startIndex, endIndex - startIndex);
+                    }
+                }
+
+                // Loại bỏ khoảng trắng thừa
+                description = description.Trim();
+            }
+
             return new ProductDTO
             {
                 Id = product.Id,
                 Name = product.Name,
-                Description = product.Description,
+                Description = description, // Sử dụng mô tả đã được xử lý
                 Price = product.Price,
                 ImageUrl = product.ImageUrl,
                 Quantity = product.Quantity,

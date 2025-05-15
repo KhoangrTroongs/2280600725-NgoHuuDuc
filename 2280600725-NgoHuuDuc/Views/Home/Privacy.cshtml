@@ -17,7 +17,7 @@
                 <a href="@Url.Action("Index", "Home")" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory == null ? "active" : "")">
                     Tất cả danh mục
                 </a>
-                
+
 @foreach (var category in ViewBag.Categories)
 {
     <a href="@Url.Action("Index", "Home", new { categoryId = category.Id })" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
@@ -29,7 +29,7 @@
         </div>
         <div class="col-md-9">
             <h2>@(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory.Name)</h2>
-            
+
 @if (!Model.Any())
 {
     <p>Không có sản phẩm nào trong danh mục này.</p>
@@ -54,11 +54,48 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@product.Name</h5>
                         <p class="card-text text-muted">@product.Category.Name</p>
-                        <p class="card-text">@(
-                            product.Description?.Length > 100 
-                            ? product.Description.Substring(0, 100) + "..." 
-                            : product.Description
-                        )</p>
+                        @{
+                            var description = product.Description;
+                            var sizeTag = "[SIZES]";
+                            var endSizeTag = "[/SIZES]";
+                            var reviewTag = "[REVIEWS]";
+                            var endReviewTag = "[/REVIEWS]";
+
+                            // Loại bỏ phần kỹ thuật khỏi mô tả
+                            if (!string.IsNullOrEmpty(description))
+                            {
+                                // Loại bỏ phần kích thước
+                                if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                                {
+                                    var startIndex = description.IndexOf(sizeTag);
+                                    var endIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                                    if (startIndex < endIndex)
+                                    {
+                                        description = description.Remove(startIndex, endIndex - startIndex);
+                                    }
+                                }
+
+                                // Loại bỏ phần đánh giá
+                                if (description.Contains(reviewTag) && description.Contains(endReviewTag))
+                                {
+                                    var startIndex = description.IndexOf(reviewTag);
+                                    var endIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                                    if (startIndex < endIndex)
+                                    {
+                                        description = description.Remove(startIndex, endIndex - startIndex);
+                                    }
+                                }
+
+                                // Loại bỏ khoảng trắng thừa
+                                description = description.Trim();
+                            }
+
+                            // Cắt ngắn mô tả nếu quá dài
+                            var displayDescription = description?.Length > 100
+                                ? description.Substring(0, 100) + "..."
+                                : description;
+                        }
+                        <p class="card-text">@displayDescription</p>
                         <p class="card-text"><strong>@product.Price.ToString("N0") VNĐ</strong></p>
                         <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">Chi tiết</a>
                     </div>

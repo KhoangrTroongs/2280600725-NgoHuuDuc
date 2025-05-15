@@ -23,7 +23,45 @@
             <dd class="col-sm-8">@Model.Price.ToString("C")</dd>
 
             <dt class="col-sm-4">Mô tả</dt>
-            <dd class="col-sm-8">@Model.Description</dd>
+            <dd class="col-sm-8">
+                @{
+                    var description = Model.Description;
+                    var sizeTag = "[SIZES]";
+                    var endSizeTag = "[/SIZES]";
+                    var reviewTag = "[REVIEWS]";
+                    var endReviewTag = "[/REVIEWS]";
+
+                    // Loại bỏ phần kỹ thuật khỏi mô tả
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        // Loại bỏ phần kích thước
+                        if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                        {
+                            var startIndex = description.IndexOf(sizeTag);
+                            var endIndex = description.IndexOf(endSizeTag) + endSizeTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
+                        }
+
+                        // Loại bỏ phần đánh giá
+                        if (description.Contains(reviewTag) && description.Contains(endReviewTag))
+                        {
+                            var startIndex = description.IndexOf(reviewTag);
+                            var endIndex = description.IndexOf(endReviewTag) + endReviewTag.Length;
+                            if (startIndex < endIndex)
+                            {
+                                description = description.Remove(startIndex, endIndex - startIndex);
+                            }
+                        }
+
+                        // Loại bỏ khoảng trắng thừa
+                        description = description.Trim();
+                    }
+                }
+                @description
+            </dd>
 
             <dt class="col-sm-4">Danh mục</dt>
             <dd class="col-sm-8">@Model.Category?.Name</dd>
