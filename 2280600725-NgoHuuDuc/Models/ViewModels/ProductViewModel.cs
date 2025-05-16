@@ -25,6 +25,10 @@ namespace NgoHuuDuc_2280600725.Models.ViewModels
         [Display(Name = "Số lượng")]
         public int Quantity { get; set; } = 0;
 
+        [Display(Name = "Ẩn sản phẩm")]
+        public bool IsHidden { get; set; } = false;
+
+
         [Display(Name = "Hình ảnh")]
         public IFormFile? Image { get; set; }  // Make nullable
 

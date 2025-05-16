@@ -40,21 +40,36 @@ namespace NgoHuuDuc_2280600725.Controllers
 
             try
             {
-                var products = await _productRepository.GetProductsByCategoryAsync(categoryId, pageNumber, pageSize);
+                // Luôn lấy danh sách danh mục trước
+                ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                ViewBag.CategoryId = categoryId;
+                ViewBag.CurrentPage = pageNumber;
+                ViewBag.PageSize = pageSize;
+
+                // Nếu là admin, hiển thị tất cả sản phẩm, ngược lại chỉ hiển thị sản phẩm không bị ẩn
+                var products = User.IsInRole("Administrator")
+                    ? await _productRepository.GetProductsByCategoryAsync(categoryId, pageNumber, pageSize)
+                    : await _productRepository.GetProductsByCategoryAsync(categoryId, pageNumber, pageSize, false);
+
                 if (products == null || products.Count == 0)
                 {
                     _logger.LogWarning("Không tìm thấy sản phẩm nào.");
                     TempData["Error"] = "Không tìm thấy sản phẩm.";
-                }
 
-                ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
-                ViewBag.CategoryId = categoryId;
-                ViewBag.CurrentPage = pageNumber;
-                ViewBag.TotalPages = products.TotalPages;
-                ViewBag.HasPreviousPage = products.HasPreviousPage;
-                ViewBag.HasNextPage = products.HasNextPage;
-                ViewBag.PageSize = pageSize;
-                ViewBag.TotalItems = products.TotalItems;
+                    // Đặt giá trị mặc định cho các thuộc tính phân trang
+                    ViewBag.TotalPages = 1;
+                    ViewBag.HasPreviousPage = false;
+                    ViewBag.HasNextPage = false;
+                    ViewBag.TotalItems = 0;
+                }
+                else
+                {
+                    // Chỉ gán các thuộc tính phân trang khi products không null
+                    ViewBag.TotalPages = products.TotalPages;
+                    ViewBag.HasPreviousPage = products.HasPreviousPage;
+                    ViewBag.HasNextPage = products.HasNextPage;
+                    ViewBag.TotalItems = products.TotalItems;
+                }
 
                 if (categoryId.HasValue)
                 {
@@ -68,7 +83,8 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi lấy danh sách sản phẩm");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách sản phẩm.";
-                return View(null);
+                // Trả về một danh sách rỗng thay vì null
+                return View(new PaginatedList<Product>(new List<Product>(), 0, pageNumber, pageSize));
                 // return RedirectToAction("Index");
             }
         }
@@ -85,15 +101,35 @@ namespace NgoHuuDuc_2280600725.Controllers
 
             try
             {
-                var products = await _productRepository.SearchProductsAsync(keyword, pageNumber, pageSize);
-                ViewBag.SearchKeyword = keyword;
-                ViewBag.ResultCount = products.TotalItems;
+                // Luôn lấy danh sách danh mục trước
                 ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                ViewBag.SearchKeyword = keyword;
                 ViewBag.CurrentPage = pageNumber;
-                ViewBag.TotalPages = products.TotalPages;
-                ViewBag.HasPreviousPage = products.HasPreviousPage;
-                ViewBag.HasNextPage = products.HasNextPage;
                 ViewBag.PageSize = pageSize;
+
+                // Nếu là admin, hiển thị tất cả sản phẩm, ngược lại chỉ hiển thị sản phẩm không bị ẩn
+                var products = User.IsInRole("Administrator")
+                    ? await _productRepository.SearchProductsAsync(keyword, pageNumber, pageSize)
+                    : await _productRepository.SearchProductsAsync(keyword, pageNumber, pageSize, false);
+
+                if (products == null || products.Count == 0)
+                {
+                    _logger.LogWarning("Không tìm thấy sản phẩm nào với từ khóa: {Keyword}", keyword);
+
+                    // Đặt giá trị mặc định cho các thuộc tính phân trang
+                    ViewBag.ResultCount = 0;
+                    ViewBag.TotalPages = 1;
+                    ViewBag.HasPreviousPage = false;
+                    ViewBag.HasNextPage = false;
+                }
+                else
+                {
+                    // Chỉ gán các thuộc tính phân trang khi products không null
+                    ViewBag.ResultCount = products.TotalItems;
+                    ViewBag.TotalPages = products.TotalPages;
+                    ViewBag.HasPreviousPage = products.HasPreviousPage;
+                    ViewBag.HasNextPage = products.HasNextPage;
+                }
 
                 return View(products);
             }
@@ -101,7 +137,16 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi tìm kiếm sản phẩm với từ khóa: {Keyword}", keyword);
                 TempData["Error"] = "Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại sau.";
-                return RedirectToAction("Index");
+                // Trả về một danh sách rỗng thay vì chuyển hướng
+                ViewBag.Categories = await _categoryRepository.GetAllCategoriesAsync();
+                ViewBag.SearchKeyword = keyword;
+                ViewBag.ResultCount = 0;
+                ViewBag.CurrentPage = pageNumber;
+                ViewBag.TotalPages = 1;
+                ViewBag.HasPreviousPage = false;
+                ViewBag.HasNextPage = false;
+                ViewBag.PageSize = pageSize;
+                return View(new PaginatedList<Product>(new List<Product>(), 0, pageNumber, pageSize));
             }
         }
 
@@ -142,6 +187,8 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Description = model.Description,
                 Price = model.Price,
                 Quantity = model.Quantity,
+                IsHidden = false, // Mặc định sản phẩm không bị ẩn
+
                 CategoryId = model.CategoryId,
                 ImageUrl = "/images/no-image.svg",
                 Model3DUrl = null
@@ -220,6 +267,8 @@ namespace NgoHuuDuc_2280600725.Controllers
                 Description = product.Description,
                 Price = product.Price,
                 Quantity = product.Quantity,
+                IsHidden = product.IsHidden,
+
                 CategoryId = product.CategoryId,
                 ExistingImageUrl = product.ImageUrl,
                 ExistingModel3DUrl = product.Model3DUrl,
@@ -256,6 +305,8 @@ namespace NgoHuuDuc_2280600725.Controllers
             product.Description = model.Description;
             product.Price = model.Price;
             product.Quantity = model.Quantity;
+            product.IsHidden = model.IsHidden;
+
             product.CategoryId = model.CategoryId;
 
             if (model.Image != null && model.Image.Length > 0)
@@ -359,6 +410,13 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return NotFound();
             }
 
+            // Kiểm tra xem sản phẩm có còn hàng không
+            if (product.Quantity > 0)
+            {
+                TempData["Error"] = "Không thể xóa sản phẩm còn hàng. Vui lòng ẩn sản phẩm thay vì xóa.";
+                return RedirectToAction(nameof(Index));
+            }
+
             return View(product);
         }
 
@@ -371,6 +429,13 @@ namespace NgoHuuDuc_2280600725.Controllers
             if (product == null)
             {
                 return NotFound();
+            }
+
+            // Kiểm tra xem sản phẩm có còn hàng không
+            if (product.Quantity > 0)
+            {
+                TempData["Error"] = "Không thể xóa sản phẩm còn hàng. Vui lòng ẩn sản phẩm thay vì xóa.";
+                return RedirectToAction(nameof(Index));
             }
 
             // Remove associated image file if it exists
@@ -411,6 +476,13 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 return NotFound();
             }
+
+            // Nếu sản phẩm bị ẩn và người dùng không phải admin, trả về NotFound
+            if (product.IsHidden && !User.IsInRole("Administrator"))
+            {
+                return NotFound();
+            }
+
 
             return View(product);
         }

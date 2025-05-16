@@ -24,6 +24,8 @@ namespace NgoHuuDuc_2280600725.Responsitories
             return await query.ToListAsync();
         }
 
+
+
         public async Task<Product> GetProductByIdAsync(int id)
         {
             return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
@@ -51,6 +53,7 @@ namespace NgoHuuDuc_2280600725.Responsitories
                 existingProduct.Description = product.Description;
                 existingProduct.Price = product.Price;
                 existingProduct.Quantity = product.Quantity;
+
                 existingProduct.CategoryId = product.CategoryId;
                 existingProduct.ImageUrl = product.ImageUrl;
                 existingProduct.Model3DUrl = product.Model3DUrl;
@@ -100,6 +103,8 @@ namespace NgoHuuDuc_2280600725.Responsitories
                 .ToListAsync();
         }
 
+
+
         public async Task<PaginatedList<Product>> GetProductsByCategoryAsync(int? categoryId, int pageIndex, int pageSize)
         {
             var query = _context.Products.Include(p => p.Category).AsQueryable();
@@ -109,6 +114,25 @@ namespace NgoHuuDuc_2280600725.Responsitories
             }
             return await PaginatedList<Product>.CreateAsync(query, pageIndex, pageSize);
         }
+
+        public async Task<PaginatedList<Product>> GetProductsByCategoryAsync(int? categoryId, int pageIndex, int pageSize, bool includeHidden)
+        {
+            var query = _context.Products.Include(p => p.Category).AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (!includeHidden)
+            {
+                query = query.Where(p => !p.IsHidden);
+            }
+
+            return await PaginatedList<Product>.CreateAsync(query, pageIndex, pageSize);
+        }
+
+
 
         public async Task<PaginatedList<Product>> SearchProductsAsync(string keyword, int pageIndex, int pageSize)
         {
@@ -124,5 +148,27 @@ namespace NgoHuuDuc_2280600725.Responsitories
 
             return await PaginatedList<Product>.CreateAsync(query, pageIndex, pageSize);
         }
+
+        public async Task<PaginatedList<Product>> SearchProductsAsync(string keyword, int pageIndex, int pageSize, bool includeHidden)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return await GetProductsByCategoryAsync(null, pageIndex, pageSize, includeHidden);
+
+            keyword = keyword.ToLower();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Name.ToLower().Contains(keyword) ||
+                           p.Description.ToLower().Contains(keyword) ||
+                           p.Category.Name.ToLower().Contains(keyword));
+
+            if (!includeHidden)
+            {
+                query = query.Where(p => !p.IsHidden);
+            }
+
+            return await PaginatedList<Product>.CreateAsync(query, pageIndex, pageSize);
+        }
+
+
     }
 }

@@ -38,6 +38,9 @@ namespace NgoHuuDuc_2280600725.Models
         [Display(Name = "Số lượng")]
         public int Quantity { get; set; } = 0;
 
+        [Display(Name = "Ẩn sản phẩm")]
+        public bool IsHidden { get; set; } = false;
+
         [Required(ErrorMessage = "Danh mục không được để trống")]
         [Display(Name = "Danh mục")]
         public int CategoryId { get; set; }

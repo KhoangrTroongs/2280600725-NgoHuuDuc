@@ -234,6 +234,8 @@ namespace NgoHuuDuc_2280600725.Controllers.API
             }
         }
 
+
+
         // POST: api/BulkProducts/quickEdit
         [HttpPost("quickEdit")]
         public async Task<IActionResult> QuickEdit([FromBody] QuickEditModel model)
@@ -479,6 +481,8 @@ namespace NgoHuuDuc_2280600725.Controllers.API
         public decimal Price { get; set; }
         public int Quantity { get; set; }
     }
+
+
 
     public class ImportResult
     {

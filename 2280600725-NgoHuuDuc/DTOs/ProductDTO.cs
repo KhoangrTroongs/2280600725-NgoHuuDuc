@@ -18,6 +18,8 @@ namespace NgoHuuDuc_2280600725.DTOs
 
         public int Quantity { get; set; } = 0;
 
+        public bool IsHidden { get; set; } = false;
+
         public int CategoryId { get; set; }
 
         public string? CategoryName { get; set; }
@@ -38,6 +40,8 @@ namespace NgoHuuDuc_2280600725.DTOs
         [Required(ErrorMessage = "Số lượng không được để trống")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
         public int Quantity { get; set; } = 0;
+
+        public bool IsHidden { get; set; } = false;
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
         public int CategoryId { get; set; }
@@ -60,6 +64,8 @@ namespace NgoHuuDuc_2280600725.DTOs
         [Required(ErrorMessage = "Số lượng không được để trống")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
         public int Quantity { get; set; } = 0;
+
+
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
         public int CategoryId { get; set; }

@@ -14,12 +14,15 @@
                     <a href="@Url.Action("Index", "Product")" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory == null ? "active" : "")">
                         <i class="fas fa-tags me-2"></i>Tất cả danh mục
                     </a>
-                    @foreach (var category in ViewBag.Categories)
+                    @if (ViewBag.Categories != null)
                     {
-                        <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })"
-                           class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
-                            <i class="fas fa-tag me-2"></i>@category.Name
-                        </a>
+                        foreach (var category in ViewBag.Categories)
+                        {
+                            <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })"
+                               class="list-group-item list-group-item-action @(ViewBag.SelectedCategory?.Id == category.Id ? "active" : "")">
+                                <i class="fas fa-tag me-2"></i>@category.Name
+                            </a>
+                        }
                     }
                 </div>
             </div>
@@ -44,9 +47,9 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>
                     <i class="fas fa-tshirt me-2"></i>
-                    @(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory.Name)
+                    @(ViewBag.SelectedCategory == null ? "Tất cả sản phẩm" : ViewBag.SelectedCategory?.Name ?? "Danh mục không xác định")
                 </span>
-                <span class="badge bg-primary">@ViewBag.TotalItems sản phẩm</span>
+                <span class="badge bg-primary">@(ViewBag.TotalItems ?? 0) sản phẩm</span>
             </div>
             <div class="card-body">
                 @if (User.IsInRole("Administrator"))
@@ -148,6 +151,7 @@
                                         <th>Danh mục</th>
                                         <th>Giá</th>
                                         <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
                                         <th width="150px">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -164,7 +168,7 @@
                                     }
                                     else
                                     {
-                                        int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+                                        int startIndex = ((ViewBag.CurrentPage ?? 1) - 1) * (ViewBag.PageSize ?? 12) + 1;
 
                                         for (int i = 0; i < Model.Count; i++)
                                         {
@@ -210,6 +214,20 @@
                                                     </span>
                                                 </td>
                                                 <td>
+                                                    @if (item.IsHidden)
+                                                    {
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-eye-slash me-1"></i>Đã ẩn
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-eye me-1"></i>Hiển thị
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
                                                     <div class="btn-group btn-group-sm">
                                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-elegant-primary" title="Sửa">
                                                             <i class="fas fa-edit"></i>
@@ -228,6 +246,12 @@
                                                                 title="Sửa nhanh">
                                                             <i class="fas fa-bolt"></i>
                                                         </button>
+                                                        <button type="button" class="btn @(item.IsHidden ? "btn-info" : "btn-warning") toggle-visibility-btn"
+                                                                data-id="@item.Id"
+                                                                data-is-hidden="@item.IsHidden.ToString().ToLower()"
+                                                                title="@(item.IsHidden ? "Hiển thị sản phẩm" : "Ẩn sản phẩm")">
+                                                            <i class="fas @(item.IsHidden ? "fa-eye" : "fa-eye-slash")"></i>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -242,7 +266,7 @@
                 {
                     <div class="row">
                     @{
-                        int startIndex = (ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1;
+                        int startIndex = ((ViewBag.CurrentPage ?? 1) - 1) * (ViewBag.PageSize ?? 12) + 1;
                     }
 
                     @for (int i = 0; i < Model.Count; i++)
@@ -546,35 +570,296 @@
                     }
                 });
 
-                // Bulk export
+                // Tạo modal xuất Excel
+                if ($('#exportExcelModal').length === 0) {
+                    var exportModalHtml = `
+                    <div class="modal fade" id="exportExcelModal" tabindex="-1" aria-labelledby="exportExcelModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exportExcelModalLabel">Xuất sản phẩm ra Excel</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Lọc theo danh mục</label>
+                                                <select class="form-select" id="exportCategoryFilter">
+                                                    <option value="" selected>Tất cả danh mục</option>
+                                                    @if (ViewBag.Categories != null)
+                                                    {
+                                                        foreach (var category in ViewBag.Categories)
+                                                        {
+                                                            <option value="@category.Id">@category.Name</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Lọc theo tình trạng</label>
+                                                <select class="form-select" id="exportStockFilter">
+                                                    <option value="" selected>Tất cả tình trạng</option>
+                                                    <option value="in-stock">Còn hàng</option>
+                                                    <option value="out-of-stock">Hết hàng</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Sắp xếp theo</label>
+                                                <select class="form-select" id="exportSortBy">
+                                                    <option value="id-asc" selected>ID (tăng dần)</option>
+                                                    <option value="id-desc">ID (giảm dần)</option>
+                                                    <option value="name-asc">Tên sản phẩm (A-Z)</option>
+                                                    <option value="name-desc">Tên sản phẩm (Z-A)</option>
+                                                    <option value="price-asc">Giá (thấp đến cao)</option>
+                                                    <option value="price-desc">Giá (cao đến thấp)</option>
+                                                    <option value="stock-asc">Tồn kho (thấp đến cao)</option>
+                                                    <option value="stock-desc">Tồn kho (cao đến thấp)</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Lọc theo giá</label>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <input type="number" class="form-control" id="exportPriceMin" placeholder="Giá tối thiểu">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="number" class="form-control" id="exportPriceMax" placeholder="Giá tối đa">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thêm trường ẩn để lưu trữ tùy chọn xuất mặc định -->
+                                            <input type="hidden" id="exportOption" value="all">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="button" class="btn btn-success" id="exportExcelSubmit">
+                                        <i class="fas fa-file-export me-1"></i>Xuất Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    $('body').append(exportModalHtml);
+
+                    // Xử lý sự kiện xuất Excel
+                    $('#exportExcelSubmit').click(function() {
+                        // Sử dụng giá trị mặc định 'all' cho exportOption
+                        var exportOption = $('#exportOption').val();
+                        var categoryId = $('#exportCategoryFilter').val();
+                        var stockFilter = $('#exportStockFilter').val();
+                        var sortBy = $('#exportSortBy').val();
+                        var priceMin = $('#exportPriceMin').val();
+                        var priceMax = $('#exportPriceMax').val();
+
+                        // Tạo URL với tham số
+                        var url = '/Excel/ExportProductsSimple?';
+
+                        // Thêm các tùy chọn lọc và sắp xếp
+                        if (categoryId) {
+                            url += '&categoryId=' + categoryId;
+                        }
+
+                        if (stockFilter) {
+                            url += '&stockFilter=' + stockFilter;
+                        }
+
+                        if (sortBy) {
+                            url += '&sortBy=' + sortBy;
+                        }
+
+                        if (priceMin) {
+                            url += '&priceMin=' + priceMin;
+                        }
+
+                        if (priceMax) {
+                            url += '&priceMax=' + priceMax;
+                        }
+
+                        // Đóng modal
+                        $('#exportExcelModal').modal('hide');
+
+                        // Hiển thị thông báo đang xuất Excel
+                        var toastHtml = `
+                        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                            <div id="exportToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header bg-success text-white">
+                                    <i class="fas fa-file-excel me-2"></i>
+                                    <strong class="me-auto">Xuất Excel</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">
+                                    Đang xuất dữ liệu ra file Excel...
+                                </div>
+                            </div>
+                        </div>`;
+
+                        // Thêm toast vào body nếu chưa tồn tại
+                        if ($('#exportToast').length === 0) {
+                            $('body').append(toastHtml);
+                        }
+
+                        // Hiển thị toast
+                        var exportToast = new bootstrap.Toast(document.getElementById('exportToast'));
+                        exportToast.show();
+
+                        // Sử dụng AJAX để kiểm tra trước khi mở URL
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(response) {
+                                // Nếu có lỗi, hiển thị thông báo
+                                if (response && response.success === false) {
+                                    // Ẩn toast thành công
+                                    exportToast.hide();
+
+                                    // Hiển thị thông báo lỗi
+                                    var errorToastHtml = `
+                                    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                                        <div id="exportErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                            <div class="toast-header bg-danger text-white">
+                                                <i class="fas fa-exclamation-circle me-2"></i>
+                                                <strong class="me-auto">Lỗi xuất Excel</strong>
+                                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
+                                            <div class="toast-body">
+                                                ${response.message}
+                                            </div>
+                                        </div>
+                                    </div>`;
+
+                                    // Thêm toast vào body nếu chưa tồn tại
+                                    if ($('#exportErrorToast').length === 0) {
+                                        $('body').append(errorToastHtml);
+                                    } else {
+                                        $('#exportErrorToast .toast-body').text(response.message);
+                                    }
+
+                                    // Hiển thị toast lỗi
+                                    var errorToast = new bootstrap.Toast(document.getElementById('exportErrorToast'));
+                                    errorToast.show();
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Nếu không phải JSON response, đây là file Excel, mở trong tab mới
+                                if (xhr.status === 200) {
+                                    window.open(url, '_blank');
+                                } else {
+                                    // Hiển thị thông báo lỗi
+                                    alert('Có lỗi xảy ra khi xuất Excel: ' + error);
+                                }
+                            }
+                        });
+                    });
+                }
+
+                // Bulk export button click
                 $('#bulkExportBtn').click(function(e) {
                     e.preventDefault();
+
+                    // Kiểm tra xem có sản phẩm nào được chọn không
                     var selectedIds = [];
                     $('.product-checkbox:checked').each(function() {
                         selectedIds.push($(this).val());
                     });
 
-                    // Nếu không có sản phẩm nào được chọn, xuất tất cả sản phẩm
-                    if (selectedIds.length === 0) {
-                        // Lấy tất cả ID sản phẩm hiển thị (sau khi lọc nếu có)
-                        $('tbody tr:visible').each(function() {
-                            var id = $(this).find('.product-checkbox').val();
-                            if (id) {
-                                selectedIds.push(id);
+                    // Nếu có sản phẩm được chọn, sử dụng danh sách đó
+                    if (selectedIds.length > 0) {
+                        $('#exportOption').val('selected');
+
+                        // Tạo URL trực tiếp và mở tab mới
+                        var url = '/Excel/ExportProductsSimple?ids=' + selectedIds.join(',');
+
+                        // Hiển thị thông báo đang xuất Excel
+                        var toastHtml = `
+                        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                            <div id="exportToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header bg-success text-white">
+                                    <i class="fas fa-file-excel me-2"></i>
+                                    <strong class="me-auto">Xuất Excel</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">
+                                    Đang xuất ${selectedIds.length} sản phẩm đã chọn ra file Excel...
+                                </div>
+                            </div>
+                        </div>`;
+
+                        // Thêm toast vào body nếu chưa tồn tại
+                        if ($('#exportToast').length === 0) {
+                            $('body').append(toastHtml);
+                        }
+
+                        // Hiển thị toast
+                        var exportToast = new bootstrap.Toast(document.getElementById('exportToast'));
+                        exportToast.show();
+
+                        // Sử dụng AJAX để kiểm tra trước khi mở URL
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(response) {
+                                // Nếu có lỗi, hiển thị thông báo
+                                if (response && response.success === false) {
+                                    // Ẩn toast thành công
+                                    exportToast.hide();
+
+                                    // Hiển thị thông báo lỗi
+                                    var errorToastHtml = `
+                                    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                                        <div id="exportErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                            <div class="toast-header bg-danger text-white">
+                                                <i class="fas fa-exclamation-circle me-2"></i>
+                                                <strong class="me-auto">Lỗi xuất Excel</strong>
+                                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
+                                            <div class="toast-body">
+                                                ${response.message}
+                                            </div>
+                                        </div>
+                                    </div>`;
+
+                                    // Thêm toast vào body nếu chưa tồn tại
+                                    if ($('#exportErrorToast').length === 0) {
+                                        $('body').append(errorToastHtml);
+                                    } else {
+                                        $('#exportErrorToast .toast-body').text(response.message);
+                                    }
+
+                                    // Hiển thị toast lỗi
+                                    var errorToast = new bootstrap.Toast(document.getElementById('exportErrorToast'));
+                                    errorToast.show();
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Nếu không phải JSON response, đây là file Excel, mở trong tab mới
+                                if (xhr.status === 200) {
+                                    window.open(url, '_blank');
+                                } else {
+                                    // Hiển thị thông báo lỗi
+                                    alert('Có lỗi xảy ra khi xuất Excel: ' + error);
+                                }
                             }
                         });
-
-                        if (selectedIds.length === 0) {
-                            alert('Không có sản phẩm nào để xuất Excel.');
-                            return;
-                        }
+                    } else {
+                        // Nếu không có sản phẩm nào được chọn, hiển thị modal để lọc
+                        $('#exportOption').val('all');
+                        var exportExcelModal = new bootstrap.Modal(document.getElementById('exportExcelModal'));
+                        exportExcelModal.show();
                     }
-
-                    // Tạo URL với tham số ids
-                    var url = '/Excel/ExportProducts?ids=' + selectedIds.join(',');
-
-                    // Mở URL trong tab mới để tải file
-                    window.open(url, '_blank');
                 });
 
                 // Search functionality
@@ -804,36 +1089,91 @@
                 if ($('#importExcelModal').length === 0) {
                     var importModalHtml = `
                     <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="importExcelModalLabel">Nhập sản phẩm từ Excel</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form id="importExcelForm" enctype="multipart/form-data">
-                                        <div class="mb-3">
-                                            <label for="excelFile" class="form-label">Chọn file Excel</label>
-                                            <input type="file" class="form-control" id="excelFile" accept=".xlsx">
-                                            <div class="form-text">Chỉ hỗ trợ file Excel (.xlsx)</div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <form id="importExcelForm" enctype="multipart/form-data">
+                                                <div class="mb-3">
+                                                    <label for="excelFile" class="form-label">Chọn file Excel</label>
+                                                    <input type="file" class="form-control" id="excelFile" accept=".xlsx">
+                                                    <div class="form-text">Chỉ hỗ trợ file Excel (.xlsx)</div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Tùy chọn nhập</label>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="updateExisting" checked>
+                                                        <label class="form-check-label" for="updateExisting">
+                                                            Cập nhật sản phẩm đã tồn tại
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skipErrors" checked>
+                                                        <label class="form-check-label" for="skipErrors">
+                                                            Bỏ qua các dòng lỗi
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="alert alert-info">
+                                                    <h6><i class="fas fa-info-circle me-2"></i>Hướng dẫn</h6>
+                                                    <ol class="mb-0">
+                                                        <li>Tải <a href="/Excel/DownloadTemplate" target="_blank">file mẫu Excel</a></li>
+                                                        <li>Điền thông tin sản phẩm vào file</li>
+                                                        <li>Tải lên và nhập dữ liệu</li>
+                                                    </ol>
+                                                </div>
+                                            </form>
                                         </div>
-                                    </form>
-                                    <div id="importResult" class="d-none">
-                                        <div class="alert alert-info">
-                                            <h6>Kết quả nhập</h6>
-                                            <p>Tổng số dòng: <span id="totalRows">0</span></p>
-                                            <p>Thành công: <span id="successCount">0</span></p>
-                                            <p>Lỗi: <span id="errorCount">0</span></p>
-                                        </div>
-                                        <div id="errorList" class="d-none">
-                                            <h6>Danh sách lỗi:</h6>
-                                            <ul id="errorListItems" class="text-danger"></ul>
+                                        <div class="col-md-6">
+                                            <div id="importResult" class="d-none">
+                                                <div class="alert alert-info">
+                                                    <h6><i class="fas fa-chart-bar me-2"></i>Kết quả nhập</h6>
+                                                    <div class="progress mb-3">
+                                                        <div id="importProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                                    </div>
+                                                    <div class="row text-center">
+                                                        <div class="col-4">
+                                                            <div class="h4" id="totalRows">0</div>
+                                                            <div class="small text-muted">Tổng số dòng</div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="h4 text-success" id="successCount">0</div>
+                                                            <div class="small text-muted">Thành công</div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="h4 text-danger" id="errorCount">0</div>
+                                                            <div class="small text-muted">Lỗi</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="errorList" class="d-none">
+                                                    <div class="card">
+                                                        <div class="card-header bg-danger text-white">
+                                                            <i class="fas fa-exclamation-triangle me-2"></i>Danh sách lỗi
+                                                        </div>
+                                                        <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                                            <ul id="errorListItems" class="text-danger mb-0"></ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="importPlaceholder" class="text-center py-5">
+                                                <i class="fas fa-file-excel fa-4x text-muted mb-3"></i>
+                                                <p class="text-muted">Chọn file Excel và nhấn "Nhập dữ liệu" để bắt đầu</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                    <button type="button" class="btn btn-primary" id="importExcelSubmit">Nhập dữ liệu</button>
+                                    <button type="button" class="btn btn-primary" id="importExcelSubmit">
+                                        <i class="fas fa-file-import me-1"></i>Nhập dữ liệu
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -845,6 +1185,7 @@
                     $('#importExcelBtn').click(function(e) {
                         e.preventDefault();
                         $('#importResult').addClass('d-none');
+                        $('#importPlaceholder').removeClass('d-none');
                         $('#errorList').addClass('d-none');
                         $('#excelFile').val('');
                         var importExcelModal = new bootstrap.Modal(document.getElementById('importExcelModal'));
@@ -860,6 +1201,12 @@
 
                         var formData = new FormData();
                         formData.append('file', fileInput.files[0]);
+                        formData.append('updateExisting', $('#updateExisting').prop('checked'));
+                        formData.append('skipErrors', $('#skipErrors').prop('checked'));
+
+                        $('#importPlaceholder').addClass('d-none');
+                        $('#importResult').removeClass('d-none');
+                        $('#importProgressBar').css('width', '0%');
 
                         $.ajax({
                             url: '/Excel/ImportProducts',
@@ -871,14 +1218,22 @@
                                 $('#importExcelSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
                             },
                             success: function(result) {
-                                $('#importExcelSubmit').prop('disabled', false).text('Nhập dữ liệu');
+                                $('#importExcelSubmit').prop('disabled', false).html('<i class="fas fa-file-import me-1"></i>Nhập dữ liệu');
 
                                 if (result.success) {
-                                    $('#importResult').removeClass('d-none');
+                                    // Cập nhật thông tin kết quả
                                     $('#totalRows').text(result.totalRows || 0);
                                     $('#successCount').text(result.successCount);
                                     $('#errorCount').text(result.errorCount);
 
+                                    // Cập nhật thanh tiến trình
+                                    var progressPercent = 0;
+                                    if (result.totalRows > 0) {
+                                        progressPercent = Math.round((result.successCount / result.totalRows) * 100);
+                                    }
+                                    $('#importProgressBar').css('width', progressPercent + '%');
+
+                                    // Hiển thị danh sách lỗi nếu có
                                     if (result.errorCount > 0) {
                                         $('#errorList').removeClass('d-none');
                                         $('#errorListItems').empty();
@@ -890,24 +1245,151 @@
                                         $('#errorList').addClass('d-none');
                                     }
 
-                                    // Nếu nhập thành công, reload sau 3 giây
+                                    // Hiển thị thông báo thành công
                                     if (result.successCount > 0) {
+                                        // Thêm thông báo thành công
+                                        var successMessage = $('<div class="alert alert-success mt-3">' +
+                                            '<i class="fas fa-check-circle me-2"></i>' +
+                                            'Đã nhập thành công ' + result.successCount + ' sản phẩm. Trang sẽ tải lại sau 3 giây.' +
+                                            '</div>');
+
+                                        $('#importResult').append(successMessage);
+
+                                        // Reload sau 3 giây
                                         setTimeout(function() {
                                             location.reload();
                                         }, 3000);
                                     }
                                 } else {
-                                    alert(result.message);
+                                    // Hiển thị thông báo lỗi
+                                    var errorMessage = $('<div class="alert alert-danger mt-3">' +
+                                        '<i class="fas fa-exclamation-circle me-2"></i>' +
+                                        result.message +
+                                        '</div>');
+
+                                    $('#importResult').append(errorMessage);
                                 }
                             },
                             error: function(xhr, status, error) {
-                                $('#importExcelSubmit').prop('disabled', false).text('Nhập dữ liệu');
-                                alert('Có lỗi xảy ra khi nhập Excel: ' + error);
+                                $('#importExcelSubmit').prop('disabled', false).html('<i class="fas fa-file-import me-1"></i>Nhập dữ liệu');
+
+                                // Hiển thị thông báo lỗi
+                                var errorMessage = $('<div class="alert alert-danger mt-3">' +
+                                    '<i class="fas fa-exclamation-circle me-2"></i>' +
+                                    'Có lỗi xảy ra khi nhập Excel: ' + error +
+                                    '</div>');
+
+                                $('#importResult').append(errorMessage);
                             }
                         });
                     });
                 }
             }
+
+            // Lưu trữ trạng thái của các nút ẩn/hiện
+            var productVisibilityState = {};
+
+            // Khởi tạo trạng thái ban đầu cho các nút
+            $('.toggle-visibility-btn').each(function() {
+                var $btn = $(this);
+                var productId = $btn.data('id');
+                var isHidden = $btn.attr('data-is-hidden') === 'true';
+                productVisibilityState[productId] = isHidden;
+                console.log('Khởi tạo trạng thái sản phẩm ID ' + productId + ': ' + (isHidden ? 'Đã ẩn' : 'Hiển thị'));
+            });
+
+            // Xử lý sự kiện ẩn/hiện sản phẩm
+            $(document).on('click', '.toggle-visibility-btn', function() {
+                var btn = $(this);
+                var id = btn.data('id');
+                var currentIsHidden = productVisibilityState[id];
+
+                // Log để debug
+                console.log('Nút ẩn/hiện sản phẩm ID ' + id + ' được click. Trạng thái hiện tại: ' + (currentIsHidden ? 'Đã ẩn' : 'Hiển thị'));
+
+                // Hiển thị thông báo xác nhận
+                if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái hiển thị của sản phẩm này?')) {
+                    // Gửi yêu cầu API để thay đổi trạng thái
+                    $.ajax({
+                        url: '/api/ProductVisibility/toggle',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            id: id
+                        }),
+                        success: function(response) {
+                            if (response.success) {
+                                // Cập nhật UI
+                                var row = btn.closest('tr');
+                                var statusCell = row.find('td:nth-child(8)'); // Cột trạng thái (cột thứ 8)
+                                var isHidden = response.product.isHidden;
+
+                                // Cập nhật UI dựa trên trạng thái mới từ server
+                                if (isHidden) {
+                                    // Sản phẩm đã bị ẩn
+                                    statusCell.html('<span class="badge bg-warning text-dark"><i class="fas fa-eye-slash me-1"></i>Đã ẩn</span>');
+
+                                    // Cập nhật nút thành "Hiển thị sản phẩm"
+                                    btn.removeClass('btn-warning').addClass('btn-info');
+                                    btn.attr('title', 'Hiển thị sản phẩm');
+                                    btn.find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+                                } else {
+                                    // Sản phẩm đang hiển thị
+                                    statusCell.html('<span class="badge bg-info"><i class="fas fa-eye me-1"></i>Hiển thị</span>');
+
+                                    // Cập nhật nút thành "Ẩn sản phẩm"
+                                    btn.removeClass('btn-info').addClass('btn-warning');
+                                    btn.attr('title', 'Ẩn sản phẩm');
+                                    btn.find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+                                }
+
+                                // Log để debug
+                                console.log('Cập nhật trạng thái sản phẩm ID ' + id + ' thành ' + (isHidden ? 'Đã ẩn' : 'Hiển thị'));
+
+                                // Cập nhật trạng thái trong biến JavaScript
+                                productVisibilityState[id] = isHidden;
+                                console.log('Đã cập nhật trạng thái sản phẩm ID ' + id + ' trong biến JavaScript thành ' + (isHidden ? 'Đã ẩn' : 'Hiển thị'));
+
+                                // Cập nhật thuộc tính data-is-hidden trong DOM (chỉ để tham khảo)
+                                btn.attr('data-is-hidden', isHidden.toString().toLowerCase());
+
+                                // Hiển thị thông báo thành công
+                                var toastHtml = `
+                                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                                    <div id="visibilityToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="toast-header bg-success text-white">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <strong class="me-auto">Thành công</strong>
+                                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                        </div>
+                                        <div class="toast-body">
+                                            ${response.message}
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                                // Thêm toast vào body nếu chưa tồn tại
+                                if ($('#visibilityToast').length === 0) {
+                                    $('body').append(toastHtml);
+                                } else {
+                                    $('#visibilityToast .toast-body').text(response.message);
+                                }
+
+                                // Hiển thị toast
+                                var visibilityToast = new bootstrap.Toast(document.getElementById('visibilityToast'));
+                                visibilityToast.show();
+                            } else {
+                                alert('Lỗi: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Có lỗi xảy ra khi cập nhật trạng thái sản phẩm: ' + error);
+                        }
+                    });
+                }
+            });
         });
     </script>
+
+
 }

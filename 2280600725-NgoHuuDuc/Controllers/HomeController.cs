@@ -33,7 +33,10 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return RedirectToAction(nameof(Dashboard));
             }
 
-            var products = _context.Products.Include(p => p.Category).AsQueryable();
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Where(p => !p.IsHidden) // Chỉ hiển thị sản phẩm không bị ẩn
+                .AsQueryable();
 
             if (categoryId.HasValue)
             {

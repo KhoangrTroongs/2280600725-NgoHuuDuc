@@ -1,15 +1,18 @@
 @{
-    var prevDisabled = !ViewBag.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !ViewBag.HasNextPage ? "disabled" : "";
-    var totalPages = ViewBag.TotalPages;
-    var currentPage = ViewBag.CurrentPage;
-    var controller = ViewContext.RouteData.Values["controller"].ToString();
-    var action = ViewContext.RouteData.Values["action"].ToString();
+    // Xử lý các trường hợp null
+    var hasPrePage = ViewBag.HasPreviousPage ?? false;
+    var hasNextPage = ViewBag.HasNextPage ?? false;
+    var prevDisabled = !hasPrePage ? "disabled" : "";
+    var nextDisabled = !hasNextPage ? "disabled" : "";
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
 
     // Determine route values based on the current action
     var routeValues = new Dictionary<string, string>();
 
-    if (action == "Search")
+    if (action == "Search" && ViewBag.SearchKeyword != null)
     {
         routeValues.Add("keyword", ViewBag.SearchKeyword.ToString());
     }
@@ -100,6 +103,6 @@
     </nav>
 
     <div class="text-center text-muted mb-4">
-        <small>Hiển thị @ViewBag.PageSize sản phẩm trên mỗi trang | Tổng cộng @ViewBag.TotalItems sản phẩm</small>
+        <small>Hiển thị @(ViewBag.PageSize ?? 0) sản phẩm trên mỗi trang | Tổng cộng @(ViewBag.TotalItems ?? 0) sản phẩm</small>
     </div>
 }

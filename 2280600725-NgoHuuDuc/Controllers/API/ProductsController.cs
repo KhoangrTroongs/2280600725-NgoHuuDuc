@@ -27,7 +27,10 @@ namespace NgoHuuDuc_2280600725.Controllers.API
         {
             try
             {
-                var products = await _productService.GetProductsByCategoryAsync(categoryId);
+                // Nếu là admin, hiển thị tất cả sản phẩm, ngược lại chỉ hiển thị sản phẩm không bị ẩn
+                var products = User.IsInRole("Administrator")
+                    ? await _productService.GetProductsByCategoryAsync(categoryId)
+                    : await _productService.GetProductsByCategoryAsync(categoryId, false);
                 return Ok(ResponseDTO<IEnumerable<ProductDTO>>.Success(products));
             }
             catch (Exception ex)
@@ -46,7 +49,10 @@ namespace NgoHuuDuc_2280600725.Controllers.API
         {
             try
             {
-                var products = await _productService.GetProductsByCategoryAsync(categoryId, pageIndex, pageSize);
+                // Nếu là admin, hiển thị tất cả sản phẩm, ngược lại chỉ hiển thị sản phẩm không bị ẩn
+                var products = User.IsInRole("Administrator")
+                    ? await _productService.GetProductsByCategoryAsync(categoryId, pageIndex, pageSize)
+                    : await _productService.GetProductsByCategoryAsync(categoryId, pageIndex, pageSize, false);
                 return Ok(ResponseDTO<PaginatedList<ProductDTO>>.Success(products));
             }
             catch (Exception ex)
@@ -67,6 +73,15 @@ namespace NgoHuuDuc_2280600725.Controllers.API
                 {
                     return NotFound(ResponseDTO<ProductDTO>.Fail("Product not found."));
                 }
+
+                // Nếu sản phẩm bị ẩn và người dùng không phải admin, trả về NotFound
+                if (product.IsHidden && !User.IsInRole("Administrator"))
+                {
+                    return NotFound(ResponseDTO<ProductDTO>.Fail("Product not found."));
+                }
+
+
+
                 return Ok(ResponseDTO<ProductDTO>.Success(product));
             }
             catch (Exception ex)
@@ -85,7 +100,10 @@ namespace NgoHuuDuc_2280600725.Controllers.API
         {
             try
             {
-                var products = await _productService.SearchProductsAsync(keyword, pageIndex, pageSize);
+                // Nếu là admin, hiển thị tất cả sản phẩm, ngược lại chỉ hiển thị sản phẩm không bị ẩn
+                var products = User.IsInRole("Administrator")
+                    ? await _productService.SearchProductsAsync(keyword, pageIndex, pageSize)
+                    : await _productService.SearchProductsAsync(keyword, pageIndex, pageSize, false);
                 return Ok(ResponseDTO<PaginatedList<ProductDTO>>.Success(products));
             }
             catch (Exception ex)
