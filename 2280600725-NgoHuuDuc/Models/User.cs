@@ -47,5 +47,15 @@ namespace NgoHuuDuc_2280600725.Models
         [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
         [Display(Name = "Số điện thoại")]
         public override string? PhoneNumber { get; set; }
+
+        // External login properties
+        [Display(Name = "Facebook ID")]
+        public string? FacebookId { get; set; }
+
+        [Display(Name = "Google ID")]
+        public string? GoogleId { get; set; }
+
+        [Display(Name = "External Provider")]
+        public string? ExternalProvider { get; set; }
     }
 }

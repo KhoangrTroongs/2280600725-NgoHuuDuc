@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NgoHuuDuc_2280600725.Data;
 using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Responsitories;
 using NgoHuuDuc_2280600725.Services;
 using NgoHuuDuc_2280600725.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -19,7 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    options.UseSqlServer(connectionString);
+    // Suppress the pending model changes warning
+    options.ConfigureWarnings(warnings =>
+        warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -93,6 +100,38 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"] ?? "https://localhost:5001",
         ValidAudience = builder.Configuration["JWT:ValidAudience"] ?? "https://localhost:5001",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? "DefaultSecretKeyWithAtLeast32Characters!"))
+    };
+})
+// Add Facebook authentication
+.AddFacebook(options =>
+{
+    options.AppId = builder.Configuration["Authentication:Facebook:AppId"] ?? "your-facebook-app-id";
+    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ?? "your-facebook-app-secret";
+    options.CallbackPath = "/signin-facebook";
+    options.SaveTokens = true;
+})
+// Add Google authentication
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "your-google-client-id";
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "your-google-client-secret";
+    options.CallbackPath = "/signin-google";
+    options.SaveTokens = true;
+
+    // Thêm các tùy chọn bổ sung để debug
+    options.Events = new OAuthEvents
+    {
+        OnRedirectToAuthorizationEndpoint = context =>
+        {
+            Console.WriteLine($"Redirecting to: {context.RedirectUri}");
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        },
+        OnRemoteFailure = context =>
+        {
+            Console.WriteLine($"Remote failure: {context.Failure?.Message}");
+            return Task.CompletedTask;
+        }
     };
 });
 

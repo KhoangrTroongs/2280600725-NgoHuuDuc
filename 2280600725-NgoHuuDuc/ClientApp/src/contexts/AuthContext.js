@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 export const AuthContext = createContext();
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.data.isSuccess) {
-        const { token, userId, userName } = response.data.data;
+        const { token } = response.data.data;
         localStorage.setItem('token', token);
         setToken(token);
         return { success: true };
@@ -51,9 +51,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
       };
     }
   };
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/api/Auth/register', userData);
 
       if (response.data.isSuccess) {
-        const { token, userId, userName } = response.data.data;
+        const { token } = response.data.data;
         localStorage.setItem('token', token);
         setToken(token);
         return { success: true };
@@ -72,9 +72,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Register error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.'
       };
     }
   };
@@ -110,22 +110,68 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Update profile error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Cập nhật thông tin thất bại. Vui lòng thử lại.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Cập nhật thông tin thất bại. Vui lòng thử lại.'
       };
     }
   };
 
-  const value = {
+  const externalLogin = async (provider, providerKey, email, name, photoUrl) => {
+    try {
+      const response = await axios.post('/api/Auth/external-login', {
+        provider,
+        providerKey,
+        email,
+        name,
+        photoUrl
+      });
+
+      if (response.data.isSuccess) {
+        const { token } = response.data.data;
+        localStorage.setItem('token', token);
+        setToken(token);
+        return { success: true };
+      } else {
+        return { success: false, message: response.data.message };
+      }
+    } catch (error) {
+      console.error('External login error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Đăng nhập bằng tài khoản ngoài thất bại. Vui lòng thử lại.'
+      };
+    }
+  };
+
+  const getExternalLoginUrl = async (provider) => {
+    try {
+      const response = await axios.get(`/api/Auth/external-login-token/${provider}`);
+      if (response.data.isSuccess) {
+        return { success: true, url: response.data.data };
+      } else {
+        return { success: false, message: response.data.message };
+      }
+    } catch (error) {
+      console.error('Get external login URL error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Không thể lấy URL đăng nhập bằng tài khoản ngoài.'
+      };
+    }
+  };
+
+  const value = useMemo(() => ({
     currentUser,
     loading,
     login,
     register,
     logout,
     updateProfile,
+    externalLogin,
+    getExternalLoginUrl,
     isAuthenticated: !!token
-  };
+  }), [currentUser, loading, token]);
 
   return (
     <AuthContext.Provider value={value}>

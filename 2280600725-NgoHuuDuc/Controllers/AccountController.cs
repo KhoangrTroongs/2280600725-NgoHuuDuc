@@ -7,8 +7,11 @@ using NgoHuuDuc_2280600725.Models;
 using NgoHuuDuc_2280600725.Models.AccountViewModels;
 using NgoHuuDuc_2280600725.Models.ViewModels;
 using NgoHuuDuc_2280600725.Responsitories;
+using NgoHuuDuc_2280600725.Services.Interfaces;
+using NgoHuuDuc_2280600725.DTOs;
 using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 
 namespace NgoHuuDuc_2280600725.Controllers
 {
@@ -17,13 +20,22 @@ namespace NgoHuuDuc_2280600725.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<AccountController> _logger;
+        private readonly IAuthService _authService;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AccountController(
             IUserRepository userRepository,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IAuthService authService,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager)
         {
             _userRepository = userRepository;
             _logger = logger;
+            _authService = authService;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         // GET: /Account/Login
@@ -622,6 +634,69 @@ namespace NgoHuuDuc_2280600725.Controllers
             {
                 _logger.LogInformation("Redirecting to Home/Index");
                 return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+        }
+
+        // GET: /Account/ExternalLogin
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            // Lưu URL trả về để chuyển hướng sau khi đăng nhập
+            ViewData["ReturnUrl"] = returnUrl;
+
+            // Cấu hình URL callback sau khi xác thực với nhà cung cấp bên ngoài
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+
+            // Cấu hình thuộc tính xác thực cho nhà cung cấp bên ngoài
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
+            // Chuyển hướng đến nhà cung cấp bên ngoài để đăng nhập
+            return Challenge(properties, provider);
+        }
+
+        // GET: /Account/ExternalLoginCallback
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            // Nếu có lỗi từ nhà cung cấp bên ngoài
+            if (remoteError != null)
+            {
+                _logger.LogError($"Lỗi từ nhà cung cấp bên ngoài: {remoteError}");
+                ModelState.AddModelError(string.Empty, $"Lỗi từ nhà cung cấp đăng nhập: {remoteError}");
+                return View("Login");
+            }
+
+            // Lấy thông tin đăng nhập từ nhà cung cấp bên ngoài
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                _logger.LogWarning("Không thể lấy thông tin đăng nhập từ nhà cung cấp bên ngoài.");
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Xử lý đăng nhập bằng tài khoản ngoài
+            var result = await _authService.HandleExternalLoginCallbackAsync(info);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation("Đăng nhập thành công bằng tài khoản {Provider}.", info.LoginProvider);
+
+                // Nếu đây là API request, trả về token JWT
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, token = result.Token });
+                }
+
+                // Nếu không, chuyển hướng đến URL trả về
+                return RedirectToLocal(returnUrl);
+            }
+            else
+            {
+                _logger.LogWarning("Đăng nhập thất bại bằng tài khoản {Provider}: {Message}", info.LoginProvider, result.Message);
+                ModelState.AddModelError(string.Empty, result.Message ?? "Đăng nhập không thành công.");
+                return View("Login");
             }
         }
     }

@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { Container, Form, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Form, Button, Alert, Card, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
+import { FaFacebook, FaGoogle } from 'react-icons/fa';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,11 +10,11 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get the return URL from location state or default to home page
   const from = location.state?.from?.pathname || '/';
 
@@ -21,7 +22,7 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       const result = await login(email, password, rememberMe);
       if (result.success) {
@@ -37,6 +38,16 @@ const Login = () => {
     }
   };
 
+  const handleSocialLogin = (provider) => {
+    try {
+      // Redirect to the external login URL
+      window.location.href = `/Account/ExternalLogin?provider=${provider}&returnUrl=${encodeURIComponent(from)}`;
+    } catch (error) {
+      setError('Đã xảy ra lỗi khi đăng nhập bằng tài khoản ngoài. Vui lòng thử lại sau.');
+      console.error(`${provider} login error:`, error);
+    }
+  };
+
   return (
     <Container className="py-5">
       <Row className="justify-content-center">
@@ -44,9 +55,9 @@ const Login = () => {
           <Card className="shadow">
             <Card.Body className="p-4">
               <h2 className="text-center mb-4">Đăng nhập</h2>
-              
+
               {error && <Alert variant="danger">{error}</Alert>}
-              
+
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="email">
                   <Form.Label>Email</Form.Label>
@@ -58,7 +69,7 @@ const Login = () => {
                     placeholder="Nhập email của bạn"
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3" controlId="password">
                   <Form.Label>Mật khẩu</Form.Label>
                   <Form.Control
@@ -69,7 +80,7 @@ const Login = () => {
                     placeholder="Nhập mật khẩu của bạn"
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3" controlId="rememberMe">
                   <Form.Check
                     type="checkbox"
@@ -78,18 +89,45 @@ const Login = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
                 </Form.Group>
-                
+
                 <div className="d-grid gap-2">
                   <Button variant="primary" type="submit" disabled={loading}>
                     {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                   </Button>
                 </div>
               </Form>
-              
+
               <div className="text-center mt-3">
                 <p>
                   Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
                 </p>
+              </div>
+
+              <hr />
+              <div className="mt-3">
+                <h5 className="text-center mb-3">Hoặc đăng nhập bằng</h5>
+                <Row>
+                  <Col xs={6}>
+                    <Button
+                      variant="primary"
+                      className="w-100 d-flex align-items-center justify-content-center"
+                      style={{ backgroundColor: '#3b5998', borderColor: '#3b5998' }}
+                      onClick={() => handleSocialLogin('Facebook')}
+                    >
+                      <FaFacebook className="me-2" /> Facebook
+                    </Button>
+                  </Col>
+                  <Col xs={6}>
+                    <Button
+                      variant="danger"
+                      className="w-100 d-flex align-items-center justify-content-center"
+                      style={{ backgroundColor: '#db4437', borderColor: '#db4437' }}
+                      onClick={() => handleSocialLogin('Google')}
+                    >
+                      <FaGoogle className="me-2" /> Google
+                    </Button>
+                  </Col>
+                </Row>
               </div>
             </Card.Body>
           </Card>

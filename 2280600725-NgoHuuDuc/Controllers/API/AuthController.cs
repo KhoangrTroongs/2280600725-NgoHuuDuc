@@ -90,5 +90,54 @@ namespace NgoHuuDuc_2280600725.Controllers.API
                 return StatusCode(500, ResponseDTO<bool>.Fail("An error occurred during logout."));
             }
         }
+
+        // POST: api/Auth/external-login
+        [HttpPost("external-login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ResponseDTO<AuthResponseDTO>>> ExternalLogin(ExternalLoginDTO externalLoginDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ResponseDTO<AuthResponseDTO>.Fail("Invalid external login data.", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
+                }
+
+                var result = await _authService.ExternalLoginAsync(externalLoginDto);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(ResponseDTO<AuthResponseDTO>.Fail(result.Message ?? "External login failed."));
+                }
+
+                return Ok(ResponseDTO<AuthResponseDTO>.Success(result));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during external login for provider {Provider}", externalLoginDto.Provider);
+                return StatusCode(500, ResponseDTO<AuthResponseDTO>.Fail("An error occurred during external login."));
+            }
+        }
+
+        // GET: api/Auth/external-login-token
+        [HttpGet("external-login-token/{provider}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ResponseDTO<string>>> GetExternalLoginToken(string provider)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(provider))
+                {
+                    return BadRequest(ResponseDTO<string>.Fail("Provider is required."));
+                }
+
+                var token = await _authService.GetExternalLoginProviderTokenAsync(provider);
+                return Ok(ResponseDTO<string>.Success(token));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting external login token for provider {Provider}", provider);
+                return StatusCode(500, ResponseDTO<string>.Fail("An error occurred while getting external login token."));
+            }
+        }
     }
 }
