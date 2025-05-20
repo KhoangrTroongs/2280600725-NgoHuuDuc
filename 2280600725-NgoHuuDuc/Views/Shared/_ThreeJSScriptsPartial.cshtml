@@ -78,69 +78,196 @@
                     // Add renderer to the container
                     viewerContainer.appendChild(renderer.domElement);
 
-                    // Create color picker controls
+                    // Create color picker controls - more compact and less intrusive
                     const colorControls = document.createElement('div');
                     colorControls.className = 'color-controls';
                     colorControls.style.position = 'absolute';
                     colorControls.style.bottom = '10px';
-                    colorControls.style.left = '10px';
+                    colorControls.style.right = '10px'; // Move to right side
                     colorControls.style.zIndex = '100';
                     colorControls.style.background = 'rgba(255, 255, 255, 0.7)';
-                    colorControls.style.padding = '5px';
-                    colorControls.style.borderRadius = '5px';
+                    colorControls.style.padding = '8px';
+                    colorControls.style.borderRadius = '8px';
+                    colorControls.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                    colorControls.style.maxWidth = '220px'; // Make it narrower
+                    colorControls.style.maxHeight = '250px';
+                    colorControls.style.overflowY = 'auto';
+                    colorControls.style.transition = 'opacity 0.3s ease';
+                    colorControls.style.opacity = '0.8'; // Start slightly transparent
+
+                    // Add hover effect to make it fully opaque when hovered
+                    colorControls.onmouseover = function() {
+                        this.style.opacity = '1';
+                    };
+
+                    colorControls.onmouseout = function() {
+                        this.style.opacity = '0.8';
+                    };
 
                     // Add color options with more vibrant colors for better visibility
                     const colors = [
                         { name: 'Đen', hex: '#000000' },
-                        { name: 'Xanh đậm', hex: '#0a3d62' },
-                        { name: 'Xám', hex: '#4b4b4b' },
-                        { name: 'Nâu', hex: '#6f4e37' },
+                        { name: 'Trắng', hex: '#FFFFFF' },
+                        { name: 'Xám', hex: '#808080' },
+                        { name: 'Xám đậm', hex: '#4b4b4b' },
+                        { name: 'Đỏ', hex: '#FF0000' },
                         { name: 'Đỏ đô', hex: '#8b0000' },
-                        { name: 'Xanh lá', hex: '#2ecc71' },
-                        { name: 'Cam', hex: '#e67e22' },
-                        { name: 'Tím', hex: '#9b59b6' }
+                        { name: 'Hồng', hex: '#FF69B4' },
+                        { name: 'Cam', hex: '#FFA500' },
+                        { name: 'Vàng', hex: '#FFFF00' },
+                        { name: 'Xanh lá', hex: '#00FF00' },
+                        { name: 'Xanh lá đậm', hex: '#2ecc71' },
+                        { name: 'Xanh dương', hex: '#0000FF' },
+                        { name: 'Xanh dương đậm', hex: '#0a3d62' },
+                        { name: 'Xanh ngọc', hex: '#00FFFF' },
+                        { name: 'Tím', hex: '#800080' },
+                        { name: 'Tím nhạt', hex: '#9b59b6' },
+                        { name: 'Nâu', hex: '#6f4e37' },
+                        { name: 'Nâu đỏ', hex: '#A52A2A' }
                     ];
 
-                    colorControls.innerHTML = '<div style="margin-bottom: 5px; font-weight: bold;">Màu sắc:</div>';
+                    // Create a toggle button to show/hide color controls
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.innerHTML = '<i class="fas fa-palette"></i>';
+                    toggleBtn.style.position = 'absolute';
+                    toggleBtn.style.bottom = '10px';
+                    toggleBtn.style.right = '10px';
+                    toggleBtn.style.zIndex = '101';
+                    toggleBtn.style.width = '40px';
+                    toggleBtn.style.height = '40px';
+                    toggleBtn.style.borderRadius = '50%';
+                    toggleBtn.style.backgroundColor = '#007bff';
+                    toggleBtn.style.color = 'white';
+                    toggleBtn.style.border = 'none';
+                    toggleBtn.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                    toggleBtn.style.cursor = 'pointer';
+                    toggleBtn.style.display = 'flex';
+                    toggleBtn.style.alignItems = 'center';
+                    toggleBtn.style.justifyContent = 'center';
+                    toggleBtn.style.fontSize = '18px';
+                    toggleBtn.title = 'Thay đổi màu sắc';
+
+                    // Initially hide color controls
+                    colorControls.style.display = 'none';
+                    colorControls.style.right = '60px'; // Position next to toggle button
+
+                    // Toggle color controls visibility
+                    let colorControlsVisible = false;
+                    toggleBtn.onclick = function() {
+                        colorControlsVisible = !colorControlsVisible;
+                        colorControls.style.display = colorControlsVisible ? 'block' : 'none';
+                        this.innerHTML = colorControlsVisible ? '<i class="fas fa-times"></i>' : '<i class="fas fa-palette"></i>';
+                        this.style.backgroundColor = colorControlsVisible ? '#dc3545' : '#007bff';
+                    };
+
+                    viewerContainer.appendChild(toggleBtn);
+
+                    // Compact header
+                    colorControls.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold; font-size: 12px; color: #333; text-align: center;">Màu sắc</div>';
+
+                    // Create color grid container - more compact
+                    const colorGrid = document.createElement('div');
+                    colorGrid.style.display = 'grid';
+                    colorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; // 5 columns instead of 6
+                    colorGrid.style.gap = '6px'; // Smaller gap
+                    colorGrid.style.marginBottom = '8px';
 
                     colors.forEach(color => {
                         const colorBtn = document.createElement('button');
-                        colorBtn.style.width = '30px';
-                        colorBtn.style.height = '30px';
+                        colorBtn.style.width = '25px'; // Smaller buttons
+                        colorBtn.style.height = '25px';
                         colorBtn.style.backgroundColor = color.hex;
-                        colorBtn.style.margin = '0 5px 5px 0';
                         colorBtn.style.border = '2px solid #ddd';
                         colorBtn.style.borderRadius = '50%';
                         colorBtn.style.cursor = 'pointer';
+                        colorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
                         colorBtn.title = color.name;
+
+                        // Add hover effect
+                        colorBtn.onmouseover = function() {
+                            this.style.transform = 'scale(1.1)';
+                        };
+
+                        colorBtn.onmouseout = function() {
+                            this.style.transform = 'scale(1)';
+                        };
 
                         colorBtn.onclick = function() {
                             changeModelColor(gltf.scene, color.hex);
                             // Highlight selected color
-                            document.querySelectorAll('.color-controls button').forEach(btn => {
+                            document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
                                 btn.style.border = '2px solid #ddd';
+                                btn.style.boxShadow = 'none';
                             });
                             this.style.border = '2px solid #000';
+                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
                         };
 
-                        colorControls.appendChild(colorBtn);
+                        colorBtn.className = 'color-btn';
+                        colorGrid.appendChild(colorBtn);
                     });
 
-                    // Add reset button
+                    colorControls.appendChild(colorGrid);
+
+                    // Add compact controls row
+                    const controlsRow = document.createElement('div');
+                    controlsRow.style.display = 'flex';
+                    controlsRow.style.justifyContent = 'space-between';
+                    controlsRow.style.alignItems = 'center';
+                    controlsRow.style.gap = '5px';
+
+                    // Add reset button with improved styling
                     const resetBtn = document.createElement('button');
-                    resetBtn.innerHTML = 'Màu gốc';
+                    resetBtn.innerHTML = '<i class="fas fa-undo-alt"></i>';
+                    resetBtn.title = 'Khôi phục màu gốc';
                     resetBtn.className = 'btn btn-sm btn-outline-secondary';
-                    resetBtn.style.display = 'block';
-                    resetBtn.style.marginTop = '5px';
+                    resetBtn.style.padding = '3px 8px';
+                    resetBtn.style.fontSize = '12px';
+                    resetBtn.style.flex = '0 0 auto';
                     resetBtn.onclick = function() {
                         resetModelColor(gltf.scene);
                         // Reset button highlights
-                        document.querySelectorAll('.color-controls button').forEach(btn => {
+                        document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
                             btn.style.border = '2px solid #ddd';
+                            btn.style.boxShadow = 'none';
                         });
                     };
 
-                    colorControls.appendChild(resetBtn);
+                    // Add a custom color picker - more compact
+                    const customColorInput = document.createElement('input');
+                    customColorInput.type = 'color';
+                    customColorInput.style.width = '30px';
+                    customColorInput.style.height = '30px';
+                    customColorInput.style.border = 'none';
+                    customColorInput.style.borderRadius = '4px';
+                    customColorInput.style.cursor = 'pointer';
+                    customColorInput.style.padding = '0';
+                    customColorInput.style.flex = '0 0 auto';
+                    customColorInput.title = 'Chọn màu tùy chỉnh';
+
+                    const applyCustomBtn = document.createElement('button');
+                    applyCustomBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    applyCustomBtn.title = 'Áp dụng màu tùy chỉnh';
+                    applyCustomBtn.className = 'btn btn-sm btn-primary';
+                    applyCustomBtn.style.padding = '3px 8px';
+                    applyCustomBtn.style.fontSize = '12px';
+                    applyCustomBtn.style.flex = '0 0 auto';
+
+                    applyCustomBtn.onclick = function() {
+                        const customColor = customColorInput.value;
+                        changeModelColor(gltf.scene, customColor);
+                        // Reset other button highlights
+                        document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
+                            btn.style.border = '2px solid #ddd';
+                            btn.style.boxShadow = 'none';
+                        });
+                    };
+
+                    controlsRow.appendChild(resetBtn);
+                    controlsRow.appendChild(customColorInput);
+                    controlsRow.appendChild(applyCustomBtn);
+
+                    colorControls.appendChild(controlsRow);
                     viewerContainer.appendChild(colorControls);
 
                     // Add the container to the DOM
@@ -246,13 +373,16 @@
     let camera = null;
     let renderer = null;
 
-    // Function to change model color - simplified approach
+    // Function to change model color - enhanced to handle black materials and only change the largest material
     function changeModelColor(model, colorHex) {
         // Store the current model for reference
         currentModel = model;
 
         // Convert hex to THREE.js color
         const color = new THREE.Color(colorHex);
+
+        // Log the color being applied
+        console.log('Applying color:', colorHex, 'RGB:', color.r.toFixed(2), color.g.toFixed(2), color.b.toFixed(2));
 
         // Store original materials if not already stored
         if (!originalMaterials) {
@@ -287,109 +417,521 @@
             });
         }
 
-        // Apply color change only to vest (dark colored materials)
         console.log('Changing color to:', colorHex);
 
-        // Force material update by creating new materials
+        // Find the main mesh in the model using multiple strategies
+        let mainMesh = null;
+
+        // Log all meshes in the model for debugging
+        console.log('All meshes in the model:');
         model.traverse((child) => {
-            if (child.isMesh && child.material) {
-                console.log('Examining mesh:', child.name);
+            if (child.isMesh) {
+                console.log(`Mesh: ${child.name}, Type: ${child.type}`);
+            }
+        });
 
-                // Apply color change
-                if (Array.isArray(child.material)) {
-                    for (let i = 0; i < child.material.length; i++) {
-                        const oldMat = child.material[i];
+        // Strategy 1: Look for meshes with specific names that are likely to be the main part
+        const mainPartNames = ['body', 'main', 'base', 'hull', 'chassis', 'frame', 'primary', 'car', 'vehicle', 'model'];
+        let foundMainPart = false;
 
-                        // Calculate brightness of the material color (0-1)
-                        const oldColor = oldMat.color;
-                        const brightness = (oldColor.r + oldColor.g + oldColor.b) / 3;
-
-                        // Only change dark materials (likely the vest)
-                        // Skip bright materials (likely the shirt)
-                        if (brightness < 0.5) {
-                            console.log(`Material ${i} is dark (brightness: ${brightness.toFixed(2)}), changing color`);
-
-                            // Create a new material with the same properties
-                            const newMat = oldMat.clone();
-                            // Set the new color
-                            newMat.color.set(color);
-                            // Make sure the material knows it needs to update
-                            newMat.needsUpdate = true;
-
-                            // Replace the old material with the new one
-                            child.material[i] = newMat;
-
-                            console.log(`Updated material ${i}:`, oldMat.name, 'Old color:', oldMat.color, 'New color:', newMat.color);
-                        } else {
-                            console.log(`Material ${i} is bright (brightness: ${brightness.toFixed(2)}), skipping`);
-                        }
-                    }
-                } else {
-                    const oldMat = child.material;
-
-                    // Calculate brightness of the material color (0-1)
-                    const oldColor = oldMat.color;
-                    const brightness = (oldColor.r + oldColor.g + oldColor.b) / 3;
-
-                    // Only change dark materials (likely the vest)
-                    // Skip bright materials (likely the shirt)
-                    if (brightness < 0.5) {
-                        console.log(`Material is dark (brightness: ${brightness.toFixed(2)}), changing color`);
-
-                        // Create a new material with the same properties
-                        const newMat = oldMat.clone();
-                        // Set the new color
-                        newMat.color.set(color);
-                        // Make sure the material knows it needs to update
-                        newMat.needsUpdate = true;
-
-                        // Replace the old material with the new one
-                        child.material = newMat;
-
-                        console.log('Updated material:', oldMat.name, 'Old color:', oldMat.color, 'New color:', newMat.color);
-                    } else {
-                        console.log(`Material is bright (brightness: ${brightness.toFixed(2)}), skipping`);
+        model.traverse((child) => {
+            if (child.isMesh && child.name && !foundMainPart) {
+                const lowerName = child.name.toLowerCase();
+                // Check if this mesh has a name suggesting it's the main part
+                for (const partName of mainPartNames) {
+                    if (lowerName.includes(partName)) {
+                        console.log('Found main part by name:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                        break;
                     }
                 }
             }
         });
 
+        // Strategy 2: If no main part found by name, look for the mesh with the most vertices
+        // This is often a better indicator of the main mesh than volume
+        if (!foundMainPart) {
+            let maxVertices = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh && child.geometry && child.geometry.attributes.position) {
+                    const vertexCount = child.geometry.attributes.position.count;
+                    console.log(`Mesh: ${child.name}, Vertices: ${vertexCount}`);
+
+                    if (vertexCount > maxVertices) {
+                        maxVertices = vertexCount;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by vertex count:', mainMesh.name, 'with', maxVertices, 'vertices');
+            }
+        }
+
+        // Strategy 3: If still no main part found, look for the mesh with the largest volume
+        if (!foundMainPart) {
+            let largestSize = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    // Calculate the size of the mesh using its bounding box
+                    const boundingBox = new THREE.Box3().setFromObject(child);
+                    const size = boundingBox.getSize(new THREE.Vector3());
+                    const volume = size.x * size.y * size.z;
+
+                    console.log('Mesh:', child.name, 'Volume:', volume);
+
+                    // Update largest mesh if this one is bigger
+                    if (volume > largestSize) {
+                        largestSize = volume;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by volume:', mainMesh.name, 'with volume', largestSize);
+            }
+        }
+
+        // Strategy 4: If still no main part found, look for a mesh that has a material with a texture
+        // Often the main visible part has a texture
+        if (!foundMainPart) {
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    if (Array.isArray(child.material)) {
+                        // Check if any of the materials have a texture
+                        for (const mat of child.material) {
+                            if (mat.map) {
+                                console.log('Found mesh with texture:', child.name);
+                                mainMesh = child;
+                                foundMainPart = true;
+                                break;
+                            }
+                        }
+                    } else if (child.material.map) {
+                        console.log('Found mesh with texture:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+
+                if (foundMainPart) return;
+            });
+        }
+
+        // If we found the main mesh, change its color
+        if (mainMesh) {
+            console.log('Main mesh found:', mainMesh.name);
+
+            if (Array.isArray(mainMesh.material)) {
+                // If the mesh has multiple materials, change all of them
+                for (let i = 0; i < mainMesh.material.length; i++) {
+                    const oldMat = mainMesh.material[i];
+
+                    // Create a completely new material based on the type
+                    let newMat;
+
+                    // Determine the material type and create appropriate replacement
+                    if (oldMat.type === 'MeshStandardMaterial') {
+                        newMat = new THREE.MeshStandardMaterial({
+                            color: color,
+                            metalness: oldMat.metalness,
+                            roughness: oldMat.roughness,
+                            transparent: oldMat.transparent,
+                            opacity: oldMat.opacity,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshPhongMaterial') {
+                        newMat = new THREE.MeshPhongMaterial({
+                            color: color,
+                            specular: oldMat.specular,
+                            shininess: oldMat.shininess,
+                            transparent: oldMat.transparent,
+                            opacity: oldMat.opacity,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshLambertMaterial') {
+                        newMat = new THREE.MeshLambertMaterial({
+                            color: color,
+                            transparent: oldMat.transparent,
+                            opacity: oldMat.opacity,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshBasicMaterial') {
+                        newMat = new THREE.MeshBasicMaterial({
+                            color: color,
+                            transparent: oldMat.transparent,
+                            opacity: oldMat.opacity,
+                            side: oldMat.side
+                        });
+                    } else {
+                        // For any other material type, clone and set color
+                        newMat = oldMat.clone();
+                        newMat.color.set(color);
+                    }
+
+                    // Preserve maps from original material if they exist
+                    if (oldMat.map) newMat.map = oldMat.map;
+                    if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                    if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+                    if (oldMat.roughnessMap) newMat.roughnessMap = oldMat.roughnessMap;
+                    if (oldMat.metalnessMap) newMat.metalnessMap = oldMat.metalnessMap;
+                    if (oldMat.aoMap) newMat.aoMap = oldMat.aoMap;
+                    if (oldMat.emissiveMap) newMat.emissiveMap = oldMat.emissiveMap;
+
+                    // Handle texture maps and special cases for black materials
+                    if (oldMat.map && oldMat.map.image) {
+                        // We'll keep the texture but apply a color overlay effect
+                        // This is done by setting the material's color and adjusting blending
+                        newMat.map = oldMat.map;
+                        newMat.color.set(color);
+                        newMat.transparent = true;
+
+                        // Use a different blending mode for better color application
+                        newMat.blending = THREE.CustomBlending;
+                        newMat.blendSrc = THREE.SrcAlphaFactor;
+                        newMat.blendDst = THREE.OneMinusSrcAlphaFactor;
+                        newMat.blendEquation = THREE.AddEquation;
+                    }
+
+                    // Force color application for dark/black materials
+                    const oldColor = new THREE.Color();
+                    if (oldMat.color) oldColor.copy(oldMat.color);
+
+                    // Check if the material is very dark (close to black)
+                    const brightness = oldColor.r + oldColor.g + oldColor.b;
+                    if (brightness < 0.15) { // If it's a very dark color
+                        // Use more aggressive color application
+                        newMat.color.set(color);
+
+                        // Adjust material properties to make color more visible
+                        if (newMat.type === 'MeshStandardMaterial' || newMat.type === 'MeshPhysicalMaterial') {
+                            newMat.metalness = 0.1; // Reduce metalness to show color better
+                            newMat.roughness = 0.7; // Increase roughness
+                        }
+
+                        // Add emissive color to help the color stand out
+                        if (newMat.emissive) {
+                            const emissiveColor = new THREE.Color(color);
+                            emissiveColor.multiplyScalar(0.2); // Subtle emissive effect
+                            newMat.emissive = emissiveColor;
+                        }
+                    }
+
+                    // Make sure the material knows it needs to update
+                    newMat.needsUpdate = true;
+
+                    // Replace the old material with the new one
+                    mainMesh.material[i] = newMat;
+
+                    console.log(`Updated material ${i} on main mesh:`, oldMat.type, 'Old color:', oldMat.color, 'New color:', newMat.color);
+                }
+            } else {
+                const oldMat = mainMesh.material;
+
+                // Create a completely new material based on the type
+                let newMat;
+
+                // Determine the material type and create appropriate replacement
+                if (oldMat.type === 'MeshStandardMaterial') {
+                    newMat = new THREE.MeshStandardMaterial({
+                        color: color,
+                        metalness: oldMat.metalness,
+                        roughness: oldMat.roughness,
+                        transparent: oldMat.transparent,
+                        opacity: oldMat.opacity,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshPhongMaterial') {
+                    newMat = new THREE.MeshPhongMaterial({
+                        color: color,
+                        specular: oldMat.specular,
+                        shininess: oldMat.shininess,
+                        transparent: oldMat.transparent,
+                        opacity: oldMat.opacity,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshLambertMaterial') {
+                    newMat = new THREE.MeshLambertMaterial({
+                        color: color,
+                        transparent: oldMat.transparent,
+                        opacity: oldMat.opacity,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshBasicMaterial') {
+                    newMat = new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: oldMat.transparent,
+                        opacity: oldMat.opacity,
+                        side: oldMat.side
+                    });
+                } else {
+                    // For any other material type, clone and set color
+                    newMat = oldMat.clone();
+                    newMat.color.set(color);
+                }
+
+                // Preserve maps from original material if they exist
+                if (oldMat.map) newMat.map = oldMat.map;
+                if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+                if (oldMat.roughnessMap) newMat.roughnessMap = oldMat.roughnessMap;
+                if (oldMat.metalnessMap) newMat.metalnessMap = oldMat.metalnessMap;
+                if (oldMat.aoMap) newMat.aoMap = oldMat.aoMap;
+                if (oldMat.emissiveMap) newMat.emissiveMap = oldMat.emissiveMap;
+
+                // Handle texture maps and special cases for black materials
+                if (oldMat.map && oldMat.map.image) {
+                    // We'll keep the texture but apply a color overlay effect
+                    // This is done by setting the material's color and adjusting blending
+                    newMat.map = oldMat.map;
+                    newMat.color.set(color);
+                    newMat.transparent = true;
+
+                    // Use a different blending mode for better color application
+                    newMat.blending = THREE.CustomBlending;
+                    newMat.blendSrc = THREE.SrcAlphaFactor;
+                    newMat.blendDst = THREE.OneMinusSrcAlphaFactor;
+                    newMat.blendEquation = THREE.AddEquation;
+                }
+
+                // Force color application for dark/black materials
+                const oldColor = new THREE.Color();
+                if (oldMat.color) oldColor.copy(oldMat.color);
+
+                // Check if the material is very dark (close to black)
+                const brightness = oldColor.r + oldColor.g + oldColor.b;
+                if (brightness < 0.15) { // If it's a very dark color
+                    // Use more aggressive color application
+                    newMat.color.set(color);
+
+                    // Adjust material properties to make color more visible
+                    if (newMat.type === 'MeshStandardMaterial' || newMat.type === 'MeshPhysicalMaterial') {
+                        newMat.metalness = 0.1; // Reduce metalness to show color better
+                        newMat.roughness = 0.7; // Increase roughness
+                    }
+
+                    // Add emissive color to help the color stand out
+                    if (newMat.emissive) {
+                        const emissiveColor = new THREE.Color(color);
+                        emissiveColor.multiplyScalar(0.2); // Subtle emissive effect
+                        newMat.emissive = emissiveColor;
+                    }
+                }
+
+                // Make sure the material knows it needs to update
+                newMat.needsUpdate = true;
+
+                // Replace the old material with the new one
+                mainMesh.material = newMat;
+
+                console.log('Updated material on main mesh:', oldMat.type, 'Old color:', oldMat.color, 'New color:', newMat.color);
+            }
+        } else {
+            console.warn('No main mesh found in the model');
+        }
+
         // Force scene update
         renderer.render(scene, camera);
     }
 
-    // Function to reset model to original colors
+    // Function to reset model to original colors - modified to only reset the largest material
     function resetModelColor(model) {
         if (!originalMaterials || !currentModel) {
             console.log('No original materials to restore');
             return;
         }
 
-        console.log('Restoring original materials');
+        console.log('Restoring original materials for main mesh');
 
-        // Restore all original materials
-        originalMaterials.forEach(item => {
-            if (item.mesh) {
-                if (typeof item.index !== 'undefined') {
-                    // For array materials
-                    if (Array.isArray(item.mesh.material) && item.index < item.mesh.material.length) {
-                        const newMat = item.material.clone();
-                        newMat.needsUpdate = true;
-                        item.mesh.material[item.index] = newMat;
-                        console.log(`Restored array material ${item.index} for mesh:`, item.mesh.name);
+        // Find the main mesh in the model using multiple strategies
+        let mainMesh = null;
+
+        // Log all meshes in the model for debugging
+        console.log('All meshes in the model:');
+        model.traverse((child) => {
+            if (child.isMesh) {
+                console.log(`Mesh: ${child.name}, Type: ${child.type}`);
+            }
+        });
+
+        // Strategy 1: Look for meshes with specific names that are likely to be the main part
+        const mainPartNames = ['body', 'main', 'base', 'hull', 'chassis', 'frame', 'primary', 'car', 'vehicle', 'model'];
+        let foundMainPart = false;
+
+        model.traverse((child) => {
+            if (child.isMesh && child.name && !foundMainPart) {
+                const lowerName = child.name.toLowerCase();
+                // Check if this mesh has a name suggesting it's the main part
+                for (const partName of mainPartNames) {
+                    if (lowerName.includes(partName)) {
+                        console.log('Found main part by name:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                        break;
                     }
-                } else {
-                    // For single materials
-                    const newMat = item.material.clone();
-                    newMat.needsUpdate = true;
-                    item.mesh.material = newMat;
-                    console.log('Restored material for mesh:', item.mesh.name);
                 }
             }
         });
 
+        // Strategy 2: If no main part found by name, look for the mesh with the most vertices
+        // This is often a better indicator of the main mesh than volume
+        if (!foundMainPart) {
+            let maxVertices = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh && child.geometry && child.geometry.attributes.position) {
+                    const vertexCount = child.geometry.attributes.position.count;
+                    console.log(`Mesh: ${child.name}, Vertices: ${vertexCount}`);
+
+                    if (vertexCount > maxVertices) {
+                        maxVertices = vertexCount;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by vertex count:', mainMesh.name, 'with', maxVertices, 'vertices');
+            }
+        }
+
+        // Strategy 3: If still no main part found, look for the mesh with the largest volume
+        if (!foundMainPart) {
+            let largestSize = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    // Calculate the size of the mesh using its bounding box
+                    const boundingBox = new THREE.Box3().setFromObject(child);
+                    const size = boundingBox.getSize(new THREE.Vector3());
+                    const volume = size.x * size.y * size.z;
+
+                    console.log('Mesh:', child.name, 'Volume:', volume);
+
+                    // Update largest mesh if this one is bigger
+                    if (volume > largestSize) {
+                        largestSize = volume;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by volume:', mainMesh.name, 'with volume', largestSize);
+            }
+        }
+
+        // Strategy 4: If still no main part found, look for a mesh that has a material with a texture
+        // Often the main visible part has a texture
+        if (!foundMainPart) {
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    if (Array.isArray(child.material)) {
+                        // Check if any of the materials have a texture
+                        for (const mat of child.material) {
+                            if (mat.map) {
+                                console.log('Found mesh with texture:', child.name);
+                                mainMesh = child;
+                                foundMainPart = true;
+                                break;
+                            }
+                        }
+                    } else if (child.material.map) {
+                        console.log('Found mesh with texture:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+
+                if (foundMainPart) return;
+            });
+        }
+
+        // If we found the main mesh, restore its original materials
+        if (mainMesh) {
+            console.log('Restoring materials for main mesh:', mainMesh.name);
+
+            // Find the original materials for this mesh
+            const meshMaterials = originalMaterials.filter(item => item.mesh === mainMesh);
+
+            if (meshMaterials.length > 0) {
+                if (Array.isArray(mainMesh.material)) {
+                    // For array materials
+                    meshMaterials.forEach(item => {
+                        if (typeof item.index !== 'undefined' && item.index < mainMesh.material.length) {
+                            // Create a deep clone of the original material
+                            const newMat = item.material.clone();
+
+                            // Ensure all properties are properly transferred
+                            if (item.material.map) newMat.map = item.material.map;
+                            if (item.material.normalMap) newMat.normalMap = item.material.normalMap;
+                            if (item.material.bumpMap) newMat.bumpMap = item.material.bumpMap;
+                            if (item.material.roughnessMap) newMat.roughnessMap = item.material.roughnessMap;
+                            if (item.material.metalnessMap) newMat.metalnessMap = item.material.metalnessMap;
+                            if (item.material.aoMap) newMat.aoMap = item.material.aoMap;
+                            if (item.material.emissiveMap) newMat.emissiveMap = item.material.emissiveMap;
+
+                            // Reset blending mode to default if it was changed
+                            newMat.blending = THREE.NormalBlending;
+
+                            // Make sure the material knows it needs to update
+                            newMat.needsUpdate = true;
+
+                            // Replace the current material with the original
+                            mainMesh.material[item.index] = newMat;
+
+                            console.log(`Restored array material ${item.index} for main mesh:`, mainMesh.name);
+                        }
+                    });
+                } else {
+                    // For single material
+                    const item = meshMaterials.find(item => typeof item.index === 'undefined');
+
+                    if (item) {
+                        // Create a deep clone of the original material
+                        const newMat = item.material.clone();
+
+                        // Ensure all properties are properly transferred
+                        if (item.material.map) newMat.map = item.material.map;
+                        if (item.material.normalMap) newMat.normalMap = item.material.normalMap;
+                        if (item.material.bumpMap) newMat.bumpMap = item.material.bumpMap;
+                        if (item.material.roughnessMap) newMat.roughnessMap = item.material.roughnessMap;
+                        if (item.material.metalnessMap) newMat.metalnessMap = item.material.metalnessMap;
+                        if (item.material.aoMap) newMat.aoMap = item.material.aoMap;
+                        if (item.material.emissiveMap) newMat.emissiveMap = item.material.emissiveMap;
+
+                        // Reset blending mode to default if it was changed
+                        newMat.blending = THREE.NormalBlending;
+
+                        // Make sure the material knows it needs to update
+                        newMat.needsUpdate = true;
+
+                        // Replace the current material with the original
+                        mainMesh.material = newMat;
+
+                        console.log('Restored material for main mesh:', mainMesh.name);
+                    }
+                }
+            } else {
+                console.warn('No original materials found for main mesh');
+            }
+        } else {
+            console.warn('No main mesh found in the model');
+        }
+
         // Force scene update
         renderer.render(scene, camera);
+
+        console.log('Material restoration complete');
     }
 
     // Show error message
