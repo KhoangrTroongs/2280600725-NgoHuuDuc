@@ -1,0 +1,127 @@
+import pandas as pd
+import random
+import os
+
+# Define categories
+categories = [
+    {"id": 1, "name": "Veston", "description": "Các loại veston xịn xịn"},
+    {"id": 2, "name": "Quần tây", "description": "Các loại quần tây tây - chất chơi người dơi"},
+    {"id": 3, "name": "Áo sơ mi", "description": "Áo sơ mi 2 trong 1"}
+]
+
+# Define product name templates for each category
+veston_templates = [
+    "Veston {color} {style} {material}",
+    "Áo vest {color} {style} {fit}",
+    "Bộ vest {color} {occasion} {material}",
+    "Veston {brand} {color} {fit}",
+    "Áo blazer {color} {style} {material}"
+]
+
+quan_tay_templates = [
+    "Quần tây {color} {style} {material}",
+    "Quần âu {color} {fit} {material}",
+    "Quần tây {brand} {color} {fit}",
+    "Quần âu {color} {style} {occasion}",
+    "Quần tây {color} {material} {fit}"
+]
+
+ao_so_mi_templates = [
+    "Áo sơ mi {color} {style} {material}",
+    "Áo sơ mi {brand} {color} {fit}",
+    "Áo sơ mi {color} {pattern} {occasion}",
+    "Áo sơ mi {color} {sleeve} {material}",
+    "Áo sơ mi {color} {style} {fit}"
+]
+
+# Define attributes for product names
+colors = ["đen", "trắng", "xanh navy", "xanh dương", "xám", "be", "nâu", "xanh rêu", "đỏ đô", "xanh đen", "kẻ sọc", "họa tiết"]
+styles = ["cổ điển", "hiện đại", "thanh lịch", "trẻ trung", "công sở", "dự tiệc", "casual", "slim fit", "regular fit"]
+materials = ["len", "cotton", "linen", "polyester", "wool", "cashmere", "tweed", "kaki", "nhung", "denim"]
+brands = ["Elegance", "Gentleman", "Classic", "Modern", "Premium", "Luxury", "Executive", "Business", "Formal"]
+fits = ["ôm body", "regular fit", "slim fit", "oversize", "standard fit", "relaxed fit", "skinny fit"]
+occasions = ["dự tiệc", "công sở", "cưới hỏi", "dạo phố", "lễ hội", "casual", "formal"]
+patterns = ["trơn", "kẻ sọc", "kẻ caro", "họa tiết", "chấm bi", "in hoa", "thêu"]
+sleeves = ["tay dài", "tay ngắn", "tay lỡ", "cộc tay"]
+
+# Define price ranges for each category
+price_ranges = {
+    "Veston": (1500000, 5000000),
+    "Quần tây": (500000, 1500000),
+    "Áo sơ mi": (350000, 1200000)
+}
+
+# Define quantity ranges
+quantity_range = (5, 50)
+
+# Define description templates
+description_templates = [
+    "{product_name} chất liệu {material} cao cấp, thiết kế {style}, phù hợp cho {occasion}.",
+    "{product_name} phong cách {style}, chất {material} mềm mại, thoáng mát, thích hợp {occasion}.",
+    "{product_name} thiết kế {fit}, chất liệu {material} bền đẹp, phù hợp cho {occasion}.",
+    "{product_name} kiểu dáng {style}, form {fit}, chất {material} cao cấp.",
+    "{product_name} thiết kế tinh tế, chất liệu {material}, kiểu dáng {style}, phù hợp {occasion}."
+]
+
+# Generate 100 random products
+products = []
+
+for i in range(100):
+    # Randomly select a category
+    category = random.choice(categories)
+    category_name = category["name"]
+    
+    # Select appropriate template based on category
+    if category_name == "Veston":
+        template = random.choice(veston_templates)
+    elif category_name == "Quần tây":
+        template = random.choice(quan_tay_templates)
+    else:  # Áo sơ mi
+        template = random.choice(ao_so_mi_templates)
+    
+    # Generate product name
+    product_name = template.format(
+        color=random.choice(colors),
+        style=random.choice(styles),
+        material=random.choice(materials),
+        brand=random.choice(brands),
+        fit=random.choice(fits),
+        occasion=random.choice(occasions),
+        pattern=random.choice(patterns),
+        sleeve=random.choice(sleeves)
+    )
+    
+    # Generate price within category range
+    min_price, max_price = price_ranges[category_name]
+    price = random.randint(min_price // 10000, max_price // 10000) * 10000  # Round to nearest 10,000 VND
+    
+    # Generate quantity
+    quantity = random.randint(*quantity_range)
+    
+    # Generate description
+    description_template = random.choice(description_templates)
+    description = description_template.format(
+        product_name=product_name,
+        material=random.choice(materials),
+        style=random.choice(styles),
+        fit=random.choice(fits),
+        occasion=random.choice(occasions)
+    )
+    
+    # Add product to list
+    products.append({
+        "Tên sản phẩm": product_name,
+        "Danh mục": category_name,
+        "Giá": price,
+        "Số lượng": quantity,
+        "Mô tả": description
+    })
+
+# Create DataFrame
+df = pd.DataFrame(products)
+
+# Save to Excel
+excel_path = os.path.join(os.path.dirname(__file__), "100_products_sample.xlsx")
+df.to_excel(excel_path, index=False)
+
+print(f"Excel file created at: {excel_path}")

@@ -222,9 +222,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                     return View(model);
                 }
 
-                if (model.Model3D.Length > 20 * 1024 * 1024) // 20MB limit for 3D models
+                if (model.Model3D.Length > 50 * 1024 * 1024) // 50MB limit for 3D models
                 {
-                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 20MB");
+                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 50MB");
                     return View(model);
                 }
 
@@ -351,9 +351,9 @@ namespace NgoHuuDuc_2280600725.Controllers
                     return View(model);
                 }
 
-                if (model.Model3D.Length > 20 * 1024 * 1024) // 20MB limit for 3D models
+                if (model.Model3D.Length > 50 * 1024 * 1024) // 50MB limit for 3D models
                 {
-                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 20MB");
+                    ModelState.AddModelError("Model3D", "Kích thước file không được vượt quá 50MB");
                     model.Categories = await _categoryRepository.GetAllCategoriesAsync();
                     return View(model);
                 }

@@ -11,6 +11,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.IISIntegration;
 
 // Cấu hình EPPlus để sử dụng giấy phép không thương mại
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -108,6 +111,26 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
+
+// Cấu hình giới hạn kích thước tệp tải lên (tăng lên 50MB)
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 52428800; // 50MB in bytes
+});
+
+// Cấu hình Kestrel để hỗ trợ tệp lớn
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800; // 50MB in bytes
+});
+
+// Cấu hình giới hạn form
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50MB in bytes
+    options.ValueLengthLimit = 52428800;
+    options.MultipartHeadersLengthLimit = 52428800;
+});
 
 // Temporarily disable SPA static files
 // builder.Services.AddSpaStaticFiles(configuration =>

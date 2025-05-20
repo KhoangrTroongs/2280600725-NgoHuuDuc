@@ -123,16 +123,10 @@
 
                 @if (has3DModel)
                 {
-                    <div id="product-3d-view" class="product-view" style="height: 400px; display: none;">
-                        <div id="model-container" style="width: 100%; height: 100%;"></div>
-                    </div>
-                }
-
-                @if (has3DModel)
-                {
                     <div class="view-toggle-buttons mt-2 d-flex">
-                        <button id="view-image-btn" class="btn btn-sm btn-primary active me-2">Xem hình ảnh</button>
-                        <button id="view-3d-btn" class="btn btn-sm btn-outline-primary">Xem mô hình 3D</button>
+                        <button id="view-3d-btn" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#model3dModal">
+                            <i class="fas fa-cube"></i> Xem mô hình 3D
+                        </button>
                         @if (User.IsInRole("Administrator"))
                         {
                             <form asp-action="DeleteModel3D" asp-route-id="@Model.Id" method="post" class="ms-auto">
@@ -528,6 +522,31 @@
     </div>
 </div>
 
+<!-- 3D Model Modal -->
+@if (has3DModel)
+{
+    <div class="modal fade" id="model3dModal" tabindex="-1" aria-labelledby="model3dModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="model3dModalLabel">Mô hình 3D - @Model.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="model-container" style="width: 100%; height: 600px;"></div>
+                </div>
+                <div class="modal-footer">
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <small class="text-muted me-auto">Đường dẫn mô hình: @Model.Model3DUrl</small>
+                    }
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
     @if (has3DModel)
     {
@@ -536,24 +555,11 @@
         <script>
             // 3D Model Viewer
             $(document).ready(function() {
-                // Toggle between image and 3D view
-                $('#view-image-btn').click(function() {
-                    $('.product-view').removeClass('active').hide();
-                    $('#product-image-view').addClass('active').show();
-                    $('#view-image-btn').addClass('btn-primary').removeClass('btn-outline-primary');
-                    $('#view-3d-btn').removeClass('btn-primary').addClass('btn-outline-primary');
-                });
-
-                $('#view-3d-btn').click(function() {
-                    $('.product-view').removeClass('active').hide();
-                    $('#product-3d-view').addClass('active').show();
-                    $('#view-3d-btn').addClass('btn-primary').removeClass('btn-outline-primary');
-                    $('#view-image-btn').removeClass('btn-primary').addClass('btn-outline-primary');
-
-                    // Always reinitialize the 3D viewer when switching to 3D view
-                    // This ensures it works correctly after page reloads or model changes
+                // Initialize 3D model when modal is shown
+                $('#model3dModal').on('shown.bs.modal', function () {
+                    // Always reinitialize the 3D viewer when the modal is opened
                     window.modelViewerInitialized = false;
-                    console.log('Initializing model viewer...');
+                    console.log('Initializing model viewer in modal...');
 
                     try {
                         const modelUrl = '@Model.Model3DUrl';
@@ -574,7 +580,16 @@
                     }
                 });
 
-                // Hàm initModelViewer đã được thay thế bằng createModelViewer
+                // Clean up when modal is hidden
+                $('#model3dModal').on('hidden.bs.modal', function () {
+                    // Clear the container to free up resources
+                    $('#model-container').empty();
+
+                    // Dispose of ThreeJS resources if needed
+                    if (window.renderer) {
+                        window.renderer.dispose();
+                    }
+                });
             });
         </script>
     }

@@ -253,14 +253,22 @@ namespace NgoHuuDuc_2280600725.Controllers
                     var worksheet = package.Workbook.Worksheets.Add("Template");
 
                     // Thiết lập header
-                    worksheet.Cells[1, 1].Value = "Tên sản phẩm";
-                    worksheet.Cells[1, 2].Value = "Danh mục";
-                    worksheet.Cells[1, 3].Value = "Giá";
-                    worksheet.Cells[1, 4].Value = "Số lượng";
-                    worksheet.Cells[1, 5].Value = "Mô tả";
+                    int col = 1;
+                    worksheet.Cells[1, col++].Value = "Tên sản phẩm";
+                    worksheet.Cells[1, col++].Value = "Danh mục";
+                    worksheet.Cells[1, col++].Value = "Giá";
+
+                    // Thêm cột kích thước
+                    worksheet.Cells[1, col++].Value = "Size S";
+                    worksheet.Cells[1, col++].Value = "Size M";
+                    worksheet.Cells[1, col++].Value = "Size L";
+                    worksheet.Cells[1, col++].Value = "Size XL";
+                    worksheet.Cells[1, col++].Value = "Size 2XL";
+
+                    worksheet.Cells[1, col++].Value = "Mô tả";
 
                     // Định dạng header
-                    using (var range = worksheet.Cells[1, 1, 1, 5])
+                    using (var range = worksheet.Cells[1, 1, 1, col - 1])
                     {
                         range.Style.Font.Bold = true;
                         range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -269,17 +277,41 @@ namespace NgoHuuDuc_2280600725.Controllers
                     }
 
                     // Thêm dữ liệu mẫu
-                    worksheet.Cells[2, 1].Value = "Áo sơ mi nam";
-                    worksheet.Cells[2, 2].Value = "Áo sơ mi";
-                    worksheet.Cells[2, 3].Value = 350000;
-                    worksheet.Cells[2, 4].Value = 10;
-                    worksheet.Cells[2, 5].Value = "Áo sơ mi nam cao cấp";
+                    // Sản phẩm 1
+                    col = 1;
+                    worksheet.Cells[2, col++].Value = "Áo sơ mi nam";
+                    worksheet.Cells[2, col++].Value = "Áo sơ mi";
+                    worksheet.Cells[2, col++].Value = 350000;
+                    worksheet.Cells[2, col++].Value = 5;  // Size S
+                    worksheet.Cells[2, col++].Value = 10; // Size M
+                    worksheet.Cells[2, col++].Value = 15; // Size L
+                    worksheet.Cells[2, col++].Value = 8;  // Size XL
+                    worksheet.Cells[2, col++].Value = 3;  // Size 2XL
+                    worksheet.Cells[2, col++].Value = "Áo sơ mi nam cao cấp, chất liệu cotton, phù hợp cho công sở";
 
-                    worksheet.Cells[3, 1].Value = "Quần tây nam";
-                    worksheet.Cells[3, 2].Value = "Quần tây";
-                    worksheet.Cells[3, 3].Value = 450000;
-                    worksheet.Cells[3, 4].Value = 15;
-                    worksheet.Cells[3, 5].Value = "Quần tây nam cao cấp";
+                    // Sản phẩm 2
+                    col = 1;
+                    worksheet.Cells[3, col++].Value = "Quần tây nam";
+                    worksheet.Cells[3, col++].Value = "Quần tây";
+                    worksheet.Cells[3, col++].Value = 450000;
+                    worksheet.Cells[3, col++].Value = 8;  // Size S
+                    worksheet.Cells[3, col++].Value = 12; // Size M
+                    worksheet.Cells[3, col++].Value = 15; // Size L
+                    worksheet.Cells[3, col++].Value = 10; // Size XL
+                    worksheet.Cells[3, col++].Value = 5;  // Size 2XL
+                    worksheet.Cells[3, col++].Value = "Quần tây nam cao cấp, chất liệu kaki, phù hợp cho công sở và dự tiệc";
+
+                    // Sản phẩm 3
+                    col = 1;
+                    worksheet.Cells[4, col++].Value = "Veston nam";
+                    worksheet.Cells[4, col++].Value = "Veston";
+                    worksheet.Cells[4, col++].Value = 1500000;
+                    worksheet.Cells[4, col++].Value = 3;  // Size S
+                    worksheet.Cells[4, col++].Value = 7;  // Size M
+                    worksheet.Cells[4, col++].Value = 10; // Size L
+                    worksheet.Cells[4, col++].Value = 5;  // Size XL
+                    worksheet.Cells[4, col++].Value = 2;  // Size 2XL
+                    worksheet.Cells[4, col++].Value = "Veston nam cao cấp, chất liệu wool, phù hợp cho các dịp trang trọng";
 
                     // Tự động điều chỉnh độ rộng cột
                     worksheet.Cells.AutoFitColumns();
@@ -358,6 +390,30 @@ namespace NgoHuuDuc_2280600725.Controllers
 
                         totalRows = rowCount - 1; // Trừ đi dòng header
 
+                        // Kiểm tra định dạng file Excel
+                        bool hasSizeColumns = false;
+                        int descriptionColumnIndex = 5; // Mặc định là cột thứ 5
+
+                        // Kiểm tra xem có cột kích thước không
+                        var headers = new List<string>();
+                        for (int col = 1; col <= worksheet.Dimension.Columns; col++)
+                        {
+                            var header = worksheet.Cells[1, col].Value?.ToString();
+                            if (!string.IsNullOrEmpty(header))
+                            {
+                                headers.Add(header);
+                            }
+                        }
+
+                        // Kiểm tra xem có cột kích thước không
+                        hasSizeColumns = headers.Any(h => h.StartsWith("Size "));
+
+                        // Nếu có cột kích thước, mô tả sẽ ở cột cuối cùng
+                        if (hasSizeColumns)
+                        {
+                            descriptionColumnIndex = headers.Count;
+                        }
+
                         // Đọc dữ liệu từ Excel (bắt đầu từ dòng 2, dòng 1 là header)
                         for (int row = 2; row <= rowCount; row++)
                         {
@@ -367,8 +423,7 @@ namespace NgoHuuDuc_2280600725.Controllers
                                 var name = worksheet.Cells[row, 1].Value?.ToString();
                                 var categoryName = worksheet.Cells[row, 2].Value?.ToString();
                                 var priceValue = worksheet.Cells[row, 3].Value;
-                                var quantityValue = worksheet.Cells[row, 4].Value;
-                                var description = worksheet.Cells[row, 5].Value?.ToString();
+                                var description = worksheet.Cells[row, descriptionColumnIndex].Value?.ToString();
 
                                 // Validate data
                                 if (string.IsNullOrWhiteSpace(name))
@@ -404,13 +459,48 @@ namespace NgoHuuDuc_2280600725.Controllers
                                     continue;
                                 }
 
-                                // Parse quantity
-                                int quantity;
-                                if (quantityValue == null || !int.TryParse(quantityValue.ToString(), out quantity) || quantity < 0)
+                                // Xử lý kích thước và số lượng
+                                int totalQuantity = 0;
+                                string sizeInfo = "";
+
+                                if (hasSizeColumns)
                                 {
-                                    errors.Add($"Dòng {row}: Số lượng không hợp lệ");
-                                    errorCount++;
-                                    continue;
+                                    // Đọc thông tin kích thước từ các cột
+                                    var sizeQuantities = new Dictionary<string, int>();
+
+                                    // Tìm các cột kích thước
+                                    for (int col = 1; col <= worksheet.Dimension.Columns; col++)
+                                    {
+                                        var header = worksheet.Cells[1, col].Value?.ToString();
+                                        if (!string.IsNullOrEmpty(header) && header.StartsWith("Size "))
+                                        {
+                                            var size = header.Substring(5); // Lấy phần sau "Size "
+                                            var quantityValue = worksheet.Cells[row, col].Value;
+
+                                            if (quantityValue != null && int.TryParse(quantityValue.ToString(), out int sizeQuantity) && sizeQuantity >= 0)
+                                            {
+                                                sizeQuantities[size] = sizeQuantity;
+                                                totalQuantity += sizeQuantity;
+                                            }
+                                        }
+                                    }
+
+                                    // Tạo chuỗi thông tin kích thước
+                                    if (sizeQuantities.Count > 0)
+                                    {
+                                        sizeInfo = string.Join(",", sizeQuantities.Select(kv => $"{kv.Key}:{kv.Value}"));
+                                    }
+                                }
+                                else
+                                {
+                                    // Nếu không có cột kích thước, đọc số lượng từ cột thứ 4
+                                    var quantityValue = worksheet.Cells[row, 4].Value;
+                                    if (quantityValue == null || !int.TryParse(quantityValue.ToString(), out totalQuantity) || totalQuantity < 0)
+                                    {
+                                        errors.Add($"Dòng {row}: Số lượng không hợp lệ");
+                                        errorCount++;
+                                        continue;
+                                    }
                                 }
 
                                 // Kiểm tra sản phẩm đã tồn tại chưa
@@ -422,11 +512,31 @@ namespace NgoHuuDuc_2280600725.Controllers
                                     // Cập nhật sản phẩm đã tồn tại
                                     product.CategoryId = category.Id;
                                     product.Price = price;
-                                    product.Quantity = quantity;
+                                    product.Quantity = totalQuantity;
 
-                                    // Chỉ cập nhật mô tả nếu có giá trị mới
+                                    // Cập nhật mô tả và thông tin kích thước
                                     if (!string.IsNullOrEmpty(description))
                                     {
+                                        // Kiểm tra xem mô tả đã có thông tin kích thước chưa
+                                        if (hasSizeColumns && !string.IsNullOrEmpty(sizeInfo))
+                                        {
+                                            var sizeTag = "[SIZES]";
+                                            var endSizeTag = "[/SIZES]";
+
+                                            if (description.Contains(sizeTag) && description.Contains(endSizeTag))
+                                            {
+                                                // Cập nhật phần kích cỡ trong mô tả
+                                                var startIndex = description.IndexOf(sizeTag) + sizeTag.Length;
+                                                var endIndex = description.IndexOf(endSizeTag);
+                                                description = description.Substring(0, startIndex) + sizeInfo + description.Substring(endIndex);
+                                            }
+                                            else
+                                            {
+                                                // Thêm phần kích cỡ vào cuối mô tả
+                                                description += $"\n\n{sizeTag}{sizeInfo}{endSizeTag}";
+                                            }
+                                        }
+
                                         product.Description = description;
                                     }
 
@@ -436,13 +546,21 @@ namespace NgoHuuDuc_2280600725.Controllers
                                 else
                                 {
                                     // Tạo sản phẩm mới
+                                    string finalDescription = description ?? "";
+
+                                    // Thêm thông tin kích thước vào mô tả nếu có
+                                    if (hasSizeColumns && !string.IsNullOrEmpty(sizeInfo))
+                                    {
+                                        finalDescription += $"\n\n[SIZES]{sizeInfo}[/SIZES]";
+                                    }
+
                                     product = new Product
                                     {
                                         Name = name,
                                         CategoryId = category.Id,
                                         Price = price,
-                                        Quantity = quantity,
-                                        Description = description ?? ""
+                                        Quantity = totalQuantity,
+                                        Description = finalDescription
                                     };
 
                                     _context.Products.Add(product);
@@ -489,7 +607,6 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return StatusCode(500, "Có lỗi xảy ra khi nhập Excel: " + ex.Message);
             }
         }
-
 
     }
 }
