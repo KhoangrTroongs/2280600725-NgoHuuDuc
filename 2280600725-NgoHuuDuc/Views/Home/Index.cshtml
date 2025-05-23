@@ -1,5 +1,12 @@
-﻿@{
+﻿@using NgoHuuDuc_2280600725.Models
+@{
     ViewData["Title"] = "Home Page";
+    var productsByCategory = ViewBag.ProductsByCategory as Dictionary<string, List<Product>>;
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ThreeJSScriptsPartial")
 }
 
 <div id="myCarousel" class="carousel slide mb-6 carousel-elegant" data-bs-ride="carousel">
@@ -79,59 +86,121 @@
 
 <div class="container marketing mt-5">
     <div class="row">
-        <div class="col-12 col-sm-6 col-lg-4 text-center">
-            <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple1">
-            <h2 class="fw-normal">Hoàng Ân</h2>
-            <p>Supper Support</p>
-            <p><a class="btn btn-elegant-secondary" href="https://github.com/SushiRedpanda" target="_blank">Xem thêm »</a></p>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4 text-center">
-            <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple2">
-            <h2 class="fw-normal">Ngô Hữu Đức</h2>
-            <p>Hàng không, ăn hàng ở không</p>
-            <p><a class="btn btn-elegant-secondary" href="https://github.com/khoangrtroongs" target="_blank">Xem thêm »</a></p>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4 text-center">
-            <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple3">
-            <h2 class="fw-normal">Nguyễn Quốc Trung</h2>
-            <p>Fép đêêêêêêêêêêêêêêêê</p>
-            <p><a class="btn btn-elegant-secondary" href="https://github.com/TrungQNdev20" target="_blank">Xem thêm »</a></p>
-        </div>
-    </div>
+        <!-- Hiển thị sản phẩm theo từng danh mục -->
+        @if (productsByCategory != null)
+        {
+            @foreach (var category in productsByCategory)
+            {
+                <div class="col-12 mb-5">
+                    <h2 class="fw-normal text-center mb-4">@category.Key</h2>
+                    <div class="row">
+                        @foreach (var product in category.Value)
+                        {
+                            <div class="col-md-2 col-sm-4 col-6 mb-4">
+                                <div class="card h-100 product-card">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 150px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/no-image.png" class="card-img-top" alt="No Image" style="height: 150px; object-fit: cover;">
+                                        }
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">@product.Name</h6>
+                                            <p class="card-text text-danger fw-bold">@product.Price.ToString("N0") đ</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="text-center mt-3">
+                        @{
+                            var categoryId = categories?.FirstOrDefault(c => c.Name == category.Key)?.Id;
+                        }
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@categoryId" class="btn btn-elegant-secondary">Xem thêm sản phẩm @category.Key</a>
+                    </div>
+                </div>
 
-    <hr class="featurette-divider">
+                <hr class="featurette-divider">
+            }
+        }
 
-    <div class="row featurette">
-        <div class="col-md-7">
-            <h2 class="featurette-heading fw-normal lh-1">Đa dạng kiểu loại. <span class="text-body-secondary">Tìm mỏi con mắt luôn.</span></h2>
-            <p class="lead">Đầy đủ các kiểu dáng. Phù hợp cho mọi lứa tuổi.</p>
+        <!-- Phần mô hình 3D và giới thiệu cửa hàng -->
+        <div class="row featurette mb-5">
+            <div class="col-md-6">
+                <h2 class="featurette-heading fw-normal lh-1">Trải nghiệm mô hình 3D <span class="text-body-secondary">Xem trước sản phẩm chân thực</span></h2>
+                <p class="lead">Elegant Suits tự hào giới thiệu công nghệ xem trước sản phẩm 3D, giúp bạn có cái nhìn chân thực nhất về sản phẩm trước khi quyết định mua hàng.</p>
+                <p>Với công nghệ hiện đại, bạn có thể:</p>
+                <ul>
+                    <li>Xoay, phóng to, thu nhỏ để xem chi tiết sản phẩm</li>
+                    <li>Thay đổi màu sắc để lựa chọn phù hợp với sở thích</li>
+                    <li>Xem trước sản phẩm từ mọi góc độ</li>
+                </ul>
+                <p><a asp-controller="Product" asp-action="Index" class="btn btn-elegant-primary mt-3">Xem tất cả sản phẩm</a></p>
+            </div>
+            <div class="col-md-6">
+                <div id="model-container" style="height: 400px; border-radius: 10px; overflow: hidden; border: 3px solid var(--elegant-gold-light);" class="shadow"></div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Hiển thị mô hình 3D cố định từ thư mục models/products
+                        show3DModel('model-container', '/models/products/final_suit.glb');
+                    });
+                </script>
+                <div class="model-controls mt-3 text-center">
+                    <button class="btn btn-sm btn-elegant-secondary me-2" onclick="changeModel('/models/products/final_suit.glb')">Vest</button>
+                    <button class="btn btn-sm btn-elegant-secondary me-2" onclick="changeModel('/models/products/final_shirt.glb')">Áo sơ mi</button>
+                    <button class="btn btn-sm btn-elegant-secondary me-2" onclick="changeModel('/models/products/final_trousers.glb')">Quần tây</button>
+                    <button class="btn btn-sm btn-elegant-secondary" onclick="changeModel('/models/products/final_gile.glb')">Gile</button>
+                </div>
+            </div>
         </div>
-        <div class="col-md-5">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/feat1.jpg" alt="Cuahang" style="border: 3px solid var(--elegant-gold-light);">
-        </div>
-    </div>
 
-    <hr class="featurette-divider">
+        <hr class="featurette-divider">
 
-    <div class="row featurette">
-        <div class="col-md-7 order-md-2">
-            <h2 class="featurette-heading fw-normal lh-1">Bạn không tìm thấy mẫu ứng ý ?!. <span class="text-body-secondary">Đừng lo, chúng tôi sẽ giúp bạn!</span></h2>
-            <p class="lead">Với hơn 500 mẫu có sẵn, chúng tôi sẽ "tùy chỉnh" lại một bộ suit dành riêng cho bạn. Tha hồ lựa chọn kiểu dáng, kích thước không giới hạn, chất liệu vải đa dạng.</p>
+        <div class="row featurette mb-5">
+            <div class="col-md-7 order-md-2">
+                <h2 class="featurette-heading fw-normal lh-1">Về Elegant Suits <span class="text-body-secondary">Đẳng cấp và phong cách</span></h2>
+                <p class="lead">Elegant Suits là thương hiệu thời trang nam cao cấp chuyên cung cấp các sản phẩm vest, quần tây, áo sơ mi với chất lượng hàng đầu.</p>
+                <p>Chúng tôi cam kết:</p>
+                <ul>
+                    <li>Sử dụng chất liệu cao cấp, nhập khẩu từ các thương hiệu nổi tiếng</li>
+                    <li>Thiết kế tinh tế, phù hợp với xu hướng thời trang hiện đại</li>
+                    <li>Đa dạng mẫu mã, kích cỡ phù hợp với mọi vóc dáng</li>
+                    <li>Dịch vụ chăm sóc khách hàng tận tâm</li>
+                </ul>
+                <p><a href="#" class="btn btn-elegant-secondary mt-3">Tìm hiểu thêm về chúng tôi</a></p>
+            </div>
+            <div class="col-md-5 order-md-1">
+                <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/maydo.jpg" alt="Elegant Suits" style="border: 3px solid var(--elegant-gold-light);">
+            </div>
         </div>
-        <div class="col-md-5 order-md-1">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/maydo.jpg" alt="Maydo" style="border: 3px solid var(--elegant-gold-light);">
-        </div>
-    </div>
 
-    <hr class="featurette-divider">
+        <hr class="featurette-divider">
 
-    <div class="row featurette">
-        <div class="col-md-7">
-            <h2 class="featurette-heading fw-normal lh-1">Tiết kiệm chi phí. <span class="text-body-secondary">Không lo về giá!</span></h2>
-            <p class="lead">Bạn chỉ đi dự tiệc có một lần nhưng phải mua hẳn một bộ suit ? Đừng lo, bên chúng tôi sẽ cho bạn mượn.</p>
-        </div>
-        <div class="col-md-5">
-            <img class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto rounded-5 shadow" width="500" height="500" src="~/images/img/wall2.jpg" alt="chomuon" style="border: 3px solid var(--elegant-gold-light);">
+        <!-- Phần hiển thị thành viên -->
+        <h2 class="fw-normal text-center mb-4">Đội ngũ của chúng tôi</h2>
+        <div class="row mb-5">
+            <div class="col-12 col-sm-6 col-lg-4 text-center">
+                <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple1">
+                <h2 class="fw-normal">Hoàng Ân</h2>
+                <p>Supper Support</p>
+                <p><a class="btn btn-elegant-secondary" href="https://github.com/SushiRedpanda" target="_blank">Xem thêm »</a></p>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 text-center">
+                <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple2">
+                <h2 class="fw-normal">Ngô Hữu Đức</h2>
+                <p>Hàng không, ăn hàng ở không</p>
+                <p><a class="btn btn-elegant-secondary" href="https://github.com/khoangrtroongs" target="_blank">Xem thêm »</a></p>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 text-center">
+                <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple3">
+                <h2 class="fw-normal">Nguyễn Quốc Trung</h2>
+                <p>Fép đêêêêêêêêêêêêêêêê</p>
+                <p><a class="btn btn-elegant-secondary" href="https://github.com/TrungQNdev20" target="_blank">Xem thêm »</a></p>
+            </div>
         </div>
     </div>
 </div>

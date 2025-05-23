@@ -33,20 +33,29 @@ namespace NgoHuuDuc_2280600725.Controllers
                 return RedirectToAction(nameof(Dashboard));
             }
 
-            var products = _context.Products
-                .Include(p => p.Category)
-                .Where(p => !p.IsHidden) // Chỉ hiển thị sản phẩm không bị ẩn
-                .AsQueryable();
+            // Lấy danh sách danh mục
+            var categories = await _context.Categories.ToListAsync();
+            ViewBag.Categories = categories;
 
-            if (categoryId.HasValue)
+            // Dictionary để lưu trữ sản phẩm theo danh mục
+            var productsByCategory = new Dictionary<string, List<Product>>();
+
+            // Lấy 5 sản phẩm mới nhất từ mỗi danh mục
+            foreach (var category in categories)
             {
-                products = products.Where(p => p.CategoryId == categoryId.Value);
-                var selectedCategory = await _context.Categories.FindAsync(categoryId.Value);
-                ViewBag.SelectedCategoryName = selectedCategory?.Name ?? "Unknown Category";
+                var categoryProducts = await _context.Products
+                    .Where(p => p.CategoryId == category.Id && !p.IsHidden)
+                    .OrderByDescending(p => p.Id) // Sắp xếp theo ID giảm dần (mới nhất trước)
+                    .Take(5)
+                    .ToListAsync();
+
+                productsByCategory.Add(category.Name, categoryProducts);
             }
 
-            ViewBag.Categories = await _context.Categories.ToListAsync();
-            return View(await products.ToListAsync());
+            // Không cần lấy sản phẩm có mô hình 3D nữa vì chúng ta sẽ hiển thị mô hình cố định
+            ViewBag.ProductsByCategory = productsByCategory;
+
+            return View();
         }
 
         [Authorize(Roles = "Administrator")]

@@ -162,10 +162,68 @@
 
                     viewerContainer.appendChild(toggleBtn);
 
-                    // Compact header
-                    colorControls.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold; font-size: 12px; color: #333; text-align: center;">Màu sắc</div>';
+                    // Create tabs for different color options
+                    const tabsContainer = document.createElement('div');
+                    tabsContainer.style.display = 'flex';
+                    tabsContainer.style.marginBottom = '8px';
+                    tabsContainer.style.borderBottom = '1px solid #ddd';
 
-                    // Create color grid container - more compact
+                    // Solid color tab
+                    const solidColorTab = document.createElement('div');
+                    solidColorTab.innerText = 'Màu đơn';
+                    solidColorTab.style.padding = '4px 8px';
+                    solidColorTab.style.cursor = 'pointer';
+                    solidColorTab.style.fontSize = '12px';
+                    solidColorTab.style.fontWeight = 'bold';
+                    solidColorTab.style.borderBottom = '2px solid #007bff';
+                    solidColorTab.style.color = '#007bff';
+
+                    // Checkered pattern tab
+                    const checkeredTab = document.createElement('div');
+                    checkeredTab.innerText = 'Màu caro';
+                    checkeredTab.style.padding = '4px 8px';
+                    checkeredTab.style.cursor = 'pointer';
+                    checkeredTab.style.fontSize = '12px';
+                    checkeredTab.style.fontWeight = 'bold';
+                    checkeredTab.style.borderBottom = '2px solid transparent';
+                    checkeredTab.style.color = '#666';
+
+                    // Add tabs to container
+                    tabsContainer.appendChild(solidColorTab);
+                    tabsContainer.appendChild(checkeredTab);
+                    colorControls.appendChild(tabsContainer);
+
+                    // Create content containers for each tab
+                    const solidColorContent = document.createElement('div');
+                    solidColorContent.style.display = 'block';
+
+                    const checkeredContent = document.createElement('div');
+                    checkeredContent.style.display = 'none';
+
+                    // Tab switching functionality
+                    solidColorTab.onclick = function() {
+                        solidColorContent.style.display = 'block';
+                        checkeredContent.style.display = 'none';
+                        solidColorTab.style.borderBottom = '2px solid #007bff';
+                        solidColorTab.style.color = '#007bff';
+                        checkeredTab.style.borderBottom = '2px solid transparent';
+                        checkeredTab.style.color = '#666';
+                    };
+
+                    checkeredTab.onclick = function() {
+                        solidColorContent.style.display = 'none';
+                        checkeredContent.style.display = 'block';
+                        checkeredTab.style.borderBottom = '2px solid #007bff';
+                        checkeredTab.style.color = '#007bff';
+                        solidColorTab.style.borderBottom = '2px solid transparent';
+                        solidColorTab.style.color = '#666';
+                    };
+
+                    // Add content containers to color controls
+                    colorControls.appendChild(solidColorContent);
+                    colorControls.appendChild(checkeredContent);
+
+                    // Create color grid container for solid colors - more compact
                     const colorGrid = document.createElement('div');
                     colorGrid.style.display = 'grid';
                     colorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; // 5 columns instead of 6
@@ -207,9 +265,9 @@
                         colorGrid.appendChild(colorBtn);
                     });
 
-                    colorControls.appendChild(colorGrid);
+                    solidColorContent.appendChild(colorGrid);
 
-                    // Add compact controls row
+                    // Add compact controls row for solid colors
                     const controlsRow = document.createElement('div');
                     controlsRow.style.display = 'flex';
                     controlsRow.style.justifyContent = 'space-between';
@@ -267,7 +325,416 @@
                     controlsRow.appendChild(customColorInput);
                     controlsRow.appendChild(applyCustomBtn);
 
-                    colorControls.appendChild(controlsRow);
+                    solidColorContent.appendChild(controlsRow);
+
+                    // Create checkered pattern controls
+                    const checkeredHeader = document.createElement('div');
+                    checkeredHeader.innerHTML = '<div style="margin-bottom: 8px; font-size: 12px; color: #333;">Chọn màu cho họa tiết caro:</div>';
+                    checkeredContent.appendChild(checkeredHeader);
+
+                    // Create primary color selector
+                    const primaryColorLabel = document.createElement('div');
+                    primaryColorLabel.innerText = 'Màu chính:';
+                    primaryColorLabel.style.fontSize = '12px';
+                    primaryColorLabel.style.marginBottom = '4px';
+                    checkeredContent.appendChild(primaryColorLabel);
+
+                    // Create primary color grid
+                    const primaryColorGrid = document.createElement('div');
+                    primaryColorGrid.style.display = 'grid';
+                    primaryColorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+                    primaryColorGrid.style.gap = '6px';
+                    primaryColorGrid.style.marginBottom = '12px';
+
+                    // Create secondary color selector
+                    const secondaryColorLabel = document.createElement('div');
+                    secondaryColorLabel.innerText = 'Màu phụ:';
+                    secondaryColorLabel.style.fontSize = '12px';
+                    secondaryColorLabel.style.marginBottom = '4px';
+
+                    // Create secondary color grid
+                    const secondaryColorGrid = document.createElement('div');
+                    secondaryColorGrid.style.display = 'grid';
+                    secondaryColorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+                    secondaryColorGrid.style.gap = '6px';
+                    secondaryColorGrid.style.marginBottom = '12px';
+
+                    // Add color buttons to primary and secondary grids
+                    colors.forEach(color => {
+                        // Primary color button
+                        const primaryColorBtn = document.createElement('button');
+                        primaryColorBtn.style.width = '25px';
+                        primaryColorBtn.style.height = '25px';
+                        primaryColorBtn.style.backgroundColor = color.hex;
+                        primaryColorBtn.style.border = '2px solid #ddd';
+                        primaryColorBtn.style.borderRadius = '50%';
+                        primaryColorBtn.style.cursor = 'pointer';
+                        primaryColorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
+                        primaryColorBtn.title = color.name;
+                        primaryColorBtn.dataset.color = color.hex;
+                        primaryColorBtn.className = 'primary-color-btn';
+
+                        // Add hover effect
+                        primaryColorBtn.onmouseover = function() {
+                            this.style.transform = 'scale(1.1)';
+                        };
+
+                        primaryColorBtn.onmouseout = function() {
+                            this.style.transform = 'scale(1)';
+                        };
+
+                        primaryColorBtn.onclick = function() {
+                            // Update primary color
+                            const primaryColor = this.dataset.color;
+                            const secondaryColor = currentCheckeredColors.secondary;
+                            const patternSize = parseInt(patternSizeSlider.value);
+                            const lineWidth = parseFloat(lineWidthSlider.value);
+                            const lineSpacing = parseInt(lineSpacingSlider.value);
+                            const patternType = patternTypeSelect.value;
+
+                            applyCheckeredPattern(gltf.scene, primaryColor, secondaryColor, patternSize, lineWidth, patternType, lineSpacing);
+
+                            // Highlight selected color
+                            document.querySelectorAll('.primary-color-btn').forEach(btn => {
+                                btn.style.border = '2px solid #ddd';
+                                btn.style.boxShadow = 'none';
+                            });
+                            this.style.border = '2px solid #000';
+                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
+                        };
+
+                        primaryColorGrid.appendChild(primaryColorBtn);
+
+                        // Secondary color button
+                        const secondaryColorBtn = document.createElement('button');
+                        secondaryColorBtn.style.width = '25px';
+                        secondaryColorBtn.style.height = '25px';
+                        secondaryColorBtn.style.backgroundColor = color.hex;
+                        secondaryColorBtn.style.border = '2px solid #ddd';
+                        secondaryColorBtn.style.borderRadius = '50%';
+                        secondaryColorBtn.style.cursor = 'pointer';
+                        secondaryColorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
+                        secondaryColorBtn.title = color.name;
+                        secondaryColorBtn.dataset.color = color.hex;
+                        secondaryColorBtn.className = 'secondary-color-btn';
+
+                        // Add hover effect
+                        secondaryColorBtn.onmouseover = function() {
+                            this.style.transform = 'scale(1.1)';
+                        };
+
+                        secondaryColorBtn.onmouseout = function() {
+                            this.style.transform = 'scale(1)';
+                        };
+
+                        secondaryColorBtn.onclick = function() {
+                            // Update secondary color
+                            const primaryColor = currentCheckeredColors.primary;
+                            const secondaryColor = this.dataset.color;
+                            const patternSize = parseInt(patternSizeSlider.value);
+                            const lineWidth = parseFloat(lineWidthSlider.value);
+                            const lineSpacing = parseInt(lineSpacingSlider.value);
+                            const patternType = patternTypeSelect.value;
+
+                            applyCheckeredPattern(gltf.scene, primaryColor, secondaryColor, patternSize, lineWidth, patternType, lineSpacing);
+
+                            // Highlight selected color
+                            document.querySelectorAll('.secondary-color-btn').forEach(btn => {
+                                btn.style.border = '2px solid #ddd';
+                                btn.style.boxShadow = 'none';
+                            });
+                            this.style.border = '2px solid #000';
+                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
+                        };
+
+                        secondaryColorGrid.appendChild(secondaryColorBtn);
+                    });
+
+                    checkeredContent.appendChild(primaryColorGrid);
+                    checkeredContent.appendChild(secondaryColorLabel);
+                    checkeredContent.appendChild(secondaryColorGrid);
+
+                    // Add custom color controls for checkered pattern
+                    const checkeredCustomControls = document.createElement('div');
+                    checkeredCustomControls.style.display = 'flex';
+                    checkeredCustomControls.style.flexDirection = 'column';
+                    checkeredCustomControls.style.gap = '8px';
+
+                    // Primary custom color
+                    const primaryCustomRow = document.createElement('div');
+                    primaryCustomRow.style.display = 'flex';
+                    primaryCustomRow.style.alignItems = 'center';
+                    primaryCustomRow.style.gap = '5px';
+
+                    const primaryCustomLabel = document.createElement('div');
+                    primaryCustomLabel.innerText = 'Màu chính tùy chỉnh:';
+                    primaryCustomLabel.style.fontSize = '12px';
+                    primaryCustomLabel.style.flex = '1';
+
+                    const primaryCustomInput = document.createElement('input');
+                    primaryCustomInput.type = 'color';
+                    primaryCustomInput.style.width = '30px';
+                    primaryCustomInput.style.height = '30px';
+                    primaryCustomInput.style.border = 'none';
+                    primaryCustomInput.style.borderRadius = '4px';
+                    primaryCustomInput.style.cursor = 'pointer';
+                    primaryCustomInput.style.padding = '0';
+                    primaryCustomInput.value = currentCheckeredColors.primary;
+
+                    primaryCustomRow.appendChild(primaryCustomLabel);
+                    primaryCustomRow.appendChild(primaryCustomInput);
+
+                    // Secondary custom color
+                    const secondaryCustomRow = document.createElement('div');
+                    secondaryCustomRow.style.display = 'flex';
+                    secondaryCustomRow.style.alignItems = 'center';
+                    secondaryCustomRow.style.gap = '5px';
+
+                    const secondaryCustomLabel = document.createElement('div');
+                    secondaryCustomLabel.innerText = 'Màu phụ tùy chỉnh:';
+                    secondaryCustomLabel.style.fontSize = '12px';
+                    secondaryCustomLabel.style.flex = '1';
+
+                    const secondaryCustomInput = document.createElement('input');
+                    secondaryCustomInput.type = 'color';
+                    secondaryCustomInput.style.width = '30px';
+                    secondaryCustomInput.style.height = '30px';
+                    secondaryCustomInput.style.border = 'none';
+                    secondaryCustomInput.style.borderRadius = '4px';
+                    secondaryCustomInput.style.cursor = 'pointer';
+                    secondaryCustomInput.style.padding = '0';
+                    secondaryCustomInput.value = currentCheckeredColors.secondary;
+
+                    secondaryCustomRow.appendChild(secondaryCustomLabel);
+                    secondaryCustomRow.appendChild(secondaryCustomInput);
+
+                    // Add pattern type selector
+                    const patternTypeRow = document.createElement('div');
+                    patternTypeRow.style.display = 'flex';
+                    patternTypeRow.style.alignItems = 'center';
+                    patternTypeRow.style.gap = '5px';
+                    patternTypeRow.style.marginTop = '8px';
+
+                    const patternTypeLabel = document.createElement('div');
+                    patternTypeLabel.innerText = 'Kiểu caro:';
+                    patternTypeLabel.style.fontSize = '12px';
+                    patternTypeLabel.style.flex = '1';
+
+                    const patternTypeSelect = document.createElement('select');
+                    patternTypeSelect.style.fontSize = '12px';
+                    patternTypeSelect.style.padding = '2px 5px';
+                    patternTypeSelect.style.borderRadius = '4px';
+                    patternTypeSelect.style.border = '1px solid #ccc';
+
+                    // Add options
+                    const checkeredOption = document.createElement('option');
+                    checkeredOption.value = 'checkered';
+                    checkeredOption.text = 'Caro đan xen';
+                    checkeredOption.selected = currentPatternType === 'checkered';
+
+                    const windowpaneOption = document.createElement('option');
+                    windowpaneOption.value = 'windowpane';
+                    windowpaneOption.text = 'Caro cửa sổ';
+                    windowpaneOption.selected = currentPatternType === 'windowpane';
+
+                    const doubleWindowpaneOption = document.createElement('option');
+                    doubleWindowpaneOption.value = 'double-windowpane';
+                    doubleWindowpaneOption.text = 'Caro cửa sổ đôi';
+                    doubleWindowpaneOption.selected = currentPatternType === 'double-windowpane';
+
+                    patternTypeSelect.appendChild(checkeredOption);
+                    patternTypeSelect.appendChild(windowpaneOption);
+                    patternTypeSelect.appendChild(doubleWindowpaneOption);
+
+                    patternTypeSelect.onchange = function() {
+                        currentPatternType = this.value;
+
+                        // Show/hide controls based on pattern type
+                        const isWindowpane = currentPatternType === 'windowpane' || currentPatternType === 'double-windowpane';
+                        const isDoubleWindowpane = currentPatternType === 'double-windowpane';
+
+                        lineWidthRow.style.display = isWindowpane ? 'flex' : 'none';
+                        lineSpacingRow.style.display = isDoubleWindowpane ? 'flex' : 'none';
+                    };
+
+                    patternTypeRow.appendChild(patternTypeLabel);
+                    patternTypeRow.appendChild(patternTypeSelect);
+
+                    // Add pattern size control
+                    const patternSizeRow = document.createElement('div');
+                    patternSizeRow.style.display = 'flex';
+                    patternSizeRow.style.alignItems = 'center';
+                    patternSizeRow.style.gap = '5px';
+                    patternSizeRow.style.marginTop = '8px';
+
+                    const patternSizeLabel = document.createElement('div');
+                    patternSizeLabel.innerText = 'Kích thước ô caro:';
+                    patternSizeLabel.style.fontSize = '12px';
+                    patternSizeLabel.style.flex = '1';
+
+                    const patternSizeSlider = document.createElement('input');
+                    patternSizeSlider.type = 'range';
+                    patternSizeSlider.min = '4';
+                    patternSizeSlider.max = '24';
+                    patternSizeSlider.step = '2';
+                    patternSizeSlider.value = currentCheckeredSize.toString();
+                    patternSizeSlider.style.width = '100px';
+
+                    const patternSizeValue = document.createElement('span');
+                    patternSizeValue.innerText = currentCheckeredSize.toString();
+                    patternSizeValue.style.fontSize = '12px';
+                    patternSizeValue.style.marginLeft = '5px';
+                    patternSizeValue.style.width = '20px';
+                    patternSizeValue.style.textAlign = 'center';
+
+                    patternSizeSlider.oninput = function() {
+                        patternSizeValue.innerText = this.value;
+                    };
+
+                    patternSizeRow.appendChild(patternSizeLabel);
+                    patternSizeRow.appendChild(patternSizeSlider);
+                    patternSizeRow.appendChild(patternSizeValue);
+
+                    // Add line width control for windowpane pattern
+                    const lineWidthRow = document.createElement('div');
+                    lineWidthRow.style.display = currentPatternType === 'windowpane' ? 'flex' : 'none';
+                    lineWidthRow.style.alignItems = 'center';
+                    lineWidthRow.style.gap = '5px';
+                    lineWidthRow.style.marginTop = '8px';
+
+                    const lineWidthLabel = document.createElement('div');
+                    lineWidthLabel.innerText = 'Độ dày đường kẻ:';
+                    lineWidthLabel.style.fontSize = '12px';
+                    lineWidthLabel.style.flex = '1';
+
+                    const lineWidthSlider = document.createElement('input');
+                    lineWidthSlider.type = 'range';
+                    lineWidthSlider.min = '1';
+                    lineWidthSlider.max = '5';
+                    lineWidthSlider.step = '0.5';
+                    lineWidthSlider.value = currentLineWidth.toString();
+                    lineWidthSlider.style.width = '100px';
+
+                    const lineWidthValue = document.createElement('span');
+                    lineWidthValue.innerText = currentLineWidth.toString();
+                    lineWidthValue.style.fontSize = '12px';
+                    lineWidthValue.style.marginLeft = '5px';
+                    lineWidthValue.style.width = '20px';
+                    lineWidthValue.style.textAlign = 'center';
+
+                    lineWidthSlider.oninput = function() {
+                        lineWidthValue.innerText = this.value;
+                    };
+
+                    lineWidthRow.appendChild(lineWidthLabel);
+                    lineWidthRow.appendChild(lineWidthSlider);
+                    lineWidthRow.appendChild(lineWidthValue);
+
+                    // Add line spacing control for double windowpane pattern
+                    const lineSpacingRow = document.createElement('div');
+                    lineSpacingRow.style.display = currentPatternType === 'double-windowpane' ? 'flex' : 'none';
+                    lineSpacingRow.style.alignItems = 'center';
+                    lineSpacingRow.style.gap = '5px';
+                    lineSpacingRow.style.marginTop = '8px';
+
+                    const lineSpacingLabel = document.createElement('div');
+                    lineSpacingLabel.innerText = 'Khoảng cách đường kẻ:';
+                    lineSpacingLabel.style.fontSize = '12px';
+                    lineSpacingLabel.style.flex = '1';
+
+                    const lineSpacingSlider = document.createElement('input');
+                    lineSpacingSlider.type = 'range';
+                    lineSpacingSlider.min = '2';
+                    lineSpacingSlider.max = '10';
+                    lineSpacingSlider.step = '1';
+                    lineSpacingSlider.value = currentLineSpacing.toString();
+                    lineSpacingSlider.style.width = '100px';
+
+                    const lineSpacingValue = document.createElement('span');
+                    lineSpacingValue.innerText = currentLineSpacing.toString();
+                    lineSpacingValue.style.fontSize = '12px';
+                    lineSpacingValue.style.marginLeft = '5px';
+                    lineSpacingValue.style.width = '20px';
+                    lineSpacingValue.style.textAlign = 'center';
+
+                    lineSpacingSlider.oninput = function() {
+                        lineSpacingValue.innerText = this.value;
+                    };
+
+                    lineSpacingRow.appendChild(lineSpacingLabel);
+                    lineSpacingRow.appendChild(lineSpacingSlider);
+                    lineSpacingRow.appendChild(lineSpacingValue);
+
+                    // Apply button for custom checkered colors
+                    const applyCheckeredBtn = document.createElement('button');
+                    applyCheckeredBtn.innerHTML = 'Áp dụng màu caro';
+                    applyCheckeredBtn.className = 'btn btn-sm btn-primary';
+                    applyCheckeredBtn.style.marginTop = '5px';
+                    applyCheckeredBtn.style.fontSize = '12px';
+
+                    applyCheckeredBtn.onclick = function() {
+                        const primaryColor = primaryCustomInput.value;
+                        const secondaryColor = secondaryCustomInput.value;
+                        const patternSize = parseInt(patternSizeSlider.value);
+                        const lineWidth = parseFloat(lineWidthSlider.value);
+                        const lineSpacing = parseInt(lineSpacingSlider.value);
+                        const patternType = patternTypeSelect.value;
+
+                        // Update global variables
+                        currentCheckeredColors.primary = primaryColor;
+                        currentCheckeredColors.secondary = secondaryColor;
+                        currentCheckeredSize = patternSize;
+                        currentLineWidth = lineWidth;
+                        currentLineSpacing = lineSpacing;
+                        currentPatternType = patternType;
+
+                        // Apply pattern with all parameters
+                        const texture = createPatternTexture(primaryColor, secondaryColor, 512, patternSize, lineWidth, lineSpacing);
+
+                        // Apply texture to model
+                        applyTextureToModel(gltf.scene, texture);
+
+                        // Reset button highlights
+                        document.querySelectorAll('.primary-color-btn, .secondary-color-btn').forEach(btn => {
+                            btn.style.border = '2px solid #ddd';
+                            btn.style.boxShadow = 'none';
+                        });
+                    };
+
+                    // Add reset button for checkered pattern
+                    const resetCheckeredBtn = document.createElement('button');
+                    resetCheckeredBtn.innerHTML = '<i class="fas fa-undo-alt"></i> Khôi phục màu gốc';
+                    resetCheckeredBtn.className = 'btn btn-sm btn-outline-secondary';
+                    resetCheckeredBtn.style.marginTop = '5px';
+                    resetCheckeredBtn.style.fontSize = '12px';
+                    resetCheckeredBtn.style.marginRight = '5px';
+
+                    resetCheckeredBtn.onclick = function() {
+                        resetModelColor(gltf.scene);
+                        // Reset button highlights
+                        document.querySelectorAll('.primary-color-btn, .secondary-color-btn').forEach(btn => {
+                            btn.style.border = '2px solid #ddd';
+                            btn.style.boxShadow = 'none';
+                        });
+                    };
+
+                    // Create a row for buttons
+                    const checkeredButtonsRow = document.createElement('div');
+                    checkeredButtonsRow.style.display = 'flex';
+                    checkeredButtonsRow.style.justifyContent = 'space-between';
+
+                    checkeredButtonsRow.appendChild(resetCheckeredBtn);
+                    checkeredButtonsRow.appendChild(applyCheckeredBtn);
+
+                    checkeredCustomControls.appendChild(primaryCustomRow);
+                    checkeredCustomControls.appendChild(secondaryCustomRow);
+                    checkeredCustomControls.appendChild(patternTypeRow);
+                    checkeredCustomControls.appendChild(patternSizeRow);
+                    checkeredCustomControls.appendChild(lineWidthRow);
+                    checkeredCustomControls.appendChild(lineSpacingRow);
+                    checkeredCustomControls.appendChild(checkeredButtonsRow);
+
+                    checkeredContent.appendChild(checkeredCustomControls);
                     viewerContainer.appendChild(colorControls);
 
                     // Add the container to the DOM
@@ -372,6 +839,11 @@
     let scene = null;
     let camera = null;
     let renderer = null;
+    let currentCheckeredColors = { primary: '#FFFFFF', secondary: '#000000' };
+    let currentCheckeredSize = 12; // Default number of segments in the checkered pattern
+    let currentPatternType = 'windowpane'; // 'checkered', 'windowpane', or 'double-windowpane'
+    let currentLineWidth = 1; // Line width for windowpane pattern
+    let currentLineSpacing = 3; // Spacing between double lines for double-windowpane pattern
 
     // Function to change model color - enhanced to handle black materials and only change the largest material
     function changeModelColor(model, colorHex) {
@@ -948,6 +1420,610 @@
                 </ul>
             </div>
         `;
+    }
+
+    // Function to create a pattern texture based on the current pattern type
+    function createPatternTexture(primaryColor, secondaryColor, size = 512, segments = null, lineWidth = null, lineSpacing = null) {
+        // Use the global values if not provided
+        if (segments === null) {
+            segments = currentCheckeredSize;
+        }
+
+        if (lineWidth === null) {
+            lineWidth = currentLineWidth;
+        }
+
+        if (lineSpacing === null) {
+            lineSpacing = currentLineSpacing;
+        }
+
+        // Create appropriate texture based on pattern type
+        if (currentPatternType === 'windowpane') {
+            return createWindowpaneTexture(primaryColor, secondaryColor, size, segments, lineWidth);
+        } else if (currentPatternType === 'double-windowpane') {
+            return createDoubleWindowpaneTexture(primaryColor, secondaryColor, size, segments, lineWidth, lineSpacing);
+        } else {
+            return createCheckeredTexture(primaryColor, secondaryColor, size, segments);
+        }
+    }
+
+    // Function to create a double windowpane pattern texture (with double lines)
+    function createDoubleWindowpaneTexture(primaryColor, secondaryColor, size = 512, segments = 12, lineWidth = 1, lineSpacing = 3) {
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Fill the background with the primary color
+        ctx.fillStyle = primaryColor;
+        ctx.fillRect(0, 0, size, size);
+
+        // Set line properties
+        ctx.strokeStyle = secondaryColor;
+        ctx.lineWidth = lineWidth;
+
+        // Calculate the size of each cell
+        const cellSize = size / segments;
+
+        // Draw the grid lines
+        ctx.beginPath();
+
+        // Draw vertical double lines
+        for (let x = 1; x < segments; x++) {
+            if (x % 3 === 0) { // Draw double lines every 3 cells for a more elegant look
+                const xPos1 = x * cellSize - lineSpacing/2;
+                const xPos2 = x * cellSize + lineSpacing/2;
+
+                // First line
+                ctx.moveTo(xPos1, 0);
+                ctx.lineTo(xPos1, size);
+
+                // Second line
+                ctx.moveTo(xPos2, 0);
+                ctx.lineTo(xPos2, size);
+            }
+        }
+
+        // Draw horizontal double lines
+        for (let y = 1; y < segments; y++) {
+            if (y % 3 === 0) { // Draw double lines every 3 cells
+                const yPos1 = y * cellSize - lineSpacing/2;
+                const yPos2 = y * cellSize + lineSpacing/2;
+
+                // First line
+                ctx.moveTo(0, yPos1);
+                ctx.lineTo(size, yPos1);
+
+                // Second line
+                ctx.moveTo(0, yPos2);
+                ctx.lineTo(size, yPos2);
+            }
+        }
+
+        ctx.stroke();
+
+        // Create a texture from the canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2); // Repeat the pattern
+
+        return texture;
+    }
+
+    // Function to create a checkered pattern texture
+    function createCheckeredTexture(primaryColor, secondaryColor, size = 512, segments = 8) {
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Calculate the size of each square
+        const squareSize = size / segments;
+
+        // Draw the checkered pattern
+        for (let x = 0; x < segments; x++) {
+            for (let y = 0; y < segments; y++) {
+                // Determine if this square should be primary or secondary color
+                const isEven = (x + y) % 2 === 0;
+                ctx.fillStyle = isEven ? primaryColor : secondaryColor;
+
+                // Draw the square
+                ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+            }
+        }
+
+        // Create a texture from the canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2); // Repeat the pattern
+
+        return texture;
+    }
+
+    // Function to create a windowpane pattern texture
+    function createWindowpaneTexture(primaryColor, secondaryColor, size = 512, segments = 12, lineWidth = 1) {
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Fill the background with the primary color
+        ctx.fillStyle = primaryColor;
+        ctx.fillRect(0, 0, size, size);
+
+        // Set line properties
+        ctx.strokeStyle = secondaryColor;
+        ctx.lineWidth = lineWidth;
+
+        // Calculate the size of each cell
+        const cellSize = size / segments;
+
+        // Draw the grid lines
+        ctx.beginPath();
+
+        // Draw vertical lines
+        for (let x = 1; x < segments; x++) {
+            const xPos = x * cellSize;
+            ctx.moveTo(xPos, 0);
+            ctx.lineTo(xPos, size);
+        }
+
+        // Draw horizontal lines
+        for (let y = 1; y < segments; y++) {
+            const yPos = y * cellSize;
+            ctx.moveTo(0, yPos);
+            ctx.lineTo(size, yPos);
+        }
+
+        ctx.stroke();
+
+        // Create a texture from the canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4); // Repeat the pattern more times to make it smaller
+
+        return texture;
+    }
+
+    // Function to apply texture directly to model
+    function applyTextureToModel(model, texture) {
+        // Store the current model for reference
+        currentModel = model;
+
+        console.log('Applying texture to model');
+
+        // Store original materials if not already stored
+        if (!originalMaterials) {
+            // Create a deep clone of all materials
+            originalMaterials = [];
+
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    // Log for debugging
+                    console.log('Found mesh:', child.name);
+
+                    // Store original material with reference to the mesh
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach((mat, index) => {
+                            originalMaterials.push({
+                                mesh: child,
+                                index: index,
+                                material: mat.clone()
+                            });
+                            // Log material properties
+                            console.log(`Material ${index}:`, mat.name, mat.color);
+                        });
+                    } else {
+                        originalMaterials.push({
+                            mesh: child,
+                            material: child.material.clone()
+                        });
+                        // Log material properties
+                        console.log('Material:', child.material.name, child.material.color);
+                    }
+                }
+            });
+        }
+
+        // Find the main mesh in the model
+        let mainMesh = findMainMesh(model);
+
+        // If we found the main mesh, apply the texture
+        if (mainMesh) {
+            console.log('Applying texture to main mesh:', mainMesh.name);
+
+            if (Array.isArray(mainMesh.material)) {
+                // If the mesh has multiple materials, change all of them
+                for (let i = 0; i < mainMesh.material.length; i++) {
+                    const oldMat = mainMesh.material[i];
+
+                    // Create a new material based on the type
+                    let newMat;
+
+                    if (oldMat.type === 'MeshStandardMaterial') {
+                        newMat = new THREE.MeshStandardMaterial({
+                            map: texture,
+                            metalness: 0.1,
+                            roughness: 0.7,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshPhongMaterial') {
+                        newMat = new THREE.MeshPhongMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshLambertMaterial') {
+                        newMat = new THREE.MeshLambertMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshBasicMaterial') {
+                        newMat = new THREE.MeshBasicMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else {
+                        // For any other material type, clone and set map
+                        newMat = oldMat.clone();
+                        newMat.map = texture;
+                    }
+
+                    // Preserve other maps from original material
+                    if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                    if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+
+                    // Make sure the material knows it needs to update
+                    newMat.needsUpdate = true;
+
+                    // Replace the old material with the new one
+                    mainMesh.material[i] = newMat;
+                }
+            } else {
+                // For single material
+                const oldMat = mainMesh.material;
+
+                // Create a new material based on the type
+                let newMat;
+
+                if (oldMat.type === 'MeshStandardMaterial') {
+                    newMat = new THREE.MeshStandardMaterial({
+                        map: texture,
+                        metalness: 0.1,
+                        roughness: 0.7,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshPhongMaterial') {
+                    newMat = new THREE.MeshPhongMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshLambertMaterial') {
+                    newMat = new THREE.MeshLambertMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshBasicMaterial') {
+                    newMat = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else {
+                    // For any other material type, clone and set map
+                    newMat = oldMat.clone();
+                    newMat.map = texture;
+                }
+
+                // Preserve other maps from original material
+                if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+
+                // Make sure the material knows it needs to update
+                newMat.needsUpdate = true;
+
+                // Replace the old material with the new one
+                mainMesh.material = newMat;
+            }
+        } else {
+            console.warn('No main mesh found in the model');
+        }
+
+        // Force scene update
+        renderer.render(scene, camera);
+    }
+
+    // Helper function to find the main mesh in a model
+    function findMainMesh(model) {
+        let mainMesh = null;
+        let foundMainPart = false;
+
+        // Strategy 1: Look for meshes with specific names
+        const mainPartNames = ['body', 'main', 'base', 'hull', 'chassis', 'frame', 'primary', 'car', 'vehicle', 'model'];
+
+        model.traverse((child) => {
+            if (child.isMesh && child.name && !foundMainPart) {
+                const lowerName = child.name.toLowerCase();
+                for (const partName of mainPartNames) {
+                    if (lowerName.includes(partName)) {
+                        console.log('Found main part by name:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Strategy 2: If no main part found by name, look for the mesh with the most vertices
+        if (!foundMainPart) {
+            let maxVertices = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh && child.geometry && child.geometry.attributes.position) {
+                    const vertexCount = child.geometry.attributes.position.count;
+                    if (vertexCount > maxVertices) {
+                        maxVertices = vertexCount;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by vertex count:', mainMesh.name, 'with', maxVertices, 'vertices');
+            }
+        }
+
+        return mainMesh;
+    }
+
+    // Function to apply pattern to model
+    function applyCheckeredPattern(model, primaryColor, secondaryColor, segments = null, lineWidth = null, patternType = null, lineSpacing = null) {
+        // Store the current model for reference
+        currentModel = model;
+
+        // Update current checkered colors
+        currentCheckeredColors.primary = primaryColor;
+        currentCheckeredColors.secondary = secondaryColor;
+
+        // Update pattern size if provided
+        if (segments !== null) {
+            currentCheckeredSize = segments;
+        }
+
+        // Update line width if provided
+        if (lineWidth !== null) {
+            currentLineWidth = lineWidth;
+        }
+
+        // Update pattern type if provided
+        if (patternType !== null) {
+            currentPatternType = patternType;
+        }
+
+        // Update line spacing if provided
+        if (lineSpacing !== null) {
+            currentLineSpacing = lineSpacing;
+        }
+
+        console.log('Applying pattern:', primaryColor, secondaryColor, 'Type:', patternType);
+
+        // Create texture with current settings
+        const texture = createPatternTexture(primaryColor, secondaryColor, 512, currentCheckeredSize, currentLineWidth, currentLineSpacing);
+
+        // Apply texture to model
+        applyTextureToModel(model, texture);
+
+        // Return early since we're using the new method
+        return;
+
+        // The code below is kept for reference but not used anymore
+        // Store original materials if not already stored
+        if (!originalMaterials) {
+            // Create a deep clone of all materials
+            originalMaterials = [];
+
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    // Log for debugging
+                    console.log('Found mesh:', child.name);
+
+                    // Store original material with reference to the mesh
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach((mat, index) => {
+                            originalMaterials.push({
+                                mesh: child,
+                                index: index,
+                                material: mat.clone()
+                            });
+                            // Log material properties
+                            console.log(`Material ${index}:`, mat.name, mat.color);
+                        });
+                    } else {
+                        originalMaterials.push({
+                            mesh: child,
+                            material: child.material.clone()
+                        });
+                        // Log material properties
+                        console.log('Material:', child.material.name, child.material.color);
+                    }
+                }
+            });
+        }
+
+        // Find the main mesh in the model (reusing the same strategies as in changeModelColor)
+        let mainMesh = null;
+        let foundMainPart = false;
+
+        // Strategy 1: Look for meshes with specific names
+        const mainPartNames = ['body', 'main', 'base', 'hull', 'chassis', 'frame', 'primary', 'car', 'vehicle', 'model'];
+
+        model.traverse((child) => {
+            if (child.isMesh && child.name && !foundMainPart) {
+                const lowerName = child.name.toLowerCase();
+                for (const partName of mainPartNames) {
+                    if (lowerName.includes(partName)) {
+                        console.log('Found main part by name:', child.name);
+                        mainMesh = child;
+                        foundMainPart = true;
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Strategy 2: If no main part found by name, look for the mesh with the most vertices
+        if (!foundMainPart) {
+            let maxVertices = 0;
+
+            model.traverse((child) => {
+                if (child.isMesh && child.geometry && child.geometry.attributes.position) {
+                    const vertexCount = child.geometry.attributes.position.count;
+                    if (vertexCount > maxVertices) {
+                        maxVertices = vertexCount;
+                        mainMesh = child;
+                        foundMainPart = true;
+                    }
+                }
+            });
+
+            if (foundMainPart) {
+                console.log('Found main part by vertex count:', mainMesh.name, 'with', maxVertices, 'vertices');
+            }
+        }
+
+        // If we found the main mesh, apply the checkered pattern
+        if (mainMesh) {
+            console.log('Applying checkered pattern to main mesh:', mainMesh.name);
+
+            // Create the pattern texture
+            const texture = createPatternTexture(primaryColor, secondaryColor, 512, currentCheckeredSize, currentLineWidth);
+
+            if (Array.isArray(mainMesh.material)) {
+                // If the mesh has multiple materials, change all of them
+                for (let i = 0; i < mainMesh.material.length; i++) {
+                    const oldMat = mainMesh.material[i];
+
+                    // Create a new material based on the type
+                    let newMat;
+
+                    if (oldMat.type === 'MeshStandardMaterial') {
+                        newMat = new THREE.MeshStandardMaterial({
+                            map: texture,
+                            metalness: 0.1,
+                            roughness: 0.7,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshPhongMaterial') {
+                        newMat = new THREE.MeshPhongMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshLambertMaterial') {
+                        newMat = new THREE.MeshLambertMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else if (oldMat.type === 'MeshBasicMaterial') {
+                        newMat = new THREE.MeshBasicMaterial({
+                            map: texture,
+                            side: oldMat.side
+                        });
+                    } else {
+                        // For any other material type, clone and set map
+                        newMat = oldMat.clone();
+                        newMat.map = texture;
+                    }
+
+                    // Preserve other maps from original material
+                    if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                    if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+
+                    // Make sure the material knows it needs to update
+                    newMat.needsUpdate = true;
+
+                    // Replace the old material with the new one
+                    mainMesh.material[i] = newMat;
+                }
+            } else {
+                // For single material
+                const oldMat = mainMesh.material;
+
+                // Create a new material based on the type
+                let newMat;
+
+                if (oldMat.type === 'MeshStandardMaterial') {
+                    newMat = new THREE.MeshStandardMaterial({
+                        map: texture,
+                        metalness: 0.1,
+                        roughness: 0.7,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshPhongMaterial') {
+                    newMat = new THREE.MeshPhongMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshLambertMaterial') {
+                    newMat = new THREE.MeshLambertMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else if (oldMat.type === 'MeshBasicMaterial') {
+                    newMat = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        side: oldMat.side
+                    });
+                } else {
+                    // For any other material type, clone and set map
+                    newMat = oldMat.clone();
+                    newMat.map = texture;
+                }
+
+                // Preserve other maps from original material
+                if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
+                if (oldMat.bumpMap) newMat.bumpMap = oldMat.bumpMap;
+
+                // Make sure the material knows it needs to update
+                newMat.needsUpdate = true;
+
+                // Replace the old material with the new one
+                mainMesh.material = newMat;
+            }
+        } else {
+            console.warn('No main mesh found in the model');
+        }
+
+        // Force scene update
+        renderer.render(scene, camera);
+    }
+
+    // Function to change the 3D model
+    function changeModel(modelUrl) {
+        // Get the model container
+        const container = document.getElementById('model-container');
+        if (!container) {
+            console.error('Model container not found');
+            return;
+        }
+
+        // Clear the container
+        container.innerHTML = '';
+
+        // Show loading indicator
+        container.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Đang tải mô hình 3D...</p></div>';
+
+        // Reset global variables
+        originalMaterials = null;
+        currentModel = null;
+
+        // Load the new model
+        show3DModel('model-container', modelUrl);
     }
 
     // For backward compatibility
