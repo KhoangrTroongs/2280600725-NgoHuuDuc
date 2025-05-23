@@ -265,6 +265,79 @@ html {
 
 .carousel-elegant .carousel-indicators button {
     background-color: var(--elegant-gold);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 5px;
+    opacity: 0.7;
+    border: none;
+}
+
+.carousel-elegant .carousel-indicators button:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.carousel-elegant .carousel-indicators button.active {
+    transform: scale(1.2);
+    background-color: var(--elegant-gold);
+    opacity: 1;
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+.carousel-elegant .carousel-item {
+    transition: transform 0.5s ease-out;
+}
+
+/* Ensure carousel transitions are smooth */
+.carousel-item {
+    transition: transform 0.6s ease-in-out;
+}
+
+/* Add fade effect to carousel items */
+.carousel-fade .carousel-item {
+    opacity: 0;
+    transition-duration: .6s;
+    transition-property: opacity;
+}
+
+.carousel-fade .carousel-item.active {
+    opacity: 1;
+}
+
+.carousel-elegant .carousel-control-prev,
+.carousel-elegant .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(26, 26, 26, 0.7);
+    border-radius: 50%;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.carousel-elegant .carousel-control-prev:hover,
+.carousel-elegant .carousel-control-next:hover {
+    background-color: var(--elegant-gold);
+    opacity: 0.9;
+    transform: scale(1.1);
+}
+
+.carousel-elegant .carousel-control-prev:active,
+.carousel-elegant .carousel-control-next:active {
+    background-color: var(--elegant-gold-dark);
+    transform: scale(0.95);
+    opacity: 1;
+}
+
+.carousel-elegant .carousel-control-prev-icon,
+.carousel-elegant .carousel-control-next-icon {
+    transition: transform 0.3s ease;
+}
+
+.carousel-elegant .carousel-control-prev:active .carousel-control-prev-icon,
+.carousel-elegant .carousel-control-next:active .carousel-control-next-icon {
+    animation: pulse 0.3s ease-out;
 }
 
 /* Admin Icon Sidebar Styling */
@@ -583,6 +656,23 @@ html {
     opacity: 1;
 }
 
+/* Featured Products Section */
+.display-5.text-elegant-gold {
+    position: relative;
+    display: inline-block;
+}
+
+.display-5.text-elegant-gold::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: var(--elegant-gold);
+}
+
 .section-title {
     position: relative;
     margin-bottom: 1.5rem;
@@ -735,4 +825,191 @@ html {
 .category-list-elegant .list-group-item:last-child {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+}
+
+/* Product Carousel Styling */
+.product-carousel-container {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.product-carousel {
+    position: relative;
+}
+
+.product-carousel .carousel-control-prev,
+.product-carousel .carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background-color: var(--elegant-gold);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.product-carousel .carousel-control-prev {
+    left: -20px;
+}
+
+.product-carousel .carousel-control-next {
+    right: -20px;
+}
+
+.product-carousel .carousel-control-prev:hover,
+.product-carousel .carousel-control-next:hover {
+    opacity: 1;
+    background-color: var(--elegant-gold-dark);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.product-carousel .carousel-control-prev:active,
+.product-carousel .carousel-control-next:active {
+    transform: translateY(-50%) scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background-color: var(--elegant-gold-dark);
+    transition: all 0.1s ease;
+}
+
+.product-carousel .carousel-control-prev:focus,
+.product-carousel .carousel-control-next:focus {
+    opacity: 1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.5);
+}
+
+.product-carousel .carousel-control-prev-icon,
+.product-carousel .carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.product-carousel .carousel-indicators {
+    bottom: -40px;
+    margin-bottom: 0;
+}
+
+.product-carousel .carousel-indicators button {
+    background-color: var(--elegant-gold-light);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 5px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.product-carousel .carousel-indicators button:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+.product-carousel .carousel-indicators button.active {
+    background-color: var(--elegant-gold);
+    opacity: 1;
+    width: 14px;
+    height: 14px;
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+.product-carousel .carousel-inner {
+    padding-bottom: 20px;
+}
+
+.product-carousel .card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    height: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-carousel .card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.product-carousel .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--elegant-gold-light);
+}
+
+.product-carousel .card-img-top {
+    transition: transform 0.5s ease;
+    height: 250px;
+    object-fit: cover;
+}
+
+.product-carousel .card:hover .card-img-top {
+    transform: scale(1.08);
+}
+
+.product-carousel .card-body {
+    transition: background-color 0.3s ease;
+}
+
+.product-carousel .card:hover .card-body {
+    background-color: rgba(212, 175, 55, 0.05);
+}
+
+/* Animation classes for carousel */
+.carousel-scale-down {
+    animation: scaleDown 0.3s forwards !important;
+}
+
+.carousel-scale-up {
+    animation: scaleUp 0.3s forwards !important;
+}
+
+.carousel-item-zoom-in {
+    animation: zoomIn 0.5s forwards !important;
+}
+
+.carousel-control-pulse {
+    animation: pulse 0.3s ease-out !important;
+}
+
+/* Animation keyframes */
+@keyframes scaleDown {
+    0% { transform: scale(1); }
+    100% { transform: scale(0.98); }
+}
+
+@keyframes scaleUp {
+    0% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+}
+
+@keyframes zoomIn {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Animation for carousel controls when clicked */
+.product-carousel .carousel-control-prev:active .carousel-control-prev-icon,
+.product-carousel .carousel-control-next:active .carousel-control-next-icon {
+    animation: pulse 0.3s ease-out;
 }

@@ -18,7 +18,7 @@ veston_templates = [
     "Áo blazer {color} {style} {material}"
 ]
 
-quan_tay_templates = [
+quan_tay_templates = [  
     "Quần tây {color} {style} {material}",
     "Quần âu {color} {fit} {material}",
     "Quần tây {brand} {color} {fit}",
