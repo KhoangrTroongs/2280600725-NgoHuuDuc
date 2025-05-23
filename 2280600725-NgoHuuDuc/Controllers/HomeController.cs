@@ -40,13 +40,13 @@ namespace NgoHuuDuc_2280600725.Controllers
             // Dictionary để lưu trữ sản phẩm theo danh mục
             var productsByCategory = new Dictionary<string, List<Product>>();
 
-            // Lấy 5 sản phẩm mới nhất từ mỗi danh mục
+            // Lấy 10 sản phẩm mới nhất từ mỗi danh mục
             foreach (var category in categories)
             {
                 var categoryProducts = await _context.Products
                     .Where(p => p.CategoryId == category.Id && !p.IsHidden)
                     .OrderByDescending(p => p.Id) // Sắp xếp theo ID giảm dần (mới nhất trước)
-                    .Take(5)
+                    .Take(10)
                     .ToListAsync();
 
                 productsByCategory.Add(category.Name, categoryProducts);

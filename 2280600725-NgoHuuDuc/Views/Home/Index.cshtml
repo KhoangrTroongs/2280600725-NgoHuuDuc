@@ -7,9 +7,264 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ThreeJSScriptsPartial")
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all product carousels
+            const productCarousels = document.querySelectorAll('.product-carousel .carousel');
+            productCarousels.forEach(carousel => {
+                // Enable touch swipe on mobile but disable auto sliding
+                const carouselInstance = new bootstrap.Carousel(carousel, {
+                    interval: false, // Disable auto sliding
+                    pause: 'hover', // Pause on hover
+                    wrap: true, // Allow wrapping around from last to first slide
+                    keyboard: true, // Allow keyboard navigation
+                    touch: true // Enable touch swiping on mobile
+                });
+
+                // Ensure carousel doesn't start automatically
+                carouselInstance.pause();
+            });
+
+            // Add hover effect to carousel controls
+            const carouselControls = document.querySelectorAll('.product-carousel .carousel-control-prev, .product-carousel .carousel-control-next');
+            carouselControls.forEach(control => {
+                control.addEventListener('mouseenter', function() {
+                    this.style.opacity = '1';
+                    this.style.backgroundColor = 'var(--elegant-gold-dark)';
+                });
+
+                control.addEventListener('mouseleave', function() {
+                    this.style.opacity = '0.8';
+                    this.style.backgroundColor = 'var(--elegant-gold)';
+                });
+            });
+
+            // Make carousel controls more visible on mobile
+            function updateCarouselControlsVisibility() {
+                const isMobile = window.innerWidth < 768;
+                carouselControls.forEach(control => {
+                    if (isMobile) {
+                        control.style.width = '30px';
+                        control.style.height = '30px';
+                        control.style.opacity = '0.9';
+                    } else {
+                        control.style.width = '40px';
+                        control.style.height = '40px';
+                        control.style.opacity = '0.8';
+                    }
+                });
+            }
+
+            // Initial call
+            updateCarouselControlsVisibility();
+
+            // Update on window resize
+            window.addEventListener('resize', updateCarouselControlsVisibility);
+
+            // Initialize main carousel
+            const mainCarousel = document.getElementById('myCarousel');
+            if (mainCarousel) {
+                const mainCarouselInstance = new bootstrap.Carousel(mainCarousel, {
+                    interval: false, // Disable auto sliding
+                    pause: 'hover', // Pause on hover
+                    keyboard: true, // Allow keyboard navigation
+                    touch: true // Enable touch swiping on mobile
+                });
+
+                // Ensure main carousel doesn't start automatically
+                mainCarouselInstance.pause();
+
+                // Function to force reflow (needed to restart animation)
+                function forceReflow(element) {
+                    // This will force a reflow by accessing the computed style
+                    void element.offsetWidth;
+                }
+
+                // Create a function to handle the slide event for main carousel
+                const handleMainSlideEvent = function(event) {
+                    // Add animation to indicators
+                    const indicators = mainCarousel.querySelectorAll('.carousel-indicators button');
+                    const activeIndicator = mainCarousel.querySelector('.carousel-indicators button.active');
+
+                    if (activeIndicator) {
+                        // Remove any existing animation classes
+                        activeIndicator.classList.remove('carousel-scale-up');
+
+                        // Force a reflow to ensure animation restarts
+                        forceReflow(activeIndicator);
+
+                        // Add animation class
+                        activeIndicator.classList.add('carousel-scale-up');
+
+                        // Remove the animation class after it completes
+                        setTimeout(() => {
+                            activeIndicator.classList.remove('carousel-scale-up');
+                        }, 300);
+                    }
+
+                    // Add animation to the carousel itself
+                    mainCarousel.classList.remove('carousel-scale-down');
+                    forceReflow(mainCarousel);
+                    mainCarousel.classList.add('carousel-scale-down');
+
+                    // Remove the animation class after it completes
+                    setTimeout(() => {
+                        mainCarousel.classList.remove('carousel-scale-down');
+                    }, 300);
+                };
+
+                // Create a function to handle the slid event for main carousel
+                const handleMainSlidEvent = function(event) {
+                    // Add a subtle animation to the active slide
+                    const activeSlide = mainCarousel.querySelector('.carousel-item.active');
+                    if (activeSlide) {
+                        // Remove any existing animation classes
+                        activeSlide.classList.remove('carousel-item-zoom-in');
+
+                        // Force a reflow to ensure animation restarts
+                        forceReflow(activeSlide);
+
+                        // Add animation class
+                        activeSlide.classList.add('carousel-item-zoom-in');
+
+                        // Remove the animation class after it completes
+                        setTimeout(() => {
+                            activeSlide.classList.remove('carousel-item-zoom-in');
+                        }, 500);
+                    }
+                };
+
+                // Add event listeners using jQuery to ensure proper event handling
+                $(mainCarousel).off('slide.bs.carousel').on('slide.bs.carousel', handleMainSlideEvent);
+                $(mainCarousel).off('slid.bs.carousel').on('slid.bs.carousel', handleMainSlidEvent);
+
+                // Add animation to main carousel control buttons
+                const mainPrevButton = mainCarousel.querySelector('.carousel-control-prev');
+                const mainNextButton = mainCarousel.querySelector('.carousel-control-next');
+
+                if (mainPrevButton) {
+                    mainPrevButton.addEventListener('click', function() {
+                        const icon = this.querySelector('.carousel-control-prev-icon');
+                        if (icon) {
+                            icon.classList.remove('carousel-control-pulse');
+                            forceReflow(icon);
+                            icon.classList.add('carousel-control-pulse');
+                            setTimeout(() => {
+                                icon.classList.remove('carousel-control-pulse');
+                            }, 300);
+                        }
+                    });
+                }
+
+                if (mainNextButton) {
+                    mainNextButton.addEventListener('click', function() {
+                        const icon = this.querySelector('.carousel-control-next-icon');
+                        if (icon) {
+                            icon.classList.remove('carousel-control-pulse');
+                            forceReflow(icon);
+                            icon.classList.add('carousel-control-pulse');
+                            setTimeout(() => {
+                                icon.classList.remove('carousel-control-pulse');
+                            }, 300);
+                        }
+                    });
+                }
+            }
+
+            // Add visual feedback when user interacts with carousel
+            productCarousels.forEach(carousel => {
+                // Function to force reflow (needed to restart animation)
+                function forceReflow(element) {
+                    // This will force a reflow by accessing the computed style
+                    void element.offsetWidth;
+                }
+
+                // Create a function to handle the slide event
+                const handleSlideEvent = function(event) {
+                    // Get the carousel element
+                    const carouselEl = event.target;
+
+                    // Remove any existing animation classes
+                    carouselEl.classList.remove('carousel-scale-down', 'carousel-scale-up');
+
+                    // Force a reflow to ensure animation restarts
+                    forceReflow(carouselEl);
+
+                    // Add the scale down animation class
+                    carouselEl.classList.add('carousel-scale-down');
+
+                    // Remove the animation class after it completes
+                    setTimeout(() => {
+                        carouselEl.classList.remove('carousel-scale-down');
+                    }, 300);
+                };
+
+                // Create a function to handle the slid event
+                const handleSlidEvent = function(event) {
+                    // Get the carousel element
+                    const carouselEl = event.target;
+
+                    // Highlight the active slide
+                    const activeSlide = carouselEl.querySelector('.carousel-item.active');
+                    if (activeSlide) {
+                        // Remove any existing animation classes
+                        activeSlide.classList.remove('carousel-item-zoom-in');
+
+                        // Force a reflow to ensure animation restarts
+                        forceReflow(activeSlide);
+
+                        // Add the zoom in animation class
+                        activeSlide.classList.add('carousel-item-zoom-in');
+
+                        // Remove the animation class after it completes
+                        setTimeout(() => {
+                            activeSlide.classList.remove('carousel-item-zoom-in');
+                        }, 500);
+                    }
+                };
+
+                // Add event listeners using jQuery to ensure proper event handling
+                $(carousel).off('slide.bs.carousel').on('slide.bs.carousel', handleSlideEvent);
+                $(carousel).off('slid.bs.carousel').on('slid.bs.carousel', handleSlidEvent);
+
+                // Add animation to control buttons
+                const prevButton = carousel.querySelector('.carousel-control-prev');
+                const nextButton = carousel.querySelector('.carousel-control-next');
+
+                if (prevButton) {
+                    prevButton.addEventListener('click', function() {
+                        const icon = this.querySelector('.carousel-control-prev-icon');
+                        if (icon) {
+                            icon.classList.remove('carousel-control-pulse');
+                            forceReflow(icon);
+                            icon.classList.add('carousel-control-pulse');
+                            setTimeout(() => {
+                                icon.classList.remove('carousel-control-pulse');
+                            }, 300);
+                        }
+                    });
+                }
+
+                if (nextButton) {
+                    nextButton.addEventListener('click', function() {
+                        const icon = this.querySelector('.carousel-control-next-icon');
+                        if (icon) {
+                            icon.classList.remove('carousel-control-pulse');
+                            forceReflow(icon);
+                            icon.classList.add('carousel-control-pulse');
+                            setTimeout(() => {
+                                icon.classList.remove('carousel-control-pulse');
+                            }, 300);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 }
 
-<div id="myCarousel" class="carousel slide mb-6 carousel-elegant" data-bs-ride="carousel">
+<div id="myCarousel" class="carousel slide mb-6 carousel-elegant" data-bs-interval="false">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1" aria-current="true"></button>
         <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
@@ -86,6 +341,13 @@
 
 <div class="container marketing mt-5">
     <div class="row">
+        <!-- Tiêu đề phần sản phẩm nổi bật -->
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold text-elegant-gold">Sản phẩm nổi bật</h2>
+            <p class="lead">Khám phá bộ sưu tập mới nhất của chúng tôi</p>
+            <div class="elegant-divider mb-4"></div>
+        </div>
+
         <!-- Hiển thị sản phẩm theo từng danh mục -->
         @if (productsByCategory != null)
         {
@@ -93,34 +355,80 @@
             {
                 <div class="col-12 mb-5">
                     <h2 class="fw-normal text-center mb-4">@category.Key</h2>
-                    <div class="row">
-                        @foreach (var product in category.Value)
-                        {
-                            <div class="col-md-2 col-sm-4 col-6 mb-4">
-                                <div class="card h-100 product-card">
-                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
-                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
-                                        {
-                                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 150px; object-fit: cover;">
-                                        }
-                                        else
-                                        {
-                                            <img src="~/images/no-image.png" class="card-img-top" alt="No Image" style="height: 150px; object-fit: cover;">
-                                        }
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title">@product.Name</h6>
-                                            <p class="card-text text-danger fw-bold">@product.Price.ToString("N0") đ</p>
-                                        </div>
-                                    </a>
+                    <div class="product-carousel-container">
+                        <div class="product-carousel">
+                            @{
+                                var totalProducts = category.Value.Count;
+                                var displayedProducts = Math.Min(totalProducts, 10);
+                            }
+
+                            <!-- Carousel wrapper -->
+                            <div id="carousel-@category.Key.Replace(" ", "")" class="carousel slide" data-bs-interval="false">
+                                <!-- Indicators -->
+                                <div class="carousel-indicators">
+                                    @for (int i = 0; i < (displayedProducts + 3) / 4; i++)
+                                    {
+                                        <button type="button"
+                                                data-bs-target="#carousel-@category.Key.Replace(" ", "")"
+                                                data-bs-slide-to="@i"
+                                                class="@(i == 0 ? "active" : "")"
+                                                aria-current="@(i == 0 ? "true" : "false")"
+                                                aria-label="Slide @(i+1)"></button>
+                                    }
                                 </div>
+
+                                <!-- Carousel items -->
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < displayedProducts; i += 4)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <div class="row">
+                                                @for (int j = i; j < Math.Min(i + 4, displayedProducts); j++)
+                                                {
+                                                    var product = category.Value[j];
+                                                    <div class="col-md-3 col-sm-6 col-6">
+                                                        <div class="card h-100 product-card">
+                                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                                {
+                                                                    <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <img src="~/images/no-image.png" class="card-img-top" alt="No Image" style="height: 250px; object-fit: cover;">
+                                                                }
+                                                                <div class="card-body text-center">
+                                                                    <h5 class="card-title">@product.Name</h5>
+                                                                    <p class="card-text text-danger fw-bold">@product.Price.ToString("N0") đ</p>
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Controls -->
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@category.Key.Replace(" ", "")" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carousel-@category.Key.Replace(" ", "")" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
-                        }
+                        </div>
                     </div>
-                    <div class="text-center mt-3">
+                    <div class="text-center mt-4">
                         @{
                             var categoryId = categories?.FirstOrDefault(c => c.Name == category.Key)?.Id;
                         }
-                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@categoryId" class="btn btn-elegant-secondary">Xem thêm sản phẩm @category.Key</a>
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@categoryId" class="btn btn-elegant-primary btn-lg">
+                            <i class="fas fa-th-list me-2"></i>Xem tất cả sản phẩm @category.Key
+                        </a>
                     </div>
                 </div>
 
@@ -186,19 +494,19 @@
             <div class="col-12 col-sm-6 col-lg-4 text-center">
                 <img src="~/images/img/ha.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple1">
                 <h2 class="fw-normal">Hoàng Ân</h2>
-                <p>Supper Support</p>
+                <p>MSSV: 2280600149</p>
                 <p><a class="btn btn-elegant-secondary" href="https://github.com/SushiRedpanda" target="_blank">Xem thêm »</a></p>
             </div>
             <div class="col-12 col-sm-6 col-lg-4 text-center">
                 <img src="~/images/img/hd.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple2">
                 <h2 class="fw-normal">Ngô Hữu Đức</h2>
-                <p>Hàng không, ăn hàng ở không</p>
+                <p>MSSV: 2280600725</p>
                 <p><a class="btn btn-elegant-secondary" href="https://github.com/khoangrtroongs" target="_blank">Xem thêm »</a></p>
             </div>
             <div class="col-12 col-sm-6 col-lg-4 text-center">
                 <img src="~/images/img/qt.jpg" class="bd-placeholder-img rounded-circle profile-img-elegant" width="140" height="140" alt="Peple3">
                 <h2 class="fw-normal">Nguyễn Quốc Trung</h2>
-                <p>Fép đêêêêêêêêêêêêêêêê</p>
+                <p>MSSV: 2280600357</p>
                 <p><a class="btn btn-elegant-secondary" href="https://github.com/TrungQNdev20" target="_blank">Xem thêm »</a></p>
             </div>
         </div>

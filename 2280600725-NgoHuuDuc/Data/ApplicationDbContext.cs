@@ -108,7 +108,9 @@ namespace NgoHuuDuc_2280600725.Data
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Veston", Description = "Các loại veston xịn xịn" },
                 new Category { Id = 2, Name = "Quần tây", Description = "Các loại quần tây tây - chất chơi người dơi" },
-                new Category { Id = 3, Name = "Áo sơ mi", Description = "Áo sơ mi 2 trong 1" }
+                new Category { Id = 3, Name = "Áo sơ mi", Description = "Áo sơ mi 2 trong 1" },
+                new Category { Id = 4, Name = "Áo Gile", Description = "Các loại áo Gile, phù hợp nhiều mục đích" },
+                new Category { Id = 5, Name = "Phụ Kiện", Description = "Các loại phụ kiện phù hợp cho từng sự kiện" }
             );
         }
 
